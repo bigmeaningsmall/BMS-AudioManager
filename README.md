@@ -7,8 +7,9 @@ The BMS Audio Manager is a Unity-based audio management system that allows you t
 
 ## Installation
 
-1. Copy the `BMS AudioManager` folder into your Unity project's `Assets` directory.
+1. Copy the `BMS AudioManager` folder into your Unity project's `Assets` directory or import the Unity package.
 2. Ensure that all necessary scripts and audio files are placed in the appropriate directories.
+3. Run the demo scene to check the functionality
 
 ## Usage
 
@@ -21,21 +22,11 @@ The BMS Audio Manager is a Unity-based audio management system that allows you t
 2. **Configure Triggers or Colliders:**
    - Set the `collisionType` to either `Trigger` or `Collision`.
    - Specify the `targetTag` to determine which objects can trigger the audio event.
+   - Use the pre-made Event Sender prefabs with the script and collider attached
+   - The event will send the audio event and parameters to the audio manager when triggered
+  
+- Alternativly, you can get the EventSender as a component and call the public methods for Play(), Pause(), and Stop()
 
-3. **Example:**
-   ```csharp
-   // Attach this script to a GameObject with a Collider component
-   public class ExampleTrigger : MonoBehaviour
-   {
-       private void OnTriggerEnter(Collider other)
-       {
-           if (other.CompareTag("Player"))
-           {
-               // The AudioEventSender_SFX script will handle the audio event
-           }
-       }
-   }
-   ```
 
 ### Calling Audio Events from Code
 
@@ -43,41 +34,41 @@ The BMS Audio Manager is a Unity-based audio management system that allows you t
 
 - **Play BGM:**
   ```csharp
-  AudioEventManager.PlayBGM?.Invoke(0, "TrackName", 1.0f, FadeType.FadeInOut, 2.0f, true, "BGM Event");
+  AudioEventManager.PlayBGM(int index, string trackName, float volume, FadeType fadeType, float fadeDuration, bool loopBGM, string eventName);
   ```
 
 - **Pause BGM:**
   ```csharp
-  AudioEventManager.PauseBGM?.Invoke(2.0f);
+  AudioEventManager.PauseBGM(float fadeDuration);
   ```
 
 - **Stop BGM:**
   ```csharp
-  AudioEventManager.StopBGM?.Invoke(2.0f);
+  AudioEventManager.StopBGM(float fadeDuration);
   ```
 
 #### Ambient Audio
 
 - **Play Ambient Audio:**
   ```csharp
-  AudioEventManager.PlayAmbientAudio?.Invoke(null, 0, "AmbientTrack", 1.0f, 1.0f, 0.5f, FadeType.FadeInOut, 2.0f, true, "Ambient Event");
+  AudioEventManager.PlayAmbientAudio(Transform attachTo, int index, string trackName, float volume, float pitch, float spatialBlend, FadeType fadeType, float fadeDuration, bool loopAmbient, string eventName);
   ```
 
 - **Pause Ambient Audio:**
   ```csharp
-  AudioEventManager.PauseAmbientAudio?.Invoke(2.0f);
+  AudioEventManager.PauseAmbientAudio(float fadeDuration);
   ```
 
 - **Stop Ambient Audio:**
   ```csharp
-  AudioEventManager.StopAmbientAudio?.Invoke(2.0f);
+  AudioEventManager.StopAmbientAudio(float fadeDuration);
   ```
 
 #### Sound Effects (SFX)
 
 - **Play SFX:**
   ```csharp
-  AudioEventManager.PlaySFX?.Invoke(null, "SFXName", 1.0f, 1.0f, true, 0.1f, 0.5f, "SFX Event");
+ AudioEventManager.PlaySFX(Transform attachTo, string soundName, float volume, float pitch, bool randomizePitch, float pitchRange,  float spatialBlend, string eventName);
   ```
 
 ## Loading Audio from Resources
@@ -89,13 +80,15 @@ Example directory structure:
 Assets/
 └── Resources/
     ├── BGM/
-    │   └── TrackName.mp3
+    │   └── TrackName.wav
     ├── Ambient/
-    │   └── AmbientTrack.mp3
+    │   └── AmbientTrack.wav
     └── SFX/
-        └── SFXName.mp3
+        └── SFXName.wav
 ```
 
 ## Conclusion
 
-The BMS Audio Manager provides a flexible and easy-to-use system for managing audio in your Unity projects. Whether you are using event-based triggers or calling audio events directly from your code, this system allows for seamless integration and control over your game's audio experience.
+The BMS Audio Manager provides a flexible and easy-to-use system for managing audio in your Unity projects.
+
+Whether you are using event-based triggers or calling audio events directly from your code, this system allows for seamless integration and control over your game's audio.
