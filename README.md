@@ -1,15 +1,19 @@
 
+---
+
 # BMS Audio Manager
 
-## Overview
+The **BMS Audio Manager** is a Unity-based audio management system that allows you to play, pause, and stop background music (BGM), ambient audio, and sound effects (SFX) using event-based triggers or direct method calls from your scripts.
 
-The BMS Audio Manager is a Unity-based audio management system that allows you to play, pause, and stop background music (BGM), ambient audio, and sound effects (SFX) using event-based triggers or direct method calls from your scripts.
+---
 
 ## Installation
 
 1. Copy the `BMS AudioManager` folder into your Unity project's `Assets` directory or import the Unity package.
-2. Ensure that all necessary scripts and audio files are placed in the appropriate directories.
-3. Run the demo scene to check the functionality
+2. Ensure all necessary scripts and audio files are placed in the appropriate directories.
+3. Run the demo scene to check the functionality.
+
+---
 
 ## Usage
 
@@ -17,16 +21,17 @@ The BMS Audio Manager is a Unity-based audio management system that allows you t
 
 1. **Attach the `AudioEventSender_SFX` Script:**
    - Attach the `AudioEventSender_SFX` script to any GameObject in your scene.
-   - Configure the parameters in the Inspector, such as `sfxName`, `volume`, `pitch`, etc.
+   - Configure parameters in the Inspector, such as `sfxName`, `volume`, `pitch`, etc.
 
 2. **Configure Triggers or Colliders:**
    - Set the `collisionType` to either `Trigger` or `Collision`.
    - Specify the `targetTag` to determine which objects can trigger the audio event.
-   - Use the pre-made Event Sender prefabs with the script and collider attached
-   - The event will send the audio event and parameters to the audio manager when triggered
-  
-- Alternativly, you can get the EventSender as a component and call the public methods for Play(), Pause(), and Stop()
+   - Use the pre-made Event Sender prefabs with the script and collider attached.
+   - The event will send audio parameters to the audio manager when triggered.
 
+Alternatively, you can get the EventSender as a component and call the public methods for `Play()`, `Pause()`, and `Stop()`.
+
+---
 
 ### Calling Audio Events from Code
 
@@ -68,8 +73,10 @@ The BMS Audio Manager is a Unity-based audio management system that allows you t
 
 - **Play SFX:**
   ```csharp
- AudioEventManager.PlaySFX(Transform attachTo, string soundName, float volume, float pitch, bool randomizePitch, float pitchRange,  float spatialBlend, string eventName);
+  AudioEventManager.PlaySFX(Transform attachTo, string soundName, float volume, float pitch, bool randomizePitch, float pitchRange, float spatialBlend, string eventName);
   ```
+
+---
 
 ## Loading Audio from Resources
 
@@ -87,8 +94,11 @@ Assets/
         └── SFXName.wav
 ```
 
+---
+
 ## Conclusion
 
-The BMS Audio Manager provides a flexible and easy-to-use system for managing audio in your Unity projects.
+The BMS Audio Manager provides a flexible and easy-to-use system for managing audio in your Unity projects. Whether you use event-based triggers or call audio events directly from code, this system allows for seamless integration and control over your game's audio.
 
-Whether you are using event-based triggers or calling audio events directly from your code, this system allows for seamless integration and control over your game's audio.
+---
+
