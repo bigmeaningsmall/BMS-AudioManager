@@ -99,14 +99,7 @@ public class AudioEventSender_SFX : MonoBehaviour, IAudioEventSender
             }
         }
         
-        //FOR LOOP TO CHECK IF THERE ARE MULTIPLE SOUNDS TO PLAY
-        for (int i = 0; i < sfxName.Length; i++){
-            Debug.Log("SFX Name: " + sfxName[i]);
-        }
-        
         sfxNameToPlay = sfxName[Random.Range(0, sfxName.Length)];
-        
-        
         
         if(eventDelay <= 0)
         {
