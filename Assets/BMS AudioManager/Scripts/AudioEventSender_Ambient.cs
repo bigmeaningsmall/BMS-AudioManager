@@ -46,21 +46,23 @@ public class AudioEventSender_Ambient : MonoBehaviour, IAudioEventSender
     public bool testMode = false;
 
     
-
     private void OnEnable()
     {
         if (playOnEnabled)
         {
-            //CHECK THE TIME THE GAME HAS BEEN RUNNING - The audiomanager will not be ready to play ambient until the start method has run
-            if (Time.timeSinceLevelLoad > 0.1f)
-            {
-                Play();
-            }
-            else
-            {
-                StartCoroutine(PlayAmbient_Delayed(eventDelay));
-            }
+            StartCoroutine(WaitForAudioManagerAndPlay());
         }
+    }
+
+    private IEnumerator WaitForAudioManagerAndPlay()
+    {
+        // Wait until AudioManager.Instance is not null
+        while (AudioManager.Instance == null)
+        {
+            yield return null; // Wait for the next frame
+        }
+        // Play the sound once AudioManager.Instance is ready
+        Play();
     }
 
     private void OnDisable()

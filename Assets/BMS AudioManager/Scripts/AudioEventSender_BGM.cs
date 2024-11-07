@@ -16,8 +16,8 @@ using UnityEngine.Serialization;
 public class AudioEventSender_BGM : MonoBehaviour, IAudioEventSender
 {
     [Space(20)]
-    ///  USE THIS TO DETERMINE WHICH EVENT TO SEND (Mutiple scripts can be attached to the same object)
-    /// Loop through the AudioEventSender_BGM scripts on the object and send the event with the matching eventName
+    // USE THIS TO DETERMINE WHICH EVENT TO SEND (Mutiple scripts can be attached to the same object)
+    // Loop through the AudioEventSender_BGM scripts on the object and send the event with the matching eventName
     public string eventName = "Custom BGM Event Name"; //for future use
 
     
@@ -52,17 +52,23 @@ public class AudioEventSender_BGM : MonoBehaviour, IAudioEventSender
     [Header("TestMode : 'M' to play music, 'N' to stop, 'B' to pause")]
     public bool testMode = false;
 
-    private void OnEnable(){
+    private void OnEnable()
+    {
         if (playOnEnabled)
-        {   
-            //CHECK THE TIME THE GAME HAS BEEN RUNNING - The audiomanager will not be ready to play music until the start method has run
-            if (Time.timeSinceLevelLoad > 0.1f){
-                Play();
-            }
-            else{
-                StartCoroutine(PlayBGM_Delayed(eventDelay)); 
-            }
+        {
+            StartCoroutine(WaitForAudioManagerAndPlay());
         }
+    }
+
+    private IEnumerator WaitForAudioManagerAndPlay()
+    {
+        // Wait until AudioManager.Instance is not null
+        while (AudioManager.Instance == null)
+        {
+            yield return null; // Wait for the next frame
+        }
+        // Play the sound once AudioManager.Instance is ready
+        Play();
     }
 
     private void OnDisable(){
