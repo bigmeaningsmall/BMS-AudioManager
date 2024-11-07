@@ -439,6 +439,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: Audio Event Zone BGM
       objectReference: {fileID: 0}
+    - target: {fileID: 7836191273684435627, guid: 139429739bafcec468e00f0d0a1a0a9f,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 8936076557747694269, guid: 139429739bafcec468e00f0d0a1a0a9f,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -557,6 +562,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: BMS - Audio Manager
       objectReference: {fileID: 0}
+    - target: {fileID: 5737640405453547409, guid: ccc2f9deca1fd8440a1f8646e2051deb,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -570,15 +580,30 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1798408813154171869, guid: 061e1c5bd8269d545a6d42f763eea41c,
+        type: 3}
+      propertyPath: collisionType
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1798408813154171869, guid: 061e1c5bd8269d545a6d42f763eea41c,
+        type: 3}
+      propertyPath: playOnEnabled
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 5348913106041535006, guid: 061e1c5bd8269d545a6d42f763eea41c,
         type: 3}
       propertyPath: m_Name
       value: Audio Event Zone SFX
       objectReference: {fileID: 0}
+    - target: {fileID: 5348913106041535006, guid: 061e1c5bd8269d545a6d42f763eea41c,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 7370856478632272372, guid: 061e1c5bd8269d545a6d42f763eea41c,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0
+      value: 2.25
       objectReference: {fileID: 0}
     - target: {fileID: 7370856478632272372, guid: 061e1c5bd8269d545a6d42f763eea41c,
         type: 3}
@@ -638,10 +663,20 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 620935151221146675, guid: ba89dcb19a3cf95418c455c01d332d04,
+        type: 3}
+      propertyPath: playOnEnabled
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 5274121441138690220, guid: ba89dcb19a3cf95418c455c01d332d04,
         type: 3}
       propertyPath: m_Name
       value: Audio Event Zone Ambience
+      objectReference: {fileID: 0}
+    - target: {fileID: 5274121441138690220, guid: ba89dcb19a3cf95418c455c01d332d04,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6014174656882223073, guid: ba89dcb19a3cf95418c455c01d332d04,
         type: 3}

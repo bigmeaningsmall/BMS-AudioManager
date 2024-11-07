@@ -580,6 +580,9 @@ private IEnumerator FadeOutAndInAmbientAudio(Transform attachTo, AudioClip newTr
     #region PlaySoundEffects ------------------------------------
     public void PlaySoundEffect(Transform attachTo, string soundName, float volume, float pitch, bool randomizePitch, float pitchRange, float spatialBlend, string eventName)
     {
+        
+        Debug.Log($"Playing sound effect '{soundName}' with volume {volume}, pitch {pitch}, spatial blend {spatialBlend}");
+        
         // Check if the sound effect exists in the dictionary
         if (!soundEffects.TryGetValue(soundName, out AudioClip clip))
         {

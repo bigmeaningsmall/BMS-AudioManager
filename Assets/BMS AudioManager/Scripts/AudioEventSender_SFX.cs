@@ -54,17 +54,23 @@ public class AudioEventSender_SFX : MonoBehaviour, IAudioEventSender
     [Header("TestMode : 'T' to play sound effect")]
     public bool testMode = false;
     
-    private void OnEnable(){
+    private void OnEnable()
+    {
         if (playOnEnabled)
-        {   
-            //CHECK THE TIME THE GAME HAS BEEN RUNNING - The audiomanager will not be ready to play music until the start method has run
-            if (Time.timeSinceLevelLoad > 0.1f){
-                Play();
-            }
-            else{
-                StartCoroutine(PlaySFX_Delayed(eventDelay)); 
-            }
+        {
+            StartCoroutine(WaitForAudioManagerAndPlay());
         }
+    }
+
+    private IEnumerator WaitForAudioManagerAndPlay()
+    {
+        // Wait until AudioManager.Instance is not null
+        while (AudioManager.Instance == null)
+        {
+            yield return null; // Wait for the next frame
+        }
+        // Play the sound once AudioManager.Instance is ready
+        Play();
     }
     
     private void OnTriggerEnter(Collider other)
@@ -92,7 +98,14 @@ public class AudioEventSender_SFX : MonoBehaviour, IAudioEventSender
             }
         }
         
+        //FOR LOOP TO CHECK IF THERE ARE MULTIPLE SOUNDS TO PLAY
+        for (int i = 0; i < sfxName.Length; i++){
+            Debug.Log("SFX Name: " + sfxName[i]);
+        }
+        
         sfxNameToPlay = sfxName[Random.Range(0, sfxName.Length)];
+        
+        
         
         if(eventDelay <= 0)
         {
