@@ -10,8 +10,9 @@ public class AudioEventSender_Ambient : MonoBehaviour, IAudioEventSender
     public string eventName = "Custom Ambient Event Name"; //for future use
 
     [Space(20)]
-    [Header("Transform that the ambient audio will attach to - leave empty to attach to AudioManager")]
-    public Transform attachTo;
+    [Header("Attach The AudioSource to Transform -  Null to Attach to AudioManager")]
+    public bool attachToThisTransform;
+    public Transform transformToAttachTo;
     [Space(10)]
     [Header("Ambient Audio Event Parameters")]
     [Space(20)]
@@ -103,15 +104,41 @@ public class AudioEventSender_Ambient : MonoBehaviour, IAudioEventSender
 
     private void PlayAmbient()
     {
-        //send the PlayAmbient Event with parameters from the inspector
-        AudioEventManager.PlayAmbientAudio(attachTo,ambientTrackNumber, ambientTrackName, volume, pitch, spatialBlend, fadeType, fadeDuration, loopAmbient, eventName);
+        if(!attachToThisTransform && transformToAttachTo == null){
+            Debug.LogWarning("No Transform to attach to - using AudioManager");
+            //send the PlayAmbient Event with parameters from the inspector
+            AudioEventManager.PlayAmbientAudio(null,ambientTrackNumber, ambientTrackName, volume, pitch, spatialBlend, fadeType, fadeDuration, loopAmbient, eventName);
+        }
+        
+        if (attachToThisTransform){
+            //send the PlayAmbient Event with parameters from the inspector
+            AudioEventManager.PlayAmbientAudio(this.transform,ambientTrackNumber, ambientTrackName, volume, pitch, spatialBlend, fadeType, fadeDuration, loopAmbient, eventName);
+        }
+        if(transformToAttachTo != null){
+            //send the PlayAmbient Event with parameters from the inspector
+            AudioEventManager.PlayAmbientAudio(transformToAttachTo, ambientTrackNumber, ambientTrackName, volume, pitch, spatialBlend, fadeType, fadeDuration, loopAmbient, eventName);
+        }
+
     }
 
     private IEnumerator PlayAmbient_Delayed(float delay)
     {
         yield return new WaitForSeconds(delay);
-        //send the PlayAmbient Event with parameters from the inspector
-        AudioEventManager.PlayAmbientAudio(attachTo, ambientTrackNumber, ambientTrackName, volume, pitch, spatialBlend, fadeType, fadeDuration, loopAmbient, eventName);
+        
+        if(!attachToThisTransform && transformToAttachTo == null){
+            Debug.LogWarning("No Transform to attach to - using AudioManager");
+            //send the PlayAmbient Event with parameters from the inspector
+            AudioEventManager.PlayAmbientAudio(null,ambientTrackNumber, ambientTrackName, volume, pitch, spatialBlend, fadeType, fadeDuration, loopAmbient, eventName);
+        }
+        
+        if (attachToThisTransform){
+            //send the PlayAmbient Event with parameters from the inspector
+            AudioEventManager.PlayAmbientAudio(this.transform,ambientTrackNumber, ambientTrackName, volume, pitch, spatialBlend, fadeType, fadeDuration, loopAmbient, eventName);
+        }
+        if(transformToAttachTo != null){
+            //send the PlayAmbient Event with parameters from the inspector
+            AudioEventManager.PlayAmbientAudio(transformToAttachTo, ambientTrackNumber, ambientTrackName, volume, pitch, spatialBlend, fadeType, fadeDuration, loopAmbient, eventName);
+        }
     }
 
     private void OnTriggerExit(Collider other)
