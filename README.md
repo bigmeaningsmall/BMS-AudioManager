@@ -1,4 +1,3 @@
-Here's an enhanced `README` with added parameter breakdowns for each event and corrected code snippets based on your instructions:
 
 ---
 
