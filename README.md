@@ -12,22 +12,24 @@ The BMS Audio Manager is a Unity-based audio management system that allows you t
 2. Ensure all necessary scripts and audio files are placed in the appropriate directories.
 3. Run the demo scene to check the functionality.
 
-## Usage
+---
 
-### Using Event Senders via Triggers or Colliders
+### Loading Audio from Resources
 
-#### Attach the `AudioEventSender_SFX` Script:
+Ensure that your audio files are placed in a `Resources` folder within your `Assets` directory. The `AudioEventManager` will load these audio files at runtime, organised by category.
 
-- Attach the `AudioEventSender_SFX` script to any GameObject in your scene.
-- Configure parameters in the Inspector, such as `sfxName`, `volume`, `pitch`, etc.
+**Example directory structure**:
 
-#### Configure Triggers or Colliders:
-
-- Set the `collisionType` to either `Trigger` or `Collision`.
-- Specify the `targetTag` to determine which objects can trigger the audio event.
-- Use the pre-made Event Sender prefabs with the script and collider attached.
-
-When triggered, the event sends audio parameters to the `AudioManager`. Alternatively, you can get the EventSender as a component and call the public methods for `Play()`, `Pause()`, and `Stop()` directly.
+```
+Assets/
+└── Resources/
+    ├── BGM/
+    │   └── TrackName.wav
+    ├── Ambient/
+    │   └── AmbientTrack.wav
+    └── SFX/
+        └── SFXName.wav
+```
 
 ---
 
@@ -121,24 +123,6 @@ When triggered, the event sends audio parameters to the `AudioManager`. Alternat
    - **`spatialBlend` (float)**: Controls the 2D/3D blend (0 for 2D, 1 for 3D).
    - **`eventName` (string)**: Identifier for tracking this SFX event.
 
----
-
-### Loading Audio from Resources
-
-Ensure that your audio files are placed in a `Resources` folder within your `Assets` directory. The `AudioEventManager` will load these audio files at runtime, organised by category.
-
-**Example directory structure**:
-
-```
-Assets/
-└── Resources/
-    ├── BGM/
-    │   └── TrackName.wav
-    ├── Ambient/
-    │   └── AmbientTrack.wav
-    └── SFX/
-        └── SFXName.wav
-```
 
 ---
 
