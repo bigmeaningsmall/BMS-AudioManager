@@ -15,9 +15,9 @@ The BMS Audio Manager is a Unity-based audio management system that allows you t
 
 ### Loading Audio from Resources
 
-Ensure that your audio files are placed in a `Resources` folder within your `Assets` directory. The `AudioEventManager` will load these audio files at runtime, organised by category.
+Ensure that your audio files are placed in a `Resources` folder within your `Assets` directory. The `AudioManager` will make these audio files available in catagory pools at runtime.
 
-**Example directory structure**:
+**Directory structure**:
 
 ```
 Assets/
@@ -29,6 +29,8 @@ Assets/
     └── SFX/
         └── SFXName.wav
 ```
+
+Note - Files in any sub folders will be available in the `AudioManager` and can be organised in folder names or catagories in your projects assets `Resources` folder.
 
 ---
 
