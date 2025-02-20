@@ -225,3 +225,9 @@ With these components, you have flexible options for triggering audio in your ga
 ## Conclusion
 
 The BMS Audio Manager provides a flexible and easy-to-use system for managing audio in your Unity projects. Whether you use event-based triggers or call audio events directly from code, this system allows for seamless integration and precise control over your game's audio.
+
+
+# UML
+
+![BMS-AudioManager-UML](https://github.com/user-attachments/assets/cf7f9d82-f85a-4596-926a-d7ab2ef794ae)
+
