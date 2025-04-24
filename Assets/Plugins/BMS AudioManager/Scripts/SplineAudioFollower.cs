@@ -24,6 +24,13 @@ public class SplineAudioFollower : MonoBehaviour
     [Header("Debug")]
     public bool showDebugVisuals = true;
     public Color debugColor = Color.green;
+    
+    [Tooltip("Show sample points along the spline for visualization")]
+    public bool showSamplePoints = false;
+    
+    [Tooltip("Number of sample points to check when finding proximity to spline")]
+    [Range(10, 100)]
+    public int splineSampleCount = 20;
 
     // Private references
     private SplineContainer splineContainer;
@@ -31,6 +38,8 @@ public class SplineAudioFollower : MonoBehaviour
     private Transform listenerTransform;
     private float currentSplinePosition = 0f; // 0-1 normalized position along spline
     private bool isInitialized = false;
+    private float closestDistanceToSpline = float.MaxValue;
+    private Vector3 closestPointOnSpline = Vector3.zero;
 
     private void Awake()
     {
@@ -81,7 +90,8 @@ public class SplineAudioFollower : MonoBehaviour
     {
         if (!isInitialized || listenerTransform == null) return;
         
-        // Check if listener is close enough to the spline
+        // Check if listener is close enough to the spline by measuring distance to any part of spline
+        // This will also update closestDistanceToSpline and closestPointOnSpline
         bool inProximity = IsListenerInProximityOfSpline();
         
         // Only update position along spline if the listener is in proximity
@@ -104,24 +114,33 @@ public class SplineAudioFollower : MonoBehaviour
     {
         if (splineContainer == null || listenerTransform == null) return false;
         
-        // Sample points along the spline to find closest one to listener
-        int sampleCount = 20; // Lower for performance, higher for accuracy
-        float minDistance = float.MaxValue;
+        // Reset closest distance tracking
+        closestDistanceToSpline = float.MaxValue;
         
-        for (int i = 0; i <= sampleCount; i++)
+        // Sample points along the spline to find closest one to listener
+        Vector3 listenerPos = listenerTransform.position;
+        
+        for (int i = 0; i <= splineSampleCount; i++)
         {
-            float t = (float)i / sampleCount;
+            float t = (float)i / splineSampleCount;
             Vector3 pointOnSpline = EvaluateSplinePosition(t);
-            float distance = Vector3.Distance(pointOnSpline, listenerTransform.position);
+            float distance = Vector3.Distance(pointOnSpline, listenerPos);
             
-            if (distance < minDistance)
+            if (distance < closestDistanceToSpline)
             {
-                minDistance = distance;
+                closestDistanceToSpline = distance;
+                closestPointOnSpline = pointOnSpline;
+                
+                // Early exit optimization - if we're already within threshold, no need to check more points
+                if (closestDistanceToSpline <= proximityThreshold)
+                {
+                    break;
+                }
             }
         }
         
-        // Return true if closest point is within proximity threshold
-        return minDistance <= proximityThreshold;
+        // Return true if closest point on spline is within proximity threshold
+        return closestDistanceToSpline <= proximityThreshold;
     }
 
     // Finds the normalized position (0-1) of the closest point on the spline to the target position
@@ -130,8 +149,8 @@ public class SplineAudioFollower : MonoBehaviour
         float closestDistance = float.MaxValue;
         float closestT = 0f;
         
-        // Number of samples to check along the spline
-        int sampleCount = 50;
+        // Number of samples to check along the spline - use higher resolution for position finding
+        int sampleCount = Mathf.Max(50, splineSampleCount * 2);
         
         for (int i = 0; i <= sampleCount; i++)
         {
@@ -168,28 +187,60 @@ public class SplineAudioFollower : MonoBehaviour
         SplineContainer spline = GetComponent<SplineContainer>();
         if (spline == null) return;
         
-        // Draw the proximity threshold around the current audio position
-        Gizmos.color = debugColor;
+        // Draw the spline itself more clearly
+        Gizmos.color = new Color(debugColor.r * 0.8f, debugColor.g * 0.8f, debugColor.b * 0.8f, 0.5f);
         
-        if (Application.isPlaying && audioObject != null)
+        // Visualize the spline with sample points
+        if (showSamplePoints)
         {
-            Gizmos.DrawWireSphere(audioObject.transform.position, proximityThreshold);
+            for (int i = 0; i <= splineSampleCount; i++)
+            {
+                float t = (float)i / splineSampleCount;
+                if (spline.Spline != null)
+                {
+                    Vector3 point = spline.EvaluatePosition(t);
+                    Gizmos.DrawSphere(point, 0.2f);
+                }
+            }
+        }
+        
+        // If we're in play mode and initialized, show the relevant debug visuals
+        if (Application.isPlaying && isInitialized)
+        {
+            // Draw a visual indication of the closest point on the spline to the listener
+            if (listenerTransform != null)
+            {
+                // Visualize the proximity
+                Gizmos.color = closestDistanceToSpline <= proximityThreshold ? Color.green : Color.yellow;
+                Gizmos.DrawLine(listenerTransform.position, closestPointOnSpline);
+                Gizmos.DrawSphere(closestPointOnSpline, 0.5f);
+                
+                // Draw a dashed line from the closest point to the actual audio position
+                Vector3 audioPos = audioObject.transform.position;
+                Gizmos.color = debugColor;
+                Gizmos.DrawLine(audioPos, closestPointOnSpline);
+                
+                // Visualize the current position on the spline
+                Vector3 currentPos = EvaluateSplinePosition(currentSplinePosition);
+                Gizmos.color = Color.blue;
+                Gizmos.DrawSphere(currentPos, 0.4f);
+            }
         }
         else
         {
-            Gizmos.DrawWireSphere(transform.position, proximityThreshold);
-        }
-        
-        // Draw the current position on the spline
-        if (Application.isPlaying && isInitialized)
-        {
-            Vector3 splinePos = EvaluateSplinePosition(currentSplinePosition);
-            Gizmos.DrawSphere(splinePos, 0.5f);
-            
-            // Draw line to listener if available
-            if (listenerTransform != null)
+            // In edit mode, show a representation of the proximity threshold
+            if (spline.Spline != null)
             {
-                Gizmos.DrawLine(splinePos, listenerTransform.position);
+                Gizmos.color = new Color(debugColor.r, debugColor.g, debugColor.b, 0.2f);
+                
+                // Display the proximity threshold along the spline
+                int tubeSamples = 12;  // Lower for better editor performance
+                for (int i = 0; i <= tubeSamples; i++)
+                {
+                    float t = (float)i / tubeSamples;
+                    Vector3 point = spline.EvaluatePosition(t);
+                    Gizmos.DrawWireSphere(point, proximityThreshold);
+                }
             }
         }
     }
