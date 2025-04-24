@@ -17,7 +17,7 @@ public class SplineAudioFollower : MonoBehaviour
     [Range(0f, 0.95f)]
     public float smoothing = 0.7f;
     
-    [Header("Optimization")]
+    [Header("Optimisation")]
     [Tooltip("Distance beyond which the follower will enter sleep mode (should be greater than proximityThreshold)")]
     [Range(10f, 200f)]
     public float sleepThreshold = 30f;
@@ -25,6 +25,22 @@ public class SplineAudioFollower : MonoBehaviour
     [Tooltip("How often to check if we should wake up when sleeping (in seconds)")]
     [Range(0.1f, 5f)]
     public float sleepCheckInterval = 0.5f;
+    
+    [Header("Closed Spline Settings")]
+    [Tooltip("When inside a closed spline, position audio at listener with this offset")]
+    public Vector3 insideListenerOffset = new Vector3(0, 0, 0);
+    
+    [Tooltip("Smoothing factor when transitioning from outside to inside closed spline")]
+    [Range(0f, 0.95f)]
+    public float insideTransitionSmoothing = 0.7f;
+    
+    [Tooltip("Smoothing factor when transitioning from inside to outside closed spline")]
+    [Range(0f, 0.95f)]
+    public float outsideTransitionSmoothing = 0.7f;
+    
+    [Tooltip("Maximum time for transition when exiting a closed spline (seconds)")]
+    [Range(0.1f, 3.0f)]
+    public float exitTransitionTime = 0.5f;
 
     [Header("References")]
     [Tooltip("The child GameObject containing the AudioSource (optional, will find automatically if not set)")]
@@ -53,6 +69,14 @@ public class SplineAudioFollower : MonoBehaviour
     // Sleep mode variables
     private bool isSleeping = false;
     private float nextSleepCheckTime = 0f;
+    
+    // Closed spline variables
+    private bool isInsideClosedSpline = false;
+    private bool isTransitioningOutside = false;
+    private Vector3 targetPosition = Vector3.zero;
+    private Vector3 exitStartPosition = Vector3.zero;
+    private Vector3 exitTargetPosition = Vector3.zero;
+    private float exitTransitionProgress = 0f;
 
     private void Awake()
     {
@@ -103,6 +127,9 @@ public class SplineAudioFollower : MonoBehaviour
     {
         if (!isInitialized || listenerTransform == null) return;
         
+        // Get spline closed state
+        bool isSplineClosed = splineContainer != null && splineContainer.Spline != null && splineContainer.Spline.Closed;
+        
         // Sleep mode handling
         if (isSleeping)
         {
@@ -135,6 +162,78 @@ public class SplineAudioFollower : MonoBehaviour
                 // Wake up - we're close enough to the spline now
                 isSleeping = false;
             }
+        }
+        
+    // For closed splines, check if listener is inside
+        if (isSplineClosed)
+        {
+            bool wasInside = isInsideClosedSpline;
+            isInsideClosedSpline = IsPointInsideClosedSpline(listenerTransform.position);
+            
+            if (isInsideClosedSpline)
+            {
+                // Inside closed spline - position audio near listener position
+                targetPosition = listenerTransform.position + insideListenerOffset;
+                
+                // Smooth the movement
+                audioObject.transform.position = Vector3.Lerp(
+                    audioObject.transform.position, 
+                    targetPosition, 
+                    Time.deltaTime * movementSpeed * (1 - insideTransitionSmoothing));
+                
+                // Reset any exit transition
+                isTransitioningOutside = false;
+                exitTransitionProgress = 0f;
+                
+                return; // Skip normal spline following
+            }
+            else if (wasInside)
+            {
+                // Just exited the closed spline - start transition
+                float closestT = FindClosestPointOnSpline(listenerTransform.position);
+                currentSplinePosition = closestT;
+                
+                // Set up smooth transition
+                isTransitioningOutside = true;
+                exitStartPosition = audioObject.transform.position;
+                exitTargetPosition = EvaluateSplinePosition(currentSplinePosition);
+                exitTransitionProgress = 0f;
+            }
+            else if (isTransitioningOutside)
+            {
+                // Continue transition to spline
+                exitTransitionProgress += Time.deltaTime / exitTransitionTime;
+                
+                if (exitTransitionProgress >= 1.0f)
+                {
+                    // Transition complete
+                    isTransitioningOutside = false;
+                    audioObject.transform.position = exitTargetPosition;
+                }
+                else
+                {
+                    // Custom smooth transition - can use different easing functions here
+                    float t = 1.0f - Mathf.Pow(1.0f - exitTransitionProgress, 2.0f); // Ease out quad
+                    audioObject.transform.position = Vector3.Lerp(
+                        exitStartPosition, 
+                        exitTargetPosition, 
+                        t);
+                    
+                    // Also update target position as it might have changed
+                    float newClosestT = FindClosestPointOnSpline(listenerTransform.position);
+                    exitTargetPosition = EvaluateSplinePosition(newClosestT);
+                    currentSplinePosition = newClosestT;
+                }
+                
+                // Skip normal spline following during transition
+                return;
+            }
+        }
+        else
+        {
+            // Not a closed spline, reset inside state
+            isInsideClosedSpline = false;
+            isTransitioningOutside = false;
         }
         
         // Check if listener is close enough to the spline by measuring distance to any part of spline
@@ -247,6 +346,82 @@ public class SplineAudioFollower : MonoBehaviour
         
         return transform.position;
     }
+    
+    // Determines if a point is inside a closed spline
+    private bool IsPointInsideClosedSpline(Vector3 point)
+    {
+        if (splineContainer == null || splineContainer.Spline == null || !splineContainer.Spline.Closed)
+            return false;
+            
+        // For this to work, we need to project everything onto a consistent plane
+        // We'll use the XZ plane (horizontal plane) as that's most common for gameplay
+        
+        // Implementation of ray-casting algorithm for point-in-polygon test
+        // For a point to be inside, a ray from the point in any fixed direction 
+        // will intersect the polygon boundary an odd number of times
+        
+        int intersectionCount = 0;
+        float rayLength = 1000f; // Long enough to extend beyond the spline
+        
+        // Sample points along the spline to form our polygon
+        // We need more points for accurate inside/outside detection
+        int polygonSamples = Mathf.Max(50, splineSampleCount * 2);
+        Vector3[] splinePoints = new Vector3[polygonSamples];
+        
+        for (int i = 0; i < polygonSamples; i++)
+        {
+            float t = (float)i / polygonSamples;
+            splinePoints[i] = EvaluateSplinePosition(t);
+        }
+        
+        // Cast a ray in the positive X direction
+        Vector3 rayStart = point;
+        Vector3 rayEnd = point + new Vector3(rayLength, 0, 0);
+        
+        // Check intersections with each polygon edge
+        for (int i = 0; i < splinePoints.Length; i++)
+        {
+            // Get current edge (line segment)
+            Vector3 p1 = splinePoints[i];
+            Vector3 p2 = splinePoints[(i + 1) % splinePoints.Length];
+            
+            // Check if ray intersects this edge
+            if (RayIntersectsLineSegment(rayStart, rayEnd, p1, p2))
+            {
+                intersectionCount++;
+            }
+        }
+        
+        // If intersection count is odd, the point is inside
+        return (intersectionCount % 2) == 1;
+    }
+    
+    // Checks if a ray intersects a line segment (projected onto XZ plane)
+    private bool RayIntersectsLineSegment(Vector3 rayStart, Vector3 rayEnd, Vector3 lineP1, Vector3 lineP2)
+    {
+        // Project everything onto XZ plane by ignoring Y component for this calculation
+        Vector2 rayStart2D = new Vector2(rayStart.x, rayStart.z);
+        Vector2 rayEnd2D = new Vector2(rayEnd.x, rayEnd.z);
+        Vector2 lineP12D = new Vector2(lineP1.x, lineP1.z);
+        Vector2 lineP22D = new Vector2(lineP2.x, lineP2.z);
+        
+        // Check if the line segment crosses the ray's path
+        // First, check if line segment straddles the ray's X-parallel line
+        if ((lineP12D.y > rayStart2D.y && lineP22D.y <= rayStart2D.y) ||
+            (lineP22D.y > rayStart2D.y && lineP12D.y <= rayStart2D.y))
+        {
+            // Calculate the X-coordinate of the intersection
+            float intersectX = lineP12D.x + (rayStart2D.y - lineP12D.y) * (lineP22D.x - lineP12D.x) / (lineP22D.y - lineP12D.y);
+            
+            // Check if intersection is along the positive ray
+            if (intersectX >= rayStart2D.x)
+            {
+                return true;
+            }
+        }
+        
+        return false;
+    }
 
     private void OnDrawGizmosSelected()
     {
@@ -278,17 +453,57 @@ public class SplineAudioFollower : MonoBehaviour
             // Draw a visual indication of the closest point on the spline to the listener
             if (listenerTransform != null)
             {
+                // Get spline closed state
+                bool isSplineClosed = spline != null && spline.Spline != null && spline.Spline.Closed;
+                
+                // Draw different indicators based on inside/outside status for closed splines
+                if (isSplineClosed)
+                {
+                    if (isInsideClosedSpline)
+                    {
+                        // Inside closed spline indicator
+                        Gizmos.color = Color.cyan;
+                        Gizmos.DrawLine(listenerTransform.position, audioObject.transform.position);
+                        Gizmos.DrawWireSphere(listenerTransform.position, 1.0f);
+                        
+                        // Draw "inside" icon
+                        Gizmos.DrawIcon(listenerTransform.position + Vector3.up * 2f, "d_greenLight", true);
+                    }
+                    else if (isTransitioningOutside)
+                    {
+                        // Transitioning out of closed spline
+                        Gizmos.color = new Color(0f, 1f, 1f, exitTransitionProgress);
+                        Gizmos.DrawLine(listenerTransform.position, audioObject.transform.position);
+                        
+                        // Draw transition path
+                        Gizmos.color = new Color(1f, 0.5f, 0f, 0.8f);
+                        Gizmos.DrawLine(exitStartPosition, exitTargetPosition);
+                        
+                        // Draw progress indicator
+                        Gizmos.DrawSphere(Vector3.Lerp(exitStartPosition, exitTargetPosition, exitTransitionProgress), 0.3f);
+                    }
+                    else
+                    {
+                        // Outside but closed spline
+                        Gizmos.color = Color.yellow;
+                        Gizmos.DrawLine(listenerTransform.position, closestPointOnSpline);
+                        Gizmos.DrawSphere(closestPointOnSpline, 0.5f);
+                    }
+                }
+                else
+                {
+                    // Normal open spline - show proximity
+                    Gizmos.color = closestDistanceToSpline <= proximityThreshold ? Color.green : Color.yellow;
+                    Gizmos.DrawLine(listenerTransform.position, closestPointOnSpline);
+                    Gizmos.DrawSphere(closestPointOnSpline, 0.5f);
+                }
+                
                 // Draw sleep state indicator
                 if (isSleeping)
                 {
                     Gizmos.color = new Color(0.5f, 0.5f, 0.5f, 0.8f);
                     DrawSleepIndicator();
                 }
-                
-                // Visualize the proximity
-                Gizmos.color = closestDistanceToSpline <= proximityThreshold ? Color.green : Color.yellow;
-                Gizmos.DrawLine(listenerTransform.position, closestPointOnSpline);
-                Gizmos.DrawSphere(closestPointOnSpline, 0.5f);
                 
                 // Draw a dashed line from the closest point to the actual audio position
                 Vector3 audioPos = audioObject.transform.position;
@@ -321,6 +536,29 @@ public class SplineAudioFollower : MonoBehaviour
                     float t = (float)i / tubeSamples;
                     Vector3 point = spline.EvaluatePosition(t);
                     Gizmos.DrawWireSphere(point, proximityThreshold);
+                }
+                
+                // If closed spline, draw a special indicator
+                if (spline.Spline.Closed)
+                {
+                    Gizmos.color = new Color(0f, 1f, 1f, 0.15f); // Cyan, very transparent
+                    
+                    // Draw a filled area to represent the inside of the closed spline
+                    // (This is an approximation since we can't actually draw filled polygons with Gizmos)
+                    Vector3 center = spline.transform.position;
+                    for (int i = 0; i < tubeSamples; i++)
+                    {
+                        float t1 = (float)i / tubeSamples;
+                        float t2 = (float)(i + 1) / tubeSamples;
+                        
+                        Vector3 p1 = spline.EvaluatePosition(t1);
+                        Vector3 p2 = spline.EvaluatePosition(t2);
+                        
+                        // Draw triangles from center to edges to simulate fill
+                        Gizmos.DrawLine(center, p1);
+                        Gizmos.DrawLine(center, p2);
+                        Gizmos.DrawLine(p1, p2);
+                    }
                 }
             }
         }
