@@ -2,14 +2,14 @@ using UnityEngine;
 using UnityEngine.Splines;
 
 [RequireComponent(typeof(SplineContainer))]
-public class SplineAudioFollower : MonoBehaviour
+public class SplineFollower : MonoBehaviour
 {
     [Header("Tracking Settings")]
-    [Tooltip("Maximum distance at which the audio will track along the spline")]
+    [Tooltip("Maximum distance at which the follower will track along the spline")]
     [Range(1f, 50f)]
     public float proximityThreshold = 10f;
     
-    [Tooltip("How quickly the audio object moves along the spline")]
+    [Tooltip("How quickly the follower object moves along the spline")]
     [Range(0.1f, 10f)]
     public float movementSpeed = 5f;
     
@@ -24,6 +24,11 @@ public class SplineAudioFollower : MonoBehaviour
     [Tooltip("How quickly the offset transitions when changed (higher = faster)")]
     [Range(0.1f, 10f)]
     public float offsetTransitionSpeed = 3.0f;
+    
+    [Header("Optimization")]
+    [Tooltip("Distance beyond which the follower will enter sleep mode (should be greater than proximityThreshold)")]
+    [Range(10f, 200f)]
+    public float sleepThreshold = 30f;
     
     [Tooltip("How often to check if we should wake up when sleeping (in seconds)")]
     [Range(0.1f, 5f)]
@@ -46,14 +51,9 @@ public class SplineAudioFollower : MonoBehaviour
     public float exitTransitionSpeedMultiplier = 2.0f;
 
     [Header("References")]
-    [Tooltip("The child GameObject containing the AudioSource (optional, will find automatically if not set)")]
-    public GameObject audioObject;
-    
-    [Header("Optimisation")]
-    [Tooltip("Distance beyond which the follower will enter sleep mode (should be greater than proximityThreshold)")]
-    [Range(10f, 200f)]
-    public float sleepThreshold = 30f;
-    
+    [Tooltip("The child GameObject that will follow the spline (optional, will be created if not set)")]
+    public GameObject followObject;
+
     [Header("Debug")]
     public bool showDebugVisuals = true;
     public Color debugColor = Color.green;
@@ -74,7 +74,7 @@ public class SplineAudioFollower : MonoBehaviour
 
     // Private references
     private SplineContainer splineContainer;
-    private AudioSource audioSource;
+    private Component targetComponent; // Can be AudioSource or any other component
     private Transform listenerTransform;
     private float currentSplinePosition = 0f; // 0-1 normalized position along spline
     private bool isInitialized = false;
@@ -106,41 +106,67 @@ public class SplineAudioFollower : MonoBehaviour
         // Get the SplineContainer component
         splineContainer = GetComponent<SplineContainer>();
         
-        // Setup audio object
-        if (audioObject == null)
+        // Setup follow object
+        if (followObject == null)
         {
-            // Try to find a child with AudioSource
+            // Check if we have an audio source to follow
             AudioSource[] childAudioSources = GetComponentsInChildren<AudioSource>();
             if (childAudioSources.Length > 0)
             {
-                audioSource = childAudioSources[0];
-                audioObject = audioSource.gameObject;
+                targetComponent = childAudioSources[0];
+                followObject = targetComponent.gameObject;
             }
             else
             {
-                // Create a child GameObject with AudioSource if none exists
-                audioObject = new GameObject("Audio Object");
-                audioObject.transform.parent = transform;
-                audioObject.transform.localPosition = Vector3.zero;
-                audioSource = audioObject.AddComponent<AudioSource>();
-                Debug.Log("Created new audio object as child of spline.");
+                // Create a child GameObject as follower
+                followObject = new GameObject("Spline Follower Object");
+                followObject.transform.parent = transform;
+                followObject.transform.localPosition = Vector3.zero;
+                
+                // We don't necessarily need a component, but we'll add a basic one for reference
+                targetComponent = followObject.AddComponent<UnityEngine.UI.GraphicRaycaster>();
+                Debug.Log("Created new follower object as child of spline.");
             }
         }
         else
         {
-            // Use the provided audio object
-            audioSource = audioObject.GetComponent<AudioSource>();
-            if (audioSource == null)
+            // Use the provided follow object
+            // Try to get a component we can reference (AudioSource is just one possibility)
+            targetComponent = followObject.GetComponent<AudioSource>();
+            
+            // If no AudioSource, try to get any component
+            if (targetComponent == null)
             {
-                audioSource = audioObject.AddComponent<AudioSource>();
+                Component[] components = followObject.GetComponents<Component>();
+                if (components.Length > 1) // First component is always Transform
+                {
+                    // Get the first non-Transform component
+                    for (int i = 0; i < components.Length; i++)
+                    {
+                        if (!(components[i] is Transform))
+                        {
+                            targetComponent = components[i];
+                            break;
+                        }
+                    }
+                }
             }
         }
         
-        // Get the audio listener (typically attached to the main camera)
+        // Get a reference to the target transform to follow (typically camera with an AudioListener)
         AudioListener listener = FindObjectOfType<AudioListener>();
         if (listener != null)
         {
             listenerTransform = listener.transform;
+        }
+        else
+        {
+            // If no AudioListener, default to main camera
+            Camera mainCamera = Camera.main;
+            if (mainCamera != null)
+            {
+                listenerTransform = mainCamera.transform;
+            }
         }
         
         // Initialize offset
@@ -252,7 +278,7 @@ public class SplineAudioFollower : MonoBehaviour
     private void StartTransition(PositionState targetState)
     {
         // Set up transition
-        transitionStartPosition = audioObject.transform.position;
+        transitionStartPosition = followObject.transform.position;
         transitionProgress = 0f;
         currentState = PositionState.Transitioning;
         transitionTargetState = targetState;
@@ -298,13 +324,13 @@ public class SplineAudioFollower : MonoBehaviour
         {
             // Transition complete
             currentState = transitionTargetState;
-            audioObject.transform.position = transitionTargetPosition;
+            followObject.transform.position = transitionTargetPosition;
         }
         else
         {
             // Custom smooth transition - Ease out quad for smoother finish
             float t = 1.0f - Mathf.Pow(1.0f - transitionProgress, 2.0f);
-            audioObject.transform.position = Vector3.Lerp(
+            followObject.transform.position = Vector3.Lerp(
                 transitionStartPosition, 
                 transitionTargetPosition, 
                 t);
@@ -360,10 +386,8 @@ public class SplineAudioFollower : MonoBehaviour
         Vector3 targetPosition = GetInsideClosedPosition();
         
         // Smooth the movement
-        audioObject.transform.position = Vector3.Lerp(
-            audioObject.transform.position, 
-            targetPosition, 
-            Time.deltaTime * movementSpeed * (1 - transitionSmoothing));
+        followObject.transform.position = Vector3.Lerp(
+            followObject.transform.position, targetPosition, Time.deltaTime * movementSpeed * (1 - transitionSmoothing));
     }
     
     private void UpdateNormalPosition()
@@ -397,11 +421,11 @@ public class SplineAudioFollower : MonoBehaviour
             if (currentOffset != Vector3.zero)
             {
                 Vector3 offsetPosition = ApplyOffsetToSplinePosition(splinePosition, currentSplinePosition);
-                audioObject.transform.position = offsetPosition;
+                followObject.transform.position = offsetPosition;
             }
             else
             {
-                audioObject.transform.position = splinePosition;
+                followObject.transform.position = splinePosition;
             }
         }
         // When not in proximity, the audio object stays where it is
@@ -636,7 +660,7 @@ public class SplineAudioFollower : MonoBehaviour
                     case PositionState.InsideClosed:
                         // Inside closed spline indicator
                         Gizmos.color = Color.cyan;
-                        Gizmos.DrawLine(listenerTransform.position, audioObject.transform.position);
+                        Gizmos.DrawLine(listenerTransform.position, followObject.transform.position);
                         Gizmos.DrawWireSphere(listenerTransform.position, 1.0f);
                         
                         // Draw "inside" icon
@@ -667,10 +691,10 @@ public class SplineAudioFollower : MonoBehaviour
                     DrawSleepIndicator();
                 }
                 
-                // Draw a dashed line from the closest point to the actual audio position
-                Vector3 audioPos = audioObject.transform.position;
+                // Draw a dashed line from the closest point to the actual follower position
+                Vector3 followerPos = followObject.transform.position;
                 Gizmos.color = debugColor;
-                Gizmos.DrawLine(audioPos, closestPointOnSpline);
+                Gizmos.DrawLine(followerPos, closestPointOnSpline);
                 
                 // Visualize the current position on the spline
                 Vector3 currentPos = EvaluateSplinePosition(currentSplinePosition);

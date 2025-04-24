@@ -419,17 +419,19 @@ MonoBehaviour:
   proximityThreshold: 3.6
   movementSpeed: 8
   smoothing: 0.7
+  positionOffset: {x: 0, y: 0, z: 0}
+  offsetTransitionSpeed: 3
   sleepThreshold: 30
   sleepCheckInterval: 0.5
-  insideListenerOffset: {x: 0, y: 0, z: 0}
-  insideTransitionSmoothing: 0.5
-  outsideTransitionSmoothing: 0.7
-  exitTransitionTime: 1
-  audioObject: {fileID: 188266596}
+  insidePositionMode: 0
+  transitionSmoothing: 0.7
+  transitionTime: 0.1
+  exitTransitionSpeedMultiplier: 2
+  followObject: {fileID: 188266596}
   showDebugVisuals: 1
   debugColor: {r: 1, g: 0, b: 0.7129016, a: 1}
   showSamplePoints: 1
-  splineSampleCount: 40
+  splineSampleCount: 60
 --- !u!114 &2074205791
 MonoBehaviour:
   m_ObjectHideFlags: 0
