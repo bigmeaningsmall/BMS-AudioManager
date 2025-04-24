@@ -16,6 +16,15 @@ public class SplineAudioFollower : MonoBehaviour
     [Tooltip("Smoothing factor for audio movement (higher = smoother but less responsive)")]
     [Range(0f, 0.95f)]
     public float smoothing = 0.7f;
+    
+    [Header("Optimization")]
+    [Tooltip("Distance beyond which the follower will enter sleep mode (should be greater than proximityThreshold)")]
+    [Range(10f, 200f)]
+    public float sleepThreshold = 30f;
+    
+    [Tooltip("How often to check if we should wake up when sleeping (in seconds)")]
+    [Range(0.1f, 5f)]
+    public float sleepCheckInterval = 0.5f;
 
     [Header("References")]
     [Tooltip("The child GameObject containing the AudioSource (optional, will find automatically if not set)")]
@@ -40,6 +49,10 @@ public class SplineAudioFollower : MonoBehaviour
     private bool isInitialized = false;
     private float closestDistanceToSpline = float.MaxValue;
     private Vector3 closestPointOnSpline = Vector3.zero;
+    
+    // Sleep mode variables
+    private bool isSleeping = false;
+    private float nextSleepCheckTime = 0f;
 
     private void Awake()
     {
@@ -90,9 +103,51 @@ public class SplineAudioFollower : MonoBehaviour
     {
         if (!isInitialized || listenerTransform == null) return;
         
+        // Sleep mode handling
+        if (isSleeping)
+        {
+            // Only check for wake-up periodically to save performance
+            if (Time.time < nextSleepCheckTime) return;
+            
+            // Get approximate spline bounds for fast rejection
+            Bounds splineBounds = GetApproximateSplineBounds();
+            splineBounds.Expand(sleepThreshold); // Expand by sleep threshold
+            
+            // Quick check if listener is far outside the expanded bounds
+            if (!splineBounds.Contains(listenerTransform.position))
+            {
+                // Still too far away, schedule next check
+                nextSleepCheckTime = Time.time + sleepCheckInterval;
+                return;
+            }
+            
+            // More detailed check - find actual distance to spline
+            float distance = GetDistanceToSpline(listenerTransform.position);
+            
+            if (distance > sleepThreshold)
+            {
+                // Still too far, stay asleep
+                nextSleepCheckTime = Time.time + sleepCheckInterval;
+                return;
+            }
+            else
+            {
+                // Wake up - we're close enough to the spline now
+                isSleeping = false;
+            }
+        }
+        
         // Check if listener is close enough to the spline by measuring distance to any part of spline
-        // This will also update closestDistanceToSpline and closestPointOnSpline
-        bool inProximity = IsListenerInProximityOfSpline();
+        float distanceToSpline = GetDistanceToSpline(listenerTransform.position);
+        bool inProximity = distanceToSpline <= proximityThreshold;
+        
+        // Check if we should enter sleep mode
+        if (distanceToSpline > sleepThreshold)
+        {
+            isSleeping = true;
+            nextSleepCheckTime = Time.time + sleepCheckInterval;
+            return;
+        }
         
         // Only update position along spline if the listener is in proximity
         if (inProximity)
@@ -109,22 +164,18 @@ public class SplineAudioFollower : MonoBehaviour
         // When not in proximity, the audio object stays where it is
     }
 
-    // Checks if the listener is close enough to any part of the spline
-    private bool IsListenerInProximityOfSpline()
+    // Gets the approximate distance from a point to the spline
+    private float GetDistanceToSpline(Vector3 point)
     {
-        if (splineContainer == null || listenerTransform == null) return false;
-        
         // Reset closest distance tracking
         closestDistanceToSpline = float.MaxValue;
         
-        // Sample points along the spline to find closest one to listener
-        Vector3 listenerPos = listenerTransform.position;
-        
+        // Sample points along the spline to find closest one to the point
         for (int i = 0; i <= splineSampleCount; i++)
         {
             float t = (float)i / splineSampleCount;
             Vector3 pointOnSpline = EvaluateSplinePosition(t);
-            float distance = Vector3.Distance(pointOnSpline, listenerPos);
+            float distance = Vector3.Distance(pointOnSpline, point);
             
             if (distance < closestDistanceToSpline)
             {
@@ -139,8 +190,25 @@ public class SplineAudioFollower : MonoBehaviour
             }
         }
         
-        // Return true if closest point on spline is within proximity threshold
-        return closestDistanceToSpline <= proximityThreshold;
+        return closestDistanceToSpline;
+    }
+    
+    // Get approximate bounds of the spline for quick rejection tests
+    private Bounds GetApproximateSplineBounds()
+    {
+        // Start with a point on the spline
+        Vector3 firstPoint = EvaluateSplinePosition(0);
+        Bounds bounds = new Bounds(firstPoint, Vector3.zero);
+        
+        // Sample a few points to create a bounding box
+        int boundsSamples = 10; // Keep this low for performance
+        for (int i = 1; i <= boundsSamples; i++)
+        {
+            float t = (float)i / boundsSamples;
+            bounds.Encapsulate(EvaluateSplinePosition(t));
+        }
+        
+        return bounds;
     }
 
     // Finds the normalized position (0-1) of the closest point on the spline to the target position
@@ -210,6 +278,13 @@ public class SplineAudioFollower : MonoBehaviour
             // Draw a visual indication of the closest point on the spline to the listener
             if (listenerTransform != null)
             {
+                // Draw sleep state indicator
+                if (isSleeping)
+                {
+                    Gizmos.color = new Color(0.5f, 0.5f, 0.5f, 0.8f);
+                    DrawSleepIndicator();
+                }
+                
                 // Visualize the proximity
                 Gizmos.color = closestDistanceToSpline <= proximityThreshold ? Color.green : Color.yellow;
                 Gizmos.DrawLine(listenerTransform.position, closestPointOnSpline);
@@ -224,6 +299,12 @@ public class SplineAudioFollower : MonoBehaviour
                 Vector3 currentPos = EvaluateSplinePosition(currentSplinePosition);
                 Gizmos.color = Color.blue;
                 Gizmos.DrawSphere(currentPos, 0.4f);
+                
+                // Visualize the sleep threshold
+                Gizmos.color = new Color(1f, 0.5f, 0f, 0.2f); // Orange, semi-transparent
+                Bounds splineBounds = GetApproximateSplineBounds();
+                splineBounds.Expand(sleepThreshold);
+                Gizmos.DrawWireCube(splineBounds.center, splineBounds.size);
             }
         }
         else
@@ -243,5 +324,18 @@ public class SplineAudioFollower : MonoBehaviour
                 }
             }
         }
+    }
+    
+    private void DrawSleepIndicator()
+    {
+        Vector3 pos = transform.position + Vector3.up * 2f;
+        
+        // Draw sleep indicator
+        Gizmos.DrawIcon(pos, "console.infoicon.sml", true);
+        
+        // Draw sleep bounds
+        Bounds splineBounds = GetApproximateSplineBounds();
+        splineBounds.Expand(sleepThreshold);
+        Gizmos.DrawWireCube(splineBounds.center, splineBounds.size);
     }
 }

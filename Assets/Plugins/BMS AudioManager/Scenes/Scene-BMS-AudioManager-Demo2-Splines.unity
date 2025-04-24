@@ -416,12 +416,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3558409d8e8820847a3521dd7a418cce, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  proximityThreshold: 10
-  movementSpeed: 5
+  proximityThreshold: 3.6
+  movementSpeed: 8
   smoothing: 0.7
-  audioObject: {fileID: 0}
+  sleepThreshold: 30
+  sleepCheckInterval: 0.5
+  audioObject: {fileID: 188266596}
   showDebugVisuals: 1
   debugColor: {r: 0, g: 1, b: 0, a: 1}
+  showSamplePoints: 1
+  splineSampleCount: 20
 --- !u!114 &2074205791
 MonoBehaviour:
   m_ObjectHideFlags: 0
