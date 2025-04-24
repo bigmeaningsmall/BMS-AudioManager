@@ -1,13 +1,9 @@
 using UnityEngine;
 using UnityEngine.Splines;
 
-[RequireComponent(typeof(AudioSource))]
+[RequireComponent(typeof(SplineContainer))]
 public class SplineAudioFollower : MonoBehaviour
 {
-    [Header("Spline References")]
-    [Tooltip("The SplineContainer that defines the path for this audio to follow")]
-    public SplineContainer splineContainer;
-
     [Header("Tracking Settings")]
     [Tooltip("Maximum distance at which the audio will track along the spline")]
     [Range(1f, 50f)]
@@ -21,11 +17,16 @@ public class SplineAudioFollower : MonoBehaviour
     [Range(0f, 0.95f)]
     public float smoothing = 0.7f;
 
+    [Header("References")]
+    [Tooltip("The child GameObject containing the AudioSource (optional, will find automatically if not set)")]
+    public GameObject audioObject;
+
     [Header("Debug")]
     public bool showDebugVisuals = true;
     public Color debugColor = Color.green;
 
     // Private references
+    private SplineContainer splineContainer;
     private AudioSource audioSource;
     private Transform listenerTransform;
     private float currentSplinePosition = 0f; // 0-1 normalized position along spline
@@ -33,20 +34,44 @@ public class SplineAudioFollower : MonoBehaviour
 
     private void Awake()
     {
-        audioSource = GetComponent<AudioSource>();
+        // Get the SplineContainer component
+        splineContainer = GetComponent<SplineContainer>();
+        
+        // Setup audio object
+        if (audioObject == null)
+        {
+            // Try to find a child with AudioSource
+            AudioSource[] childAudioSources = GetComponentsInChildren<AudioSource>();
+            if (childAudioSources.Length > 0)
+            {
+                audioSource = childAudioSources[0];
+                audioObject = audioSource.gameObject;
+            }
+            else
+            {
+                // Create a child GameObject with AudioSource if none exists
+                audioObject = new GameObject("Audio Object");
+                audioObject.transform.parent = transform;
+                audioObject.transform.localPosition = Vector3.zero;
+                audioSource = audioObject.AddComponent<AudioSource>();
+                Debug.Log("Created new audio object as child of spline.");
+            }
+        }
+        else
+        {
+            // Use the provided audio object
+            audioSource = audioObject.GetComponent<AudioSource>();
+            if (audioSource == null)
+            {
+                audioSource = audioObject.AddComponent<AudioSource>();
+            }
+        }
         
         // Get the audio listener (typically attached to the main camera)
         AudioListener listener = FindObjectOfType<AudioListener>();
         if (listener != null)
         {
             listenerTransform = listener.transform;
-        }
-        
-        if (splineContainer == null)
-        {
-            Debug.LogError("SplineAudioFollower requires a SplineContainer reference.");
-            enabled = false;
-            return;
         }
         
         isInitialized = true;
@@ -68,8 +93,8 @@ public class SplineAudioFollower : MonoBehaviour
             // Smooth the movement along the spline
             currentSplinePosition = Mathf.Lerp(currentSplinePosition, closestT, Time.deltaTime * movementSpeed * (1 - smoothing));
             
-            // Position the audio source along the spline
-            transform.position = EvaluateSplinePosition(currentSplinePosition);
+            // Position the audio object along the spline
+            audioObject.transform.position = EvaluateSplinePosition(currentSplinePosition);
         }
         // When not in proximity, the audio object stays where it is
     }
@@ -138,11 +163,22 @@ public class SplineAudioFollower : MonoBehaviour
 
     private void OnDrawGizmosSelected()
     {
-        if (!showDebugVisuals || splineContainer == null) return;
+        if (!showDebugVisuals) return;
         
-        // Draw the proximity threshold
+        SplineContainer spline = GetComponent<SplineContainer>();
+        if (spline == null) return;
+        
+        // Draw the proximity threshold around the current audio position
         Gizmos.color = debugColor;
-        Gizmos.DrawWireSphere(transform.position, proximityThreshold);
+        
+        if (Application.isPlaying && audioObject != null)
+        {
+            Gizmos.DrawWireSphere(audioObject.transform.position, proximityThreshold);
+        }
+        else
+        {
+            Gizmos.DrawWireSphere(transform.position, proximityThreshold);
+        }
         
         // Draw the current position on the spline
         if (Application.isPlaying && isInitialized)
