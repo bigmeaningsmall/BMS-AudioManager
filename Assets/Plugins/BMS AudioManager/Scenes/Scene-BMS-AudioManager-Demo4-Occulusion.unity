@@ -2163,18 +2163,27 @@ MonoBehaviour:
   wallMask:
     serializedVersion: 2
     m_Bits: 8
-  occludedVolume: 0.3
-  occludedCutoffFrequency: 500
-  directVolume: 1
-  maxRayDistance: 6
+  fullyOccludedVolume: 0.1
+  directVolume: 0.8
+  fullyOccludedCutoffFrequency: 800
+  maxBounces: 2
+  maxBounceDistance: 30
+  bounceVolumeReduction: 0.6
+  bounceLowPassReduction: 0.7
+  maxAnalysisRayDistance: 6
   analysisInterval: 0.25
-  narrowPreset: 13
-  mediumPreset: 3
-  largePreset: 10
+  useCustomReverb: 1
+  fallbackReverbPreset: 0
+  baseRoomSize: 0.5
+  baseDecayTime: 1.5
+  baseDryLevel: 0
+  baseWetLevel: -1000
+  baseReflectionsLevel: -900
   showRays: 1
-  rayHitColor: {r: 0, g: 1, b: 0, a: 1}
-  rayMissColor: {r: 1, g: 0, b: 0, a: 1}
-  occlusionRayColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
+  directPathColor: {r: 0, g: 1, b: 0, a: 1}
+  occludedPathColor: {r: 1, g: 0, b: 0, a: 1}
+  bouncePathColor: {r: 0, g: 1, b: 1, a: 1}
+  analysisRayColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   rayDisplayDuration: 1
 --- !u!82 &1752532214
 AudioSource:
@@ -2185,11 +2194,12 @@ AudioSource:
   m_GameObject: {fileID: 1752532212}
   m_Enabled: 1
   serializedVersion: 4
-  OutputAudioMixerGroup: {fileID: 0}
-  m_audioClip: {fileID: 8300000, guid: a7e8c6b308bf37e4189d8eb92dd87d5a, type: 3}
-  m_Resource: {fileID: 8300000, guid: a7e8c6b308bf37e4189d8eb92dd87d5a, type: 3}
+  OutputAudioMixerGroup: {fileID: 2268928712382745843, guid: 3c08029f3a334d8468cd0ea11728e603,
+    type: 2}
+  m_audioClip: {fileID: 8300000, guid: ff0217fc7e536de4782bd0072d01ff27, type: 3}
+  m_Resource: {fileID: 8300000, guid: ff0217fc7e536de4782bd0072d01ff27, type: 3}
   m_PlayOnAwake: 1
-  m_Volume: 1
+  m_Volume: 0.8
   m_Pitch: 1
   Loop: 1
   Mute: 0

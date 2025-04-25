@@ -46,12 +46,27 @@ public class EnvironmentalAudio : MonoBehaviour
     [Tooltip("How often to update environment analysis (seconds)")]
     [Range(0.1f, 2f)]
     [SerializeField] private float analysisInterval = 0.5f;
-    [Tooltip("Reverb preset for narrow spaces")]
-    [SerializeField] private AudioReverbPreset narrowPreset = AudioReverbPreset.Room;
-    [Tooltip("Reverb preset for medium spaces")]
-    [SerializeField] private AudioReverbPreset mediumPreset = AudioReverbPreset.Hallway;
-    [Tooltip("Reverb preset for large spaces")]
-    [SerializeField] private AudioReverbPreset largePreset = AudioReverbPreset.Concerthall;
+    [Tooltip("Enable custom reverb instead of presets")]
+    [SerializeField] private bool useCustomReverb = true;
+    [Tooltip("Reverb preset to use if custom reverb is disabled")]
+    [SerializeField] private AudioReverbPreset fallbackReverbPreset = AudioReverbPreset.Hallway;
+    
+    [Header("Custom Reverb Parameters")]
+    [Tooltip("Base room size for reverb")]
+    [Range(0f, 1f)]
+    [SerializeField] private float baseRoomSize = 0.5f;
+    [Tooltip("Base reverb decay time (seconds)")]
+    [Range(0.1f, 10f)]
+    [SerializeField] private float baseDecayTime = 1.5f;
+    [Tooltip("Dry level for direct sound (-10000 to 0 dB)")]
+    [Range(-10000f, 0f)]
+    [SerializeField] private float baseDryLevel = 0f;
+    [Tooltip("Wet level for reverb (-10000 to 0 dB)")]
+    [Range(-10000f, 0f)]
+    [SerializeField] private float baseWetLevel = -1000f;
+    [Tooltip("Base reflections level (-10000 to 1000 dB)")]
+    [Range(-10000f, 1000f)]
+    [SerializeField] private float baseReflectionsLevel = -900f;
     
     [Header("Debug Visualization")]
     [SerializeField] private bool showRays = true;
@@ -161,7 +176,27 @@ public class EnvironmentalAudio : MonoBehaviour
         }
         
         // Initialize filters
-        reverbFilter.reverbPreset = AudioReverbPreset.Off;
+        if (useCustomReverb)
+        {
+            // Set to User preset to enable custom parameter adjustment
+            reverbFilter.reverbPreset = AudioReverbPreset.User;
+            
+            // Initialize custom reverb parameters
+            reverbFilter.dryLevel = baseDryLevel;
+            reverbFilter.room = baseRoomSize;
+            reverbFilter.decayTime = baseDecayTime;
+            reverbFilter.reverbLevel = baseWetLevel;
+            reverbFilter.reflectionsLevel = baseReflectionsLevel;
+            
+            Debug.Log("[EnvironmentalAudio] Using custom reverb settings");
+        }
+        else
+        {
+            reverbFilter.reverbPreset = AudioReverbPreset.Off;
+            Debug.Log("[EnvironmentalAudio] Using reverb presets");
+        }
+        
+        // Initialize lowpass filter
         lowPassFilter.cutoffFrequency = 22000f;
         
         // Find listener if not set
@@ -422,6 +457,44 @@ public class EnvironmentalAudio : MonoBehaviour
         audioSource.volume = Mathf.Lerp(audioSource.volume, currentVolumeTarget, Time.deltaTime * 5f);
         lowPassFilter.cutoffFrequency = Mathf.Lerp(lowPassFilter.cutoffFrequency, currentLowPassTarget, Time.deltaTime * 5f);
         
+        // Update reverb based on path quality if using custom reverb
+        if (useCustomReverb)
+        {
+            float pathDistance = hasDirectPath ? 
+                Vector3.Distance(transform.position, listener.position) : 
+                (validBouncePaths.Count > 0 ? validBouncePaths[0].totalDistance : maxBounceDistance);
+                
+            // Calculate normalized distance for parameter scaling
+            float distanceNorm = Mathf.Clamp01(pathDistance / maxBounceDistance);
+            
+            // Bounce count affects reverb character
+            int bounceCount = hasDirectPath ? 0 : 
+                (validBouncePaths.Count > 0 ? validBouncePaths[0].bounceCount : 2);
+            
+            // More distance/bounces = stronger reverb, less dry signal
+            float dryLevelMod = hasDirectPath ? 0f : -200f * bounceCount - 500f * distanceNorm;
+            float roomSizeMod = 0.2f * bounceCount + 0.3f * distanceNorm;
+            float decayTimeMod = 0.5f * bounceCount + 1.0f * distanceNorm;
+            float wetLevelMod = 300f * bounceCount + 500f * distanceNorm;
+            
+            // Apply custom reverb settings with smooth transitions
+            float transitionSpeed = Time.deltaTime * 3f;
+            reverbFilter.dryLevel = Mathf.Lerp(reverbFilter.dryLevel, 
+                Mathf.Clamp(baseDryLevel + dryLevelMod, -10000f, 0f), transitionSpeed);
+            reverbFilter.room = Mathf.Lerp(reverbFilter.room, 
+                Mathf.Clamp01(baseRoomSize + roomSizeMod), transitionSpeed);
+            reverbFilter.decayTime = Mathf.Lerp(reverbFilter.decayTime, 
+                Mathf.Clamp(baseDecayTime + decayTimeMod, 0.1f, 20f), transitionSpeed);
+            reverbFilter.reverbLevel = Mathf.Lerp(reverbFilter.reverbLevel, 
+                Mathf.Clamp(baseWetLevel + wetLevelMod, -10000f, 0f), transitionSpeed);
+            reverbFilter.reflectionsLevel = Mathf.Lerp(reverbFilter.reflectionsLevel, 
+                Mathf.Clamp(baseReflectionsLevel + 100f * bounceCount, -10000f, 1000f), transitionSpeed);
+            
+            Debug.Log($"[EnvironmentalAudio] Reverb - Dry: {reverbFilter.dryLevel:F0}, " +
+                     $"Room: {reverbFilter.room:F2}, Decay: {reverbFilter.decayTime:F2}, " +
+                     $"Wet: {reverbFilter.reverbLevel:F0}, Bounces: {bounceCount}");
+        }
+        
         // Log current state for debugging
         Debug.Log($"[EnvironmentalAudio] Current audio - Volume: {audioSource.volume:F2}/{currentVolumeTarget:F2}, " +
                  $"LPF: {lowPassFilter.cutoffFrequency:F0}Hz/{currentLowPassTarget:F0}Hz, Direct path: {hasDirectPath}, Bounce paths: {validBouncePaths.Count}");
@@ -502,63 +575,75 @@ public class EnvironmentalAudio : MonoBehaviour
             }
         }
         
-        // If we found no walls, we're in an open space
-        if (hitCount == 0)
+        // Only use environment analysis for reverb if not using custom reverb
+        if (!useCustomReverb)
         {
-            Debug.Log("[EnvironmentalAudio] No walls detected - in open space, disabling reverb");
-            reverbFilter.reverbPreset = AudioReverbPreset.Off;
-            return;
-        }
-        
-        // Calculate average distance to walls
-        float avgDistance = totalWidth / hitCount;
-        
-        // Determine if we're in a corridor by checking if width and length are very different
-        float widthDifference = Mathf.Abs(distances[0] - distances[2]);
-        float lengthDifference = Mathf.Abs(distances[1] - distances[3]);
-        
-        // Higher value indicates more corridor-like environment
-        float corridorFactor = Mathf.Max(widthDifference, lengthDifference) / avgDistance;
-        
-        Debug.Log($"[EnvironmentalAudio] Environment analysis: Avg distance: {avgDistance:F2}m, " +
-                  $"Corridor factor: {corridorFactor:F2}, Hits: {hitCount}/{rayCount}");
-        
-        AudioReverbPreset selectedPreset;
-        
-        // Choose reverb preset based on average distance and corridor factor
-        if (corridorFactor > 1.5f)
-        {
-            // We're likely in a corridor
-            if (avgDistance < 3f) {
-                selectedPreset = narrowPreset;
-                Debug.Log("[EnvironmentalAudio] Detected: Narrow corridor");
+            // If we found no walls, we're in an open space
+            if (hitCount == 0)
+            {
+                Debug.Log("[EnvironmentalAudio] No walls detected - in open space, disabling reverb");
+                reverbFilter.reverbPreset = AudioReverbPreset.Off;
+                return;
             }
-            else if (avgDistance < 8f) {
-                selectedPreset = mediumPreset;
-                Debug.Log("[EnvironmentalAudio] Detected: Medium corridor");
+            
+            // Calculate average distance to walls
+            float avgDistance = totalWidth / hitCount;
+            
+            // Determine if we're in a corridor by checking if width and length are very different
+            float widthDifference = Mathf.Abs(distances[0] - distances[2]);
+            float lengthDifference = Mathf.Abs(distances[1] - distances[3]);
+            
+            // Higher value indicates more corridor-like environment
+            float corridorFactor = Mathf.Max(widthDifference, lengthDifference) / avgDistance;
+            
+            Debug.Log($"[EnvironmentalAudio] Environment analysis: Avg distance: {avgDistance:F2}m, " +
+                     $"Corridor factor: {corridorFactor:F2}, Hits: {hitCount}/{rayCount}");
+            
+            AudioReverbPreset selectedPreset;
+            
+            // Choose reverb preset based on average distance and corridor factor
+            if (corridorFactor > 1.5f)
+            {
+                // We're likely in a corridor
+                if (avgDistance < 3f) {
+                    selectedPreset = AudioReverbPreset.Hallway;
+                    Debug.Log("[EnvironmentalAudio] Detected: Narrow corridor");
+                }
+                else if (avgDistance < 8f) {
+                    selectedPreset = AudioReverbPreset.Livingroom;
+                    Debug.Log("[EnvironmentalAudio] Detected: Medium corridor");
+                }
+                else {
+                    selectedPreset = AudioReverbPreset.Auditorium;
+                    Debug.Log("[EnvironmentalAudio] Detected: Large hallway/corridor");
+                }
             }
-            else {
-                selectedPreset = largePreset;
-                Debug.Log("[EnvironmentalAudio] Detected: Large hallway/corridor");
+            else
+            {
+                // We're in a more open or square space
+                if (avgDistance < 5f) {
+                    selectedPreset = AudioReverbPreset.Room;
+                    Debug.Log("[EnvironmentalAudio] Detected: Room (square space)");
+                }
+                else {
+                    selectedPreset = AudioReverbPreset.Cave;
+                    Debug.Log("[EnvironmentalAudio] Detected: Large open space");
+                }
+            }
+            
+            // Apply preset if it changed
+            if (reverbFilter.reverbPreset != selectedPreset) {
+                Debug.Log($"[EnvironmentalAudio] Changing reverb preset from {reverbFilter.reverbPreset} to {selectedPreset}");
+                reverbFilter.reverbPreset = selectedPreset;
             }
         }
         else
         {
-            // We're in a more open or square space
-            if (avgDistance < 5f) {
-                selectedPreset = AudioReverbPreset.Room;
-                Debug.Log("[EnvironmentalAudio] Detected: Room (square space)");
+            // Just log environment info when using custom reverb
+            if (hitCount > 0) {
+                float avgDistance = totalWidth / hitCount;
+                Debug.Log($"[EnvironmentalAudio] Environment analysis (custom reverb): Avg distance: {avgDistance:F2}m, Hits: {hitCount}/{rayCount}");
             }
-            else {
-                selectedPreset = AudioReverbPreset.Cave;
-                Debug.Log("[EnvironmentalAudio] Detected: Large open space");
-            }
-        }
-        
-        // Only apply if preset has changed to avoid unnecessary updates
-        if (reverbFilter.reverbPreset != selectedPreset) {
-            Debug.Log($"[EnvironmentalAudio] Changing reverb preset from {reverbFilter.reverbPreset} to {selectedPreset}");
-            reverbFilter.reverbPreset = selectedPreset;
         }
     }
     
