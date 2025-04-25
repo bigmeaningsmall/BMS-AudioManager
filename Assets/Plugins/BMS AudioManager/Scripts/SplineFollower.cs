@@ -658,6 +658,12 @@ public class SplineFollower : MonoBehaviour
 
         return false;
     }
+    
+    
+    
+    
+
+    #region Debug Visuals
 
     private void OnDrawGizmosSelected(){
         if (!showDebugVisuals) return;
@@ -786,4 +792,6 @@ public class SplineFollower : MonoBehaviour
         splineBounds.Expand(sleepThreshold);
         Gizmos.DrawWireCube(splineBounds.center, splineBounds.size);
     }
+    
+    #endregion
 }
