@@ -42,10 +42,15 @@ public class SplineFollower : MonoBehaviour
     [Tooltip("Distance beyond which the follower will enter sleep mode (should be greater than proximityThreshold)")]
     [Range(10f, 200f)]
     public float sleepThreshold = 30f;
-
     [Tooltip("How often to check if we should wake up when sleeping (in seconds)")] [Range(0.1f, 5f)]
     public float sleepCheckInterval = 0.5f;
-
+    
+    [Tooltip("Target updates per second (0 = every frame)")]
+    [Range(0, 60)]
+    public float targetUpdatesPerSecond = 0f;
+    private float accumulatedTime = 0f;
+    private float updateInterval = 0f;
+    
     [Header("Closed Spline Settings")] [Tooltip("When inside a closed spline, use this mode for positioning")]
     public ClosedSplinePositionMode insidePositionMode = ClosedSplinePositionMode.RelativeToTarget;
 
@@ -132,6 +137,9 @@ public class SplineFollower : MonoBehaviour
             // We'll attempt to find a target in Start(), or user can call Initialize() manually
             isInitialized = false;
         }
+        
+        // Calculate update interval
+        UpdateTimingSettings();
     }
 
     private void Start(){
@@ -141,6 +149,13 @@ public class SplineFollower : MonoBehaviour
         }
     }
 
+    public void UpdateTimingSettings()
+    {
+        // Convert FPS to time interval (0 means update every frame)
+        updateInterval = (targetUpdatesPerSecond > 0) ? 1f / targetUpdatesPerSecond : 0f;
+        accumulatedTime = 0f; // Reset accumulated time when interval changes
+    }
+    
     /// <summary>
     /// Manually initialize the SplineFollower with a specific target
     /// </summary>
@@ -288,8 +303,25 @@ public class SplineFollower : MonoBehaviour
         }
     }
 
-private void Update()
+private void LateUpdate()
 {
+    // Skip if not initialized
+    if (!isInitialized || trackingTarget == null) return;
+
+    // FPS-based interval (0 = run every frame)
+    if (targetUpdatesPerSecond > 0)
+    {
+        accumulatedTime += Time.deltaTime;
+        if (accumulatedTime < updateInterval) return;
+        
+        // Use multiple of interval to avoid gradual drift
+        accumulatedTime -= updateInterval;
+        
+        // If frame rate dropped dramatically, prevent multiple catch-up updates
+        if (accumulatedTime >= updateInterval)
+            accumulatedTime = 0f;
+    }
+    
     if (!isInitialized || trackingTarget == null)
     {
         // Try to find a target if we don't have one yet
