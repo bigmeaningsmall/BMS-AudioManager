@@ -305,6 +305,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4912236814120798700, guid: d3011a8d9e8e2cb47ad213dfabb34e15,
         type: 3}
+      propertyPath: updateInterval
+      value: 30
+      objectReference: {fileID: 0}
+    - target: {fileID: 4912236814120798700, guid: d3011a8d9e8e2cb47ad213dfabb34e15,
+        type: 3}
       propertyPath: positionOffset.y
       value: 1
       objectReference: {fileID: 0}
@@ -315,8 +320,18 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4912236814120798700, guid: d3011a8d9e8e2cb47ad213dfabb34e15,
         type: 3}
+      propertyPath: proximityThreshold
+      value: 5.6
+      objectReference: {fileID: 0}
+    - target: {fileID: 4912236814120798700, guid: d3011a8d9e8e2cb47ad213dfabb34e15,
+        type: 3}
       propertyPath: sleepCheckInterval
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4912236814120798700, guid: d3011a8d9e8e2cb47ad213dfabb34e15,
+        type: 3}
+      propertyPath: targetUpdatesPerSecond
+      value: 30
       objectReference: {fileID: 0}
     - target: {fileID: 8655410209382054861, guid: d3011a8d9e8e2cb47ad213dfabb34e15,
         type: 3}
@@ -331,7 +346,7 @@ PrefabInstance:
     - target: {fileID: 8972554719354881190, guid: d3011a8d9e8e2cb47ad213dfabb34e15,
         type: 3}
       propertyPath: m_Name
-      value: Audio Spline
+      value: Audio Spline Closed Normal
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -462,6 +477,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4912236814120798700, guid: d3011a8d9e8e2cb47ad213dfabb34e15,
         type: 3}
+      propertyPath: smoothing
+      value: 0.25
+      objectReference: {fileID: 0}
+    - target: {fileID: 4912236814120798700, guid: d3011a8d9e8e2cb47ad213dfabb34e15,
+        type: 3}
       propertyPath: debugColor.b
       value: 0
       objectReference: {fileID: 0}
@@ -472,8 +492,18 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4912236814120798700, guid: d3011a8d9e8e2cb47ad213dfabb34e15,
         type: 3}
+      propertyPath: movementSpeed
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 4912236814120798700, guid: d3011a8d9e8e2cb47ad213dfabb34e15,
+        type: 3}
       propertyPath: sleepThreshold
       value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 4912236814120798700, guid: d3011a8d9e8e2cb47ad213dfabb34e15,
+        type: 3}
+      propertyPath: updateInterval
+      value: 30
       objectReference: {fileID: 0}
     - target: {fileID: 4912236814120798700, guid: d3011a8d9e8e2cb47ad213dfabb34e15,
         type: 3}
@@ -483,12 +513,22 @@ PrefabInstance:
     - target: {fileID: 4912236814120798700, guid: d3011a8d9e8e2cb47ad213dfabb34e15,
         type: 3}
       propertyPath: splineSampleCount
-      value: 10
+      value: 20
+      objectReference: {fileID: 0}
+    - target: {fileID: 4912236814120798700, guid: d3011a8d9e8e2cb47ad213dfabb34e15,
+        type: 3}
+      propertyPath: proximityThreshold
+      value: 4.4
       objectReference: {fileID: 0}
     - target: {fileID: 4912236814120798700, guid: d3011a8d9e8e2cb47ad213dfabb34e15,
         type: 3}
       propertyPath: sleepCheckInterval
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4912236814120798700, guid: d3011a8d9e8e2cb47ad213dfabb34e15,
+        type: 3}
+      propertyPath: targetUpdatesPerSecond
+      value: 60
       objectReference: {fileID: 0}
     - target: {fileID: 8655410209382054861, guid: d3011a8d9e8e2cb47ad213dfabb34e15,
         type: 3}
@@ -503,7 +543,7 @@ PrefabInstance:
     - target: {fileID: 8972554719354881190, guid: d3011a8d9e8e2cb47ad213dfabb34e15,
         type: 3}
       propertyPath: m_Name
-      value: Audio Spline (2)
+      value: Audio Spline Open
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -600,6 +640,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4912236814120798700, guid: d3011a8d9e8e2cb47ad213dfabb34e15,
         type: 3}
+      propertyPath: updateInterval
+      value: 30
+      objectReference: {fileID: 0}
+    - target: {fileID: 4912236814120798700, guid: d3011a8d9e8e2cb47ad213dfabb34e15,
+        type: 3}
       propertyPath: positionOffset.y
       value: 1
       objectReference: {fileID: 0}
@@ -615,6 +660,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4912236814120798700, guid: d3011a8d9e8e2cb47ad213dfabb34e15,
         type: 3}
+      propertyPath: targetUpdatesPerSecond
+      value: 60
+      objectReference: {fileID: 0}
+    - target: {fileID: 4912236814120798700, guid: d3011a8d9e8e2cb47ad213dfabb34e15,
+        type: 3}
       propertyPath: onlyTrackInsideClosedSpline
       value: 1
       objectReference: {fileID: 0}
@@ -626,7 +676,7 @@ PrefabInstance:
     - target: {fileID: 8972554719354881190, guid: d3011a8d9e8e2cb47ad213dfabb34e15,
         type: 3}
       propertyPath: m_Name
-      value: Audio Spline (1)
+      value: Audio Spline Closed Follow Inside Only
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
