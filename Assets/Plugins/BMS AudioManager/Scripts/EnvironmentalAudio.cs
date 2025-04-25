@@ -63,12 +63,13 @@ public class EnvironmentalAudio : MonoBehaviour
     [SerializeField] private float baseDryLevel = 0f;
     [Tooltip("Wet level for reverb (-10000 to 0 dB)")]
     [Range(-10000f, 0f)]
-    [SerializeField] private float baseWetLevel = -1000f;
+    [SerializeField] private float baseWetLevel = -2000f;
     [Tooltip("Base reflections level (-10000 to 1000 dB)")]
     [Range(-10000f, 1000f)]
-    [SerializeField] private float baseReflectionsLevel = -900f;
+    [SerializeField] private float baseReflectionsLevel = -1000f;
     
     [Header("Debug Visualization")]
+    [SerializeField] private bool enableDebugLogs = false; // Toggle this to enable/disable logs
     [SerializeField] private bool showRays = true;
     [SerializeField] private Color directPathColor = Color.green;
     [SerializeField] private Color occludedPathColor = Color.red;
@@ -151,28 +152,28 @@ public class EnvironmentalAudio : MonoBehaviour
         audioSource = GetComponent<AudioSource>();
         
         // Log initial settings for debugging
-        Debug.Log($"[EnvironmentalAudio] Initializing on {gameObject.name}");
+        LogDebug($"[EnvironmentalAudio] Initializing on {gameObject.name}");
         
         // Store initial volume for reference
         float initialVolume = audioSource.volume;
-        Debug.Log($"[EnvironmentalAudio] Initial AudioSource volume: {initialVolume}");
+        LogDebug($"[EnvironmentalAudio] Initial AudioSource volume: {initialVolume}");
         
         // Add and configure reverb filter
         if (GetComponent<AudioReverbFilter>() == null) {
             reverbFilter = gameObject.AddComponent<AudioReverbFilter>();
-            Debug.Log("[EnvironmentalAudio] Added AudioReverbFilter component");
+            LogDebug("[EnvironmentalAudio] Added AudioReverbFilter component");
         } else {
             reverbFilter = GetComponent<AudioReverbFilter>();
-            Debug.Log($"[EnvironmentalAudio] Using existing AudioReverbFilter - current preset: {reverbFilter.reverbPreset}");
+            LogDebug($"[EnvironmentalAudio] Using existing AudioReverbFilter - current preset: {reverbFilter.reverbPreset}");
         }
             
         // Add and configure low pass filter
         if (GetComponent<AudioLowPassFilter>() == null) {
             lowPassFilter = gameObject.AddComponent<AudioLowPassFilter>();
-            Debug.Log("[EnvironmentalAudio] Added AudioLowPassFilter component");
+            LogDebug("[EnvironmentalAudio] Added AudioLowPassFilter component");
         } else {
             lowPassFilter = GetComponent<AudioLowPassFilter>();
-            Debug.Log($"[EnvironmentalAudio] Using existing AudioLowPassFilter - current cutoff: {lowPassFilter.cutoffFrequency}Hz");
+            LogDebug($"[EnvironmentalAudio] Using existing AudioLowPassFilter - current cutoff: {lowPassFilter.cutoffFrequency}Hz");
         }
         
         // Initialize filters
@@ -188,12 +189,12 @@ public class EnvironmentalAudio : MonoBehaviour
             reverbFilter.reverbLevel = baseWetLevel;
             reverbFilter.reflectionsLevel = baseReflectionsLevel;
             
-            Debug.Log("[EnvironmentalAudio] Using custom reverb settings");
+            LogDebug("[EnvironmentalAudio] Using custom reverb settings");
         }
         else
         {
             reverbFilter.reverbPreset = AudioReverbPreset.Off;
-            Debug.Log("[EnvironmentalAudio] Using reverb presets");
+            LogDebug("[EnvironmentalAudio] Using reverb presets");
         }
         
         // Initialize lowpass filter
@@ -204,17 +205,17 @@ public class EnvironmentalAudio : MonoBehaviour
         {
             if (Camera.main != null) {
                 listener = Camera.main.transform;
-                Debug.Log($"[EnvironmentalAudio] Using main camera as listener: {listener.name}");
+                LogDebug($"[EnvironmentalAudio] Using main camera as listener: {listener.name}");
             } else {
-                Debug.LogWarning("[EnvironmentalAudio] No listener assigned and no main camera found!");
+                LogDebug("[EnvironmentalAudio] No listener assigned and no main camera found!");
             }
         } else {
-            Debug.Log($"[EnvironmentalAudio] Using assigned listener: {listener.name}");
+            LogDebug($"[EnvironmentalAudio] Using assigned listener: {listener.name}");
         }
         
         // Verify that AudioSource is configured properly
         if (audioSource.spatialBlend < 0.5f) {
-            Debug.LogWarning($"[EnvironmentalAudio] AudioSource has low spatial blend ({audioSource.spatialBlend}). " +
+            LogDebug($"[EnvironmentalAudio] AudioSource has low spatial blend ({audioSource.spatialBlend}). " +
                              "Consider increasing for better spatial effects.");
         }
     }
@@ -222,14 +223,14 @@ public class EnvironmentalAudio : MonoBehaviour
     private void Start()
     {
         // Log initialization for debugging
-        Debug.Log($"[EnvironmentalAudio] Starting on {gameObject.name} with audio source {audioSource.clip?.name ?? "No clip"}");
-        Debug.Log($"[EnvironmentalAudio] Using wall mask: {LayerMaskToString(wallMask)}");
-        Debug.Log($"[EnvironmentalAudio] Max bounces: {maxBounces}, Max bounce distance: {maxBounceDistance}m");
+        LogDebug($"[EnvironmentalAudio] Starting on {gameObject.name} with audio source {audioSource.clip?.name ?? "No clip"}");
+        LogDebug($"[EnvironmentalAudio] Using wall mask: {LayerMaskToString(wallMask)}");
+        LogDebug($"[EnvironmentalAudio] Max bounces: {maxBounces}, Max bounce distance: {maxBounceDistance}m");
         
         // Check if listener is assigned
         if (listener == null)
         {
-            Debug.LogWarning("[EnvironmentalAudio] No listener assigned! Finding main camera as fallback.");
+            LogDebug("[EnvironmentalAudio] No listener assigned! Finding main camera as fallback.");
         }
         
         // Force an immediate environment analysis
@@ -299,7 +300,7 @@ public class EnvironmentalAudio : MonoBehaviour
                 debugRays.Add(new DebugRay(sourcePosition, directHit.point, occludedPathColor, rayDisplayDuration));
             }
             
-            Debug.Log($"[EnvironmentalAudio] Direct path occluded by {directHit.collider.name} at {directHit.distance:F2}m");
+            LogDebug($"[EnvironmentalAudio] Direct path occluded by {directHit.collider.name} at {directHit.distance:F2}m");
             
             // If we have bounces enabled, try to find bounce paths
             if (maxBounces > 0)
@@ -318,7 +319,7 @@ public class EnvironmentalAudio : MonoBehaviour
                 debugRays.Add(new DebugRay(sourcePosition, listenerPosition, directPathColor, rayDisplayDuration));
             }
             
-            Debug.Log($"[EnvironmentalAudio] Direct path clear to listener at {distToListener:F2}m");
+            LogDebug($"[EnvironmentalAudio] Direct path clear to listener at {distToListener:F2}m");
         }
     }
     
@@ -385,7 +386,7 @@ public class EnvironmentalAudio : MonoBehaviour
                             debugRays.Add(new DebugRay(bouncePoint, listenerPosition, bouncePathColor, rayDisplayDuration));
                         }
                         
-                        Debug.Log($"[EnvironmentalAudio] Found valid 1-bounce path with distance {path.totalDistance:F2}m, " +
+                        LogDebug($"[EnvironmentalAudio] Found valid 1-bounce path with distance {path.totalDistance:F2}m, " +
                                  $"attenuation: {path.attenuation:F2}, lowpass: {path.lowPassFactor:F2}");
                         
                         // Early out if we only want a few paths
@@ -402,11 +403,11 @@ public class EnvironmentalAudio : MonoBehaviour
         if (validBouncePaths.Count > 0)
         {
             validBouncePaths.Sort((a, b) => a.CalculateQuality().CompareTo(b.CalculateQuality()));
-            Debug.Log($"[EnvironmentalAudio] Found {validBouncePaths.Count} valid bounce paths. Best path quality: {validBouncePaths[0].CalculateQuality():F2}");
+            LogDebug($"[EnvironmentalAudio] Found {validBouncePaths.Count} valid bounce paths. Best path quality: {validBouncePaths[0].CalculateQuality():F2}");
         }
         else
         {
-            Debug.Log("[EnvironmentalAudio] No valid bounce paths found - sound is fully occluded");
+            LogDebug("[EnvironmentalAudio] No valid bounce paths found - sound is fully occluded");
         }
     }
     
@@ -486,17 +487,17 @@ public class EnvironmentalAudio : MonoBehaviour
             reverbFilter.decayTime = Mathf.Lerp(reverbFilter.decayTime, 
                 Mathf.Clamp(baseDecayTime + decayTimeMod, 0.1f, 20f), transitionSpeed);
             reverbFilter.reverbLevel = Mathf.Lerp(reverbFilter.reverbLevel, 
-                Mathf.Clamp(baseWetLevel + wetLevelMod, -10000f, 0f), transitionSpeed);
+                Mathf.Clamp(baseWetLevel + wetLevelMod, -10000f, 0f), transitionSpeed*2f); //reverb level is more sensitive
             reverbFilter.reflectionsLevel = Mathf.Lerp(reverbFilter.reflectionsLevel, 
                 Mathf.Clamp(baseReflectionsLevel + 100f * bounceCount, -10000f, 1000f), transitionSpeed);
             
-            Debug.Log($"[EnvironmentalAudio] Reverb - Dry: {reverbFilter.dryLevel:F0}, " +
+            LogDebug($"[EnvironmentalAudio] Reverb - Dry: {reverbFilter.dryLevel:F0}, " +
                      $"Room: {reverbFilter.room:F2}, Decay: {reverbFilter.decayTime:F2}, " +
                      $"Wet: {reverbFilter.reverbLevel:F0}, Bounces: {bounceCount}");
         }
         
         // Log current state for debugging
-        Debug.Log($"[EnvironmentalAudio] Current audio - Volume: {audioSource.volume:F2}/{currentVolumeTarget:F2}, " +
+        LogDebug($"[EnvironmentalAudio] Current audio - Volume: {audioSource.volume:F2}/{currentVolumeTarget:F2}, " +
                  $"LPF: {lowPassFilter.cutoffFrequency:F0}Hz/{currentLowPassTarget:F0}Hz, Direct path: {hasDirectPath}, Bounce paths: {validBouncePaths.Count}");
     }
     
@@ -507,7 +508,7 @@ public class EnvironmentalAudio : MonoBehaviour
         float totalWidth = 0f;
         int hitCount = 0;
         
-        Debug.Log($"[EnvironmentalAudio] Starting environment analysis with {rayCount} rays, max distance: {maxAnalysisRayDistance}m");
+        LogDebug($"[EnvironmentalAudio] Starting environment analysis with {rayCount} rays, max distance: {maxAnalysisRayDistance}m");
         
         // Find the four closest walls in cardinal directions
         float[] distances = new float[4] { maxAnalysisRayDistance, maxAnalysisRayDistance, maxAnalysisRayDistance, maxAnalysisRayDistance };
@@ -529,7 +530,7 @@ public class EnvironmentalAudio : MonoBehaviour
                 hitCount++;
                 totalWidth += hit.distance;
                 
-                Debug.Log($"[EnvironmentalAudio] {dirNames[i]} ray hit: {hit.collider.name} at {hit.distance:F2}m");
+                LogDebug($"[EnvironmentalAudio] {dirNames[i]} ray hit: {hit.collider.name} at {hit.distance:F2}m");
                 
                 // Add debug ray
                 if (showRays)
@@ -539,7 +540,7 @@ public class EnvironmentalAudio : MonoBehaviour
             }
             else 
             {
-                Debug.Log($"[EnvironmentalAudio] {dirNames[i]} ray: No hit within {maxAnalysisRayDistance}m");
+                LogDebug($"[EnvironmentalAudio] {dirNames[i]} ray: No hit within {maxAnalysisRayDistance}m");
                 
                 if (showRays)
                 {
@@ -581,7 +582,7 @@ public class EnvironmentalAudio : MonoBehaviour
             // If we found no walls, we're in an open space
             if (hitCount == 0)
             {
-                Debug.Log("[EnvironmentalAudio] No walls detected - in open space, disabling reverb");
+                LogDebug("[EnvironmentalAudio] No walls detected - in open space, disabling reverb");
                 reverbFilter.reverbPreset = AudioReverbPreset.Off;
                 return;
             }
@@ -596,7 +597,7 @@ public class EnvironmentalAudio : MonoBehaviour
             // Higher value indicates more corridor-like environment
             float corridorFactor = Mathf.Max(widthDifference, lengthDifference) / avgDistance;
             
-            Debug.Log($"[EnvironmentalAudio] Environment analysis: Avg distance: {avgDistance:F2}m, " +
+            LogDebug($"[EnvironmentalAudio] Environment analysis: Avg distance: {avgDistance:F2}m, " +
                      $"Corridor factor: {corridorFactor:F2}, Hits: {hitCount}/{rayCount}");
             
             AudioReverbPreset selectedPreset;
@@ -607,15 +608,15 @@ public class EnvironmentalAudio : MonoBehaviour
                 // We're likely in a corridor
                 if (avgDistance < 3f) {
                     selectedPreset = AudioReverbPreset.Hallway;
-                    Debug.Log("[EnvironmentalAudio] Detected: Narrow corridor");
+                    LogDebug("[EnvironmentalAudio] Detected: Narrow corridor");
                 }
                 else if (avgDistance < 8f) {
                     selectedPreset = AudioReverbPreset.Livingroom;
-                    Debug.Log("[EnvironmentalAudio] Detected: Medium corridor");
+                    LogDebug("[EnvironmentalAudio] Detected: Medium corridor");
                 }
                 else {
-                    selectedPreset = AudioReverbPreset.Auditorium;
-                    Debug.Log("[EnvironmentalAudio] Detected: Large hallway/corridor");
+                    selectedPreset = AudioReverbPreset.Alley;
+                    LogDebug("[EnvironmentalAudio] Detected: Large hallway/corridor");
                 }
             }
             else
@@ -623,17 +624,17 @@ public class EnvironmentalAudio : MonoBehaviour
                 // We're in a more open or square space
                 if (avgDistance < 5f) {
                     selectedPreset = AudioReverbPreset.Room;
-                    Debug.Log("[EnvironmentalAudio] Detected: Room (square space)");
+                    LogDebug("[EnvironmentalAudio] Detected: Room (square space)");
                 }
                 else {
-                    selectedPreset = AudioReverbPreset.Cave;
-                    Debug.Log("[EnvironmentalAudio] Detected: Large open space");
+                    selectedPreset = AudioReverbPreset.Forest;
+                    LogDebug("[EnvironmentalAudio] Detected: Large open space");
                 }
             }
             
             // Apply preset if it changed
             if (reverbFilter.reverbPreset != selectedPreset) {
-                Debug.Log($"[EnvironmentalAudio] Changing reverb preset from {reverbFilter.reverbPreset} to {selectedPreset}");
+                LogDebug($"[EnvironmentalAudio] Changing reverb preset from {reverbFilter.reverbPreset} to {selectedPreset}");
                 reverbFilter.reverbPreset = selectedPreset;
             }
         }
@@ -642,7 +643,7 @@ public class EnvironmentalAudio : MonoBehaviour
             // Just log environment info when using custom reverb
             if (hitCount > 0) {
                 float avgDistance = totalWidth / hitCount;
-                Debug.Log($"[EnvironmentalAudio] Environment analysis (custom reverb): Avg distance: {avgDistance:F2}m, Hits: {hitCount}/{rayCount}");
+                LogDebug($"[EnvironmentalAudio] Environment analysis (custom reverb): Avg distance: {avgDistance:F2}m, Hits: {hitCount}/{rayCount}");
             }
         }
     }
@@ -677,6 +678,13 @@ public class EnvironmentalAudio : MonoBehaviour
                     Gizmos.DrawLine(bestPath.points[i], bestPath.points[i+1]);
                 }
             }
+        }
+    }
+
+    private void LogDebug(string message)
+    {
+        if (enableDebugLogs){
+            Debug.Log(message);
         }
     }
 }
