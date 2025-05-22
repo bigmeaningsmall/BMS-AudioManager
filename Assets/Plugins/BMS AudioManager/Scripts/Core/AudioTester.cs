@@ -2,13 +2,25 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Serialization;
-
+/// <summary>
+/// this script is a test script to play background music and sound effects
+/// its a good example of how to use the AudioEventManager class by passing parameters from the inspector
+/// the script also shows how to use the AudioEventSender class to play events - you can use this to play events from any script
+/// events like PlaySFX and PlayBGM are static methods and can be called from anywhere
+/// the receiver component take the parameter to play the audio
+/// BMS- AudioManager loads the audio clips from the Resources folder - you can call any audio using its name as a string
+/// calling strings is a limitation but works well for most cases in smaller projects with a small collection of audio clips
+/// </summary>
 public class AudioTester : MonoBehaviour
 {
     [Header("Press 'M' to play background music")]
-    [Space(20)]
-    [Header("Background Music Event Parameters (BGM)")]
     [Space(5)]
+    [Header("Press 'Space' to play SFX")]
+    [Space(5)]
+    [Header("Press 'I' to play call Play on the AudioEventSender_SFX")] // this method means you can avoid using events directly and use the AudioEventSender_SFX interface 
+    [Space(5)]
+    [Header("Background Music Event Parameters (BGM)")]
+    [Space(10)]
     public int musicTrackNumber = -1; 
     public string musicTrackName = "name";
     [Range(0,1f)]
@@ -61,7 +73,7 @@ public class AudioTester : MonoBehaviour
         
         if(Input.GetKeyDown(KeyCode.I))
         {
-            //to play the event using the sender component - get the component attached to the gameobject and play the event
+            //to play the event using the sender component - get the component (AudioEventSender_SFX) attached to the gameobject and play the event
             IAudioEventSender sfxSender = GetComponent<AudioEventSender_SFX>();
             if (sfxSender != null)
             {
