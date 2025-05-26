@@ -1052,7 +1052,7 @@ MonoBehaviour:
   showProximityThreshold: 1
   showSleepBounds: 1
   showClosedSplineArea: 1
-  debugColor: {r: 0, g: 1, b: 0, a: 1}
+  debugColor: {r: 0, g: 1, b: 0, a: 0}
   splineSampleCount: 20
 --- !u!1 &1344029823 stripped
 GameObject:
