@@ -104,6 +104,7 @@ public class SplineFollower : MonoBehaviour
         Transitioning
     }
 
+    
     private PositionState currentState = PositionState.Normal;
     private Vector3 currentOffset = Vector3.zero;
     private Vector3 targetOffset = Vector3.zero;
