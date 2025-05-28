@@ -529,7 +529,7 @@ public class SimplifiedSplineFollower : MonoBehaviour
             // Also draw a smaller solid sphere to make it more visible
             // Gizmos.color = new Color(debugColor.r, debugColor.g, debugColor.b, 0.1f);
             // Gizmos.DrawSphere(point, proximityThreshold);
-            // Gizmos.color = new Color(debugColor.r, debugColor.g, debugColor.b, 0.25f);
+            // Gizmos.color = new Color(debugColor.r, debugColor.g, debugColor.b, 0.05f);
         }
         
         // Draw connecting lines between proximity spheres to create a "tube" effect
