@@ -49,6 +49,9 @@ public class AudioManager : MonoBehaviour
     private FadeType dialogueFadeType = FadeType.Crossfade;
     [HideInInspector] public bool isFadingDialogueAudio = false; // Flag to prevent multiple fades at once
     private bool isPausedDialogueAudio = false; // Tracks if the dialogue audio is paused
+    private float dialogueTargetVolume = 1.0f;
+    private float dialogueTargetPitch = 1.0f;
+
     
     private Dictionary<int, AudioClip> dialogueAudioTracks = new Dictionary<int, AudioClip>();
     private AudioSource currentDialogueAudioSource;
@@ -683,6 +686,10 @@ private IEnumerator FadeOutAndInAmbientAudio(Transform attachTo, AudioClip newTr
             Debug.LogWarning("Cannot play dialogue audio while paused. Unpause first, then play new track.");
             return;
         }
+        
+        dialogueTargetVolume = volume;  // The volume parameter passed to the method
+        dialogueTargetPitch = pitch;    // The pitch parameter passed to the method
+
 
         dialogueFadeType = fadeType;
         dialogueFadeDuration = fadeDuration;
@@ -923,8 +930,10 @@ private IEnumerator FadeOutAndInDialogueAudio(Transform attachTo, AudioClip newT
     {
         isFadingDialogueAudio = true;
         currentDialogueAudioSource.UnPause(); // Resume the dialogue audio before fade-in
-        float targetVolume = 1.0f; // Set to the desired full volume
-        float targetPitch = 1.0f; // Set to the desired full pitch
+    
+        // Use the stored target values instead of hardcoded 1.0f
+        float targetVolume = dialogueTargetVolume; // This should be stored when dialogue is first played
+        float targetPitch = dialogueTargetPitch;   // This should be stored when dialogue is first played
 
         for (float t = 0; t < dialogueFadeDuration; t += Time.deltaTime)
         {
@@ -934,8 +943,10 @@ private IEnumerator FadeOutAndInDialogueAudio(Transform attachTo, AudioClip newT
         }
 
         currentDialogueAudioSource.volume = targetVolume; // Ensure final volume is set
+        currentDialogueAudioSource.pitch = targetPitch;   // Ensure final pitch is set
         isFadingDialogueAudio = false;
     }
+
     #endregion
     // --------------------------------------------------------------------------------------------
     
