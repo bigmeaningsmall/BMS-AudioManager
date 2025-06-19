@@ -5,7 +5,7 @@ using UnityEngine;
 public class AudioEventSender_Ambient : MonoBehaviour, IAudioEventSender
 {
     [Space(20)]
-    ///  USE THIS TO DETERMINE WHICH EVENT TO SEND (Multiple scripts can be attached to the same object)
+    ///  USE THIS TO DETERMINE WHICH EVENT TO SEND (Multiple scripts can be attached to the same object) //todo this is confusing currenlty as its not implemented and i cant remember the exact plan!!!
     /// Loop through the AudioEventSender_Ambient scripts on the object and send the event with the matching eventName
     public string eventName = "Custom Ambient Event Name"; //for future use
 

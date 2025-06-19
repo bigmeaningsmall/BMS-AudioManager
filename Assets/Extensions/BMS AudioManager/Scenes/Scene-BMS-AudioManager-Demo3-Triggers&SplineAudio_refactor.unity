@@ -1011,6 +1011,12 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 7366141512683043284, guid: ccc2f9deca1fd8440a1f8646e2051deb,
+        type: 3}
+      propertyPath: dialogueAudioPrefab
+      value: 
+      objectReference: {fileID: 999305839927590704, guid: 3312ccb5aaf9ed342abb38cb6f46a79c,
+        type: 3}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -1946,6 +1952,124 @@ Transform:
     type: 3}
   m_PrefabInstance: {fileID: 8446865978859788715}
   m_PrefabAsset: {fileID: 0}
+--- !u!1001 &321655844322372680
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 999305839927590704, guid: 3312ccb5aaf9ed342abb38cb6f46a79c,
+        type: 3}
+      propertyPath: m_Name
+      value: Audio Event Zone Dialogue
+      objectReference: {fileID: 0}
+    - target: {fileID: 1511122649101891729, guid: 3312ccb5aaf9ed342abb38cb6f46a79c,
+        type: 3}
+      propertyPath: ambientTrackName
+      value: dialog1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6385434301934274781, guid: 3312ccb5aaf9ed342abb38cb6f46a79c,
+        type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -3
+      objectReference: {fileID: 0}
+    - target: {fileID: 6385434301934274781, guid: 3312ccb5aaf9ed342abb38cb6f46a79c,
+        type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6385434301934274781, guid: 3312ccb5aaf9ed342abb38cb6f46a79c,
+        type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -5
+      objectReference: {fileID: 0}
+    - target: {fileID: 6385434301934274781, guid: 3312ccb5aaf9ed342abb38cb6f46a79c,
+        type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6385434301934274781, guid: 3312ccb5aaf9ed342abb38cb6f46a79c,
+        type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6385434301934274781, guid: 3312ccb5aaf9ed342abb38cb6f46a79c,
+        type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6385434301934274781, guid: 3312ccb5aaf9ed342abb38cb6f46a79c,
+        type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6385434301934274781, guid: 3312ccb5aaf9ed342abb38cb6f46a79c,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6385434301934274781, guid: 3312ccb5aaf9ed342abb38cb6f46a79c,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6385434301934274781, guid: 3312ccb5aaf9ed342abb38cb6f46a79c,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 9148101888368860369, guid: 3312ccb5aaf9ed342abb38cb6f46a79c,
+        type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 435fe358bb89ce646979b222d692b69e, type: 2}
+    m_RemovedComponents:
+    - {fileID: 1511122649101891729, guid: 3312ccb5aaf9ed342abb38cb6f46a79c, type: 3}
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 999305839927590704, guid: 3312ccb5aaf9ed342abb38cb6f46a79c,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 6547878158788865173}
+  m_SourcePrefab: {fileID: 100100000, guid: 3312ccb5aaf9ed342abb38cb6f46a79c, type: 3}
+--- !u!1 &4654872653170918361 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 999305839927590704, guid: 3312ccb5aaf9ed342abb38cb6f46a79c,
+    type: 3}
+  m_PrefabInstance: {fileID: 321655844322372680}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &6547878158788865173
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4654872653170918361}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1f51c72e1386d94468e7b4037d086293, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  eventName: Custom Dialogue Event Name
+  attachToThisTransform: 0
+  transformToAttachTo: {fileID: 0}
+  dialogueTrackNumber: -1
+  dialogueTrackName: dialog1
+  playOnEnabled: 1
+  loopDialogue: 0
+  volume: 1
+  pitch: 1
+  spatialBlend: 0
+  fadeType: 0
+  fadeDuration: 0.5
+  eventDelay: 0
+  collisionType: 2
+  targetTag: Player
+  stopOnExit: 1
+  testMode: 0
 --- !u!1001 &8446865978859788715
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2021,6 +2145,7 @@ SceneRoots:
   - {fileID: 961739753}
   - {fileID: 1024325076}
   - {fileID: 1809776765}
+  - {fileID: 321655844322372680}
   - {fileID: 846978592}
   - {fileID: 1711766959}
   - {fileID: 203844589}

@@ -29,6 +29,12 @@ public static class AudioEventManager
     public delegate void AudioEvent_PauseAmbientAudio(float fadeDuration);
     
     
+    // Define a delegate for audio events - Dialogue (works the same as Ambient for now)
+    public delegate void AudioEvent_PlayDialogue(Transform attachTo, int index, string trackName, float volume, float pitch, float spatialBlend, FadeType fadeType, float fadeDuration, bool loopDialogue, string eventName);
+    public delegate void AudioEvent_StopDialogue(float fadeDuration);
+    public delegate void AudioEvent_PauseDialogue(float fadeDuration);
+    
+    
     // Define a delegate for audio events - SFX
     public delegate void AudioEvent_PlaySFX(Transform attachTo, string soundName, float volume, float pitch, bool randomizePitch, float pitchRange,  float spatialBlend, string eventName);
     
@@ -50,6 +56,13 @@ public static class AudioEventManager
     // pausing ambient music
     public static AudioEvent_PauseAmbientAudio PauseAmbientAudio;
     
+    // --- Events --- Dialogue
+    // playing dialogue
+    public static AudioEvent_PlayDialogue PlayDialogueAudio;
+    // stopping dialogue
+    public static AudioEvent_StopDialogue StopDialogueAudio;
+    // pausing dialogue
+    public static AudioEvent_PauseDialogue PauseDialogueAudio;
     
     // --- Events --- SFX
     // Multi-delegate for playing sound effects

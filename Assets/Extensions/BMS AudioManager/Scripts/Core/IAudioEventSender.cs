@@ -5,6 +5,7 @@ public interface IAudioEventSender
     // bool PlayOnEnabled { get; set; }
     // float EventDelay { get; set; }
     //  more to come...
+    // note: we are implementing this interface to ensure that all audio event senders have a consistent structure - technically we dont need them
 
     void Play();
     void Stop();

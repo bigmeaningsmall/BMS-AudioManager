@@ -43,6 +43,19 @@ public class AudioManager : MonoBehaviour
     
     // --------------------------------------------------------------------------------------------
     
+    [Header("Dialogue Audio Settings")] // Currently works the same as Ambient Audio
+    public GameObject dialogueAudioPrefab;
+    private float dialogueFadeDuration = 0.5f;
+    private FadeType dialogueFadeType = FadeType.Crossfade;
+    public bool isFadingDialogueAudio = false; // Flag to prevent multiple fades at once
+    private bool isPausedDialogueAudio = false; // Tracks if the dialogue audio is paused
+    
+    private Dictionary<int, AudioClip> dialogueAudioTracks = new Dictionary<int, AudioClip>();
+    private AudioSource currentDialogueAudioSource;
+    private AudioSource nextDialogueAudioSource;
+
+    // --------------------------------------------------------------------------------------------
+    
     [Header("Sound Effects Settings")]
     public GameObject soundEffectPrefab;
     private Dictionary<string, AudioClip> soundEffects = new Dictionary<string, AudioClip>();
@@ -57,11 +70,13 @@ public class AudioManager : MonoBehaviour
 
     [Header("Available Sound Effects")]
     [SerializeField] private List<string> soundEffectNames = new List<string>();
+    
+    [Header("Available Dialogue Audio Tracks")]
+    [SerializeField] private List<string> dialogueTrackNames = new List<string>();
     #endregion
     // --------------------------------------------------------------------------------------------
 
-    // --------------------------------------------------------------------------------------------
-    
+    // Initialise and Subscriptions *********************
     // --------------------------------------------------------------------------------------------
     #region Initialise Singleton Pattern ------------------------------------
     private void Awake()
@@ -91,6 +106,10 @@ public class AudioManager : MonoBehaviour
         AudioEventManager.PlayAmbientAudio += PlayAmbientAudio;
         AudioEventManager.StopAmbientAudio += StopAmbientAudio;
         AudioEventManager.PauseAmbientAudio += PauseAmbientAudio;
+        
+        AudioEventManager.PlayDialogueAudio += PlayDialogueAudio;
+        AudioEventManager.StopDialogueAudio += StopDialogueAudio;
+        AudioEventManager.PauseDialogueAudio += PauseDialogueAudio;
         
         AudioEventManager.PlaySFX += PlaySoundEffect;
     }
@@ -134,11 +153,18 @@ public class AudioManager : MonoBehaviour
             soundEffects[clip.name] = clip;
             soundEffectNames.Add(clip.name);
         }
+        
+        AudioClip[] dialogueClips = Resources.LoadAll<AudioClip>("Audio/Dialogue");
+        for (int i = 0; i < dialogueClips.Length; i++)
+        {
+            dialogueAudioTracks[i] = dialogueClips[i];
+            dialogueTrackNames.Add(dialogueClips[i].name);
+        }
     }
     #endregion
     // --------------------------------------------------------------------------------------------
 
-
+    // Background Music (BGM) Management ********************
     // --------------------------------------------------------------------------------------------
     #region Play Background Music ------------------------------------
     
@@ -351,7 +377,7 @@ public class AudioManager : MonoBehaviour
     #endregion
     // --------------------------------------------------------------------------------------------
     
-    
+    // Ambient Audio Management ********************
     // --------------------------------------------------------------------------------------------
     #region PlayAmbientAudio ------------------------------------
     
@@ -585,7 +611,242 @@ private IEnumerator FadeOutAndInAmbientAudio(Transform attachTo, AudioClip newTr
     #endregion
     // --------------------------------------------------------------------------------------------
     
+    // Dialog Management *******************
+    // --------------------------------------------------------------------------------------------
+    #region PlayDialogueAudio ------------------------------------
     
+    // Event Method - Play dialogue by track number or name with optional volume and loop settings - calls appropriate overload based on parameters
+    public void PlayDialogueAudio(Transform attachTo, int trackNumber, string trackName, float volume, float pitch, float spatialBlend, FadeType fadeType, float fadeDuration, bool loop, string eventName)
+    {
+        if (isFadingDialogueAudio) return; // Block if a fade/crossfade is already in progress
+
+        dialogueFadeType = fadeType;
+        dialogueFadeDuration = fadeDuration;
+
+        if (string.IsNullOrEmpty(trackName) && trackNumber >= 0)
+        {
+            PlayDialogueAudio(attachTo, trackNumber, volume, pitch, spatialBlend, loop);
+        }
+        else if (!string.IsNullOrEmpty(trackName))
+        {
+            PlayDialogueAudio(attachTo, trackName, volume, pitch, spatialBlend, loop);
+        }
+    }
+
+    public void PlayDialogueAudio(Transform attachTo, int trackNumber, float volume, float pitch, float spatialBlend, bool loop = false)
+    {
+        if (isFadingDialogueAudio) return; // Block if a fade/crossfade is already in progress
+
+        if (!dialogueAudioTracks.TryGetValue(trackNumber, out AudioClip newTrack)) return;
+        isFadingDialogueAudio = true;
+        if (dialogueFadeType == FadeType.Crossfade)
+        {
+            StartCoroutine(CrossfadeDialogueAudio(attachTo, newTrack, volume, pitch, spatialBlend, loop));
+        }
+        else
+        {
+            StartCoroutine(FadeOutAndInDialogueAudio(attachTo, newTrack, volume, pitch, spatialBlend, loop));
+        }
+    }
+
+    public void PlayDialogueAudio(Transform attachTo, string trackName, float volume, float pitch, float spatialBlend, bool loop = false)
+    {
+        if (isFadingDialogueAudio) return; // Block if a fade/crossfade is already in progress
+
+        foreach (var track in dialogueAudioTracks)
+        {
+            if (track.Value.name == trackName)
+            {
+                isFadingDialogueAudio = true;
+                if (dialogueFadeType == FadeType.Crossfade)
+                {
+                    StartCoroutine(CrossfadeDialogueAudio(attachTo, track.Value, volume, pitch, spatialBlend, loop));
+                }
+                else
+                {
+                    StartCoroutine(FadeOutAndInDialogueAudio(attachTo, track.Value, volume, pitch, spatialBlend, loop));
+                }
+                return;
+            }
+        }
+        Debug.LogWarning($"Dialogue audio track '{trackName}' not found in Resources/Audio/Dialogue!");
+    }
+
+private IEnumerator CrossfadeDialogueAudio(Transform attachTo, AudioClip newTrack, float targetVolume, float targetPitch, float targetSpatialBlend, bool loop)
+{
+    float crossfadeDuration = dialogueFadeDuration;
+
+    if (attachTo == null)
+    {
+        attachTo = transform; // Default to AudioManager's transform if attachTo is null
+    }
+
+    GameObject dialogueObject = Instantiate(dialogueAudioPrefab, attachTo.position, Quaternion.identity, attachTo);
+    nextDialogueAudioSource = dialogueObject.GetComponent<AudioSource>();
+    nextDialogueAudioSource.clip = newTrack;
+    nextDialogueAudioSource.volume = 0;  // Start volume at 0 for crossfade
+    nextDialogueAudioSource.pitch = targetPitch;
+    nextDialogueAudioSource.spatialBlend = targetSpatialBlend;
+    nextDialogueAudioSource.loop = loop;
+    nextDialogueAudioSource.Play();
+
+    if (currentDialogueAudioSource != null && currentDialogueAudioSource.isPlaying)
+    {
+        float startVolume = currentDialogueAudioSource.volume;
+        float startPitch = currentDialogueAudioSource.pitch;
+        float startSpatialBlend = currentDialogueAudioSource.spatialBlend;
+        for (float t = 0; t < crossfadeDuration; t += Time.deltaTime)
+        {
+            currentDialogueAudioSource.volume = Mathf.Lerp(startVolume, 0, t / crossfadeDuration);
+            nextDialogueAudioSource.volume = Mathf.Lerp(0, targetVolume, t / crossfadeDuration);
+            nextDialogueAudioSource.pitch = Mathf.Lerp(startPitch, targetPitch, t / crossfadeDuration);
+            nextDialogueAudioSource.spatialBlend = Mathf.Lerp(startSpatialBlend, targetSpatialBlend, t / crossfadeDuration);
+            yield return null;
+        }
+        Destroy(currentDialogueAudioSource.gameObject); // Clean up old AudioSource after crossfade
+    }
+
+    nextDialogueAudioSource.volume = targetVolume;
+    currentDialogueAudioSource = nextDialogueAudioSource;
+    isFadingDialogueAudio = false; // Reset flag after crossfade completes
+}
+
+private IEnumerator FadeOutAndInDialogueAudio(Transform attachTo, AudioClip newTrack, float targetVolume, float targetPitch, float targetSpatialBlend, bool loop)
+{
+    if (attachTo == null)
+    {
+        attachTo = transform; // Default to AudioManager's transform if attachTo is null
+    }
+
+    if (currentDialogueAudioSource != null && currentDialogueAudioSource.isPlaying)
+    {
+        float startVolume = currentDialogueAudioSource.volume;
+        for (float t = 0; t < dialogueFadeDuration; t += Time.deltaTime)
+        {
+            currentDialogueAudioSource.volume = Mathf.Lerp(startVolume, 0, t / dialogueFadeDuration);
+            yield return null;
+        }
+        currentDialogueAudioSource.Stop();
+        Destroy(currentDialogueAudioSource.gameObject); // Clean up old AudioSource after fade out
+    }
+
+    GameObject dialogueObject = Instantiate(dialogueAudioPrefab, attachTo.position, Quaternion.identity, attachTo);
+    nextDialogueAudioSource = dialogueObject.GetComponent<AudioSource>();
+    nextDialogueAudioSource.clip = newTrack;
+    nextDialogueAudioSource.volume = 0;
+    nextDialogueAudioSource.pitch = targetPitch;
+    nextDialogueAudioSource.spatialBlend = targetSpatialBlend;
+    nextDialogueAudioSource.loop = loop;
+    nextDialogueAudioSource.Play();
+
+    for (float t = 0; t < dialogueFadeDuration; t += Time.deltaTime)
+    {
+        nextDialogueAudioSource.volume = Mathf.Lerp(0, targetVolume, t / dialogueFadeDuration);
+        nextDialogueAudioSource.pitch = Mathf.Lerp(0, targetPitch, t / dialogueFadeDuration);
+        nextDialogueAudioSource.spatialBlend = Mathf.Lerp(0, targetSpatialBlend, t / dialogueFadeDuration);
+        yield return null;
+    }
+
+    nextDialogueAudioSource.volume = targetVolume;
+    currentDialogueAudioSource = nextDialogueAudioSource;
+    isFadingDialogueAudio = false; // Reset flag after fade completes
+}
+    #endregion
+    // --------------------------------------------------------------------------------------------
+    
+    // --------------------------------------------------------------------------------------------
+    #region StopDialogueAudio ------------------------------------
+    public void StopDialogueAudio(float fadeDuration)
+    {
+        dialogueFadeDuration = fadeDuration;
+    
+        // Check if there's dialogue audio playing and that it's not already fading
+        if (currentDialogueAudioSource != null && currentDialogueAudioSource.isPlaying && !isFadingDialogueAudio)
+        {
+            StartCoroutine(FadeOutCurrentDialogueAudio());
+        }
+    }
+
+    private IEnumerator FadeOutCurrentDialogueAudio()
+    {
+        isFadingDialogueAudio = true;
+        float startVolume = currentDialogueAudioSource.volume;
+
+        // Fade out over dialogueFadeDuration
+        for (float t = 0; t < dialogueFadeDuration; t += Time.deltaTime)
+        {
+            currentDialogueAudioSource.volume = Mathf.Lerp(startVolume, 0, t / dialogueFadeDuration);
+            yield return null;
+        }
+
+        // Stop and clean up the dialogue audio source after fade-out
+        currentDialogueAudioSource.Stop();
+        Destroy(currentDialogueAudioSource.gameObject);
+        currentDialogueAudioSource = null;  // Reset the currentDialogueAudioSource reference
+        isFadingDialogueAudio = false; // Allow other fades to proceed
+    }
+    #endregion
+    // --------------------------------------------------------------------------------------------
+    
+    // --------------------------------------------------------------------------------------------
+    #region PauseDialogueAudio ------------------------------------
+    public void PauseDialogueAudio(float fadeDuration)
+    {
+        // Check if a fade is already in progress to avoid interruptions
+        if (isFadingDialogueAudio) return;
+
+        dialogueFadeDuration = fadeDuration; // Set the fade duration for pausing
+    
+        // Toggle pause state
+        if (isPausedDialogueAudio)
+        {
+            // Resume the dialogue audio with fade-in if currently paused
+            StartCoroutine(FadeInDialogueAudio());
+        }
+        else
+        {
+            // Fade out and pause if currently playing
+            StartCoroutine(FadeOutAndPauseDialogueAudio());
+        }
+
+        isPausedDialogueAudio = !isPausedDialogueAudio; // Toggle the pause state
+    }
+
+    private IEnumerator FadeOutAndPauseDialogueAudio()
+    {
+        isFadingDialogueAudio = true;
+        float startVolume = currentDialogueAudioSource.volume;
+
+        for (float t = 0; t < dialogueFadeDuration; t += Time.deltaTime)
+        {
+            currentDialogueAudioSource.volume = Mathf.Lerp(startVolume, 0, t / dialogueFadeDuration);
+            yield return null;
+        }
+
+        currentDialogueAudioSource.Pause(); // Pause the dialogue audio once fade-out completes
+        isFadingDialogueAudio = false;
+    }
+
+    private IEnumerator FadeInDialogueAudio()
+    {
+        isFadingDialogueAudio = true;
+        currentDialogueAudioSource.UnPause(); // Resume the dialogue audio before fade-in
+        float targetVolume = 1.0f; // Set to the desired full volume
+
+        for (float t = 0; t < dialogueFadeDuration; t += Time.deltaTime)
+        {
+            currentDialogueAudioSource.volume = Mathf.Lerp(0, targetVolume, t / dialogueFadeDuration);
+            yield return null;
+        }
+
+        currentDialogueAudioSource.volume = targetVolume; // Ensure final volume is set
+        isFadingDialogueAudio = false;
+    }
+    #endregion
+    // --------------------------------------------------------------------------------------------
+    
+    
+    // SFX Management ********************
     // --------------------------------------------------------------------------------------------
     #region PlaySoundEffects ------------------------------------
     public void PlaySoundEffect(Transform attachTo, string soundName, float volume, float pitch, bool randomizePitch, float pitchRange, float spatialBlend, string eventName)
