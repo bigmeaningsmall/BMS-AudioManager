@@ -14,6 +14,8 @@ using Random = UnityEngine.Random;
 
 public class AudioManager : MonoBehaviour
 {
+    [Header("VERSION")] // Version of the AudioManager - TODO : always update this when making changes
+    [SerializeField] private string version = "v1.2.1";
     public static AudioManager Instance { get; private set; }
 
     // --------------------------------------------------------------------------------------------
@@ -24,7 +26,7 @@ public class AudioManager : MonoBehaviour
     [HideInInspector] public bool isFadingMusic = false; // Flag to prevent multiple fades at once
     private bool isPausedMusic = false; // Tracks if the music is paused
     private float bgmTargetVolume = 1.0f;
-    //private float bgmTargetPitch = 1.0f; // todo add pitch control for background music
+    private float bgmTargetPitch = 1.0f; // todo add pitch control for background music
 
     private Dictionary<int, AudioClip> musicTracks = new Dictionary<int, AudioClip>();
     private AudioSource currentMusicSource;
@@ -39,13 +41,15 @@ public class AudioManager : MonoBehaviour
     [HideInInspector] public bool isFadingAmbientAudio = false; // Flag to prevent multiple fades at once
     private bool isPausedAmbientAudio = false; // Tracks if the ambient audio is paused
     private float ambientTargetVolume = 1.0f;
-    //private float ambientTargetPitch = 1.0f; //todo add pitch control for ambient audio 
+    private float ambientTargetPitch = 1.0f; //todo add pitch control for ambient audio 
     
     private Dictionary<int, AudioClip> ambientAudioTracks = new Dictionary<int, AudioClip>();
     private AudioSource currentAmbientAudioSource;
     private AudioSource nextAmbientAudioSource;
     
     // --------------------------------------------------------------------------------------------
+    
+    //TODO (Adding note here so i remember) - Need to autodestroy dialogue audio sources after they finish playing.
     
     [Header("Dialogue Audio Track")] // Currently works the same as Ambient Audio
     [SerializeField] private GameObject dialogueAudioPrefab;
@@ -527,8 +531,8 @@ private IEnumerator CrossfadeAmbientAudio(Transform attachTo, AudioClip newTrack
         {
             currentAmbientAudioSource.volume = Mathf.Lerp(startVolume, 0, t / crossfadeDuration);
             nextAmbientAudioSource.volume = Mathf.Lerp(0, targetVolume, t / crossfadeDuration);
-            nextAmbientAudioSource.pitch = Mathf.Lerp(startPitch, targetPitch, t / crossfadeDuration);
-            nextAmbientAudioSource.spatialBlend = Mathf.Lerp(startSpatialBlend, targetSpatialBlend, t / crossfadeDuration);
+            //nextAmbientAudioSource.pitch = Mathf.Lerp(startPitch, targetPitch, t / crossfadeDuration); // todo - Planned update to have pitch and volume controled seperately - disabled for now
+            nextAmbientAudioSource.spatialBlend = Mathf.Lerp(startSpatialBlend, targetSpatialBlend, t / crossfadeDuration); //todo - dont need this to be lerped but leaving until i have time to check and delete
             yield return null;
         }
         Destroy(currentAmbientAudioSource.gameObject); // Clean up old AudioSource after crossfade
@@ -796,8 +800,8 @@ private IEnumerator CrossfadeDialogueAudio(Transform attachTo, AudioClip newTrac
         {
             currentDialogueAudioSource.volume = Mathf.Lerp(startVolume, 0, t / crossfadeDuration);
             nextDialogueAudioSource.volume = Mathf.Lerp(0, targetVolume, t / crossfadeDuration);
-            nextDialogueAudioSource.pitch = Mathf.Lerp(startPitch, targetPitch, t / crossfadeDuration);
-            nextDialogueAudioSource.spatialBlend = Mathf.Lerp(startSpatialBlend, targetSpatialBlend, t / crossfadeDuration);
+            //nextDialogueAudioSource.pitch = Mathf.Lerp(startPitch, targetPitch, t / crossfadeDuration); // todo - Planned update to have pitch and volume controled seperately - disabled for now
+            nextDialogueAudioSource.spatialBlend = Mathf.Lerp(startSpatialBlend, targetSpatialBlend, t / crossfadeDuration); // todo - dont need this to be lerped but leaving until i have time to check and delete
             yield return null;
         }
         Destroy(currentDialogueAudioSource.gameObject); // Clean up old AudioSource after crossfade
@@ -823,7 +827,7 @@ private IEnumerator FadeOutAndInDialogueAudio(Transform attachTo, AudioClip newT
         for (float t = 0; t < dialogueFadeDuration; t += Time.deltaTime)
         {
             currentDialogueAudioSource.volume = Mathf.Lerp(startVolume, 0, t / dialogueFadeDuration);
-            currentDialogueAudioSource.pitch = Mathf.Lerp(startPitch, 0, t / dialogueFadeDuration);
+            //currentDialogueAudioSource.pitch = Mathf.Lerp(startPitch, 0, t / dialogueFadeDuration); // todo - Planned update to have pitch and volume controled seperately - disabled for now
             yield return null;
         }
         currentDialogueAudioSource.Stop();
@@ -841,7 +845,7 @@ private IEnumerator FadeOutAndInDialogueAudio(Transform attachTo, AudioClip newT
     for (float t = 0; t < dialogueFadeDuration; t += Time.deltaTime)
     {
         nextDialogueAudioSource.volume = Mathf.Lerp(0, targetVolume, t / dialogueFadeDuration);
-        nextDialogueAudioSource.pitch = Mathf.Lerp(0, targetPitch, t / dialogueFadeDuration);
+        //nextDialogueAudioSource.pitch = Mathf.Lerp(0, targetPitch, t / dialogueFadeDuration); // todo - Planned update to have pitch and volume controled seperately - disabled for now
         nextDialogueAudioSource.spatialBlend = Mathf.Lerp(0, targetSpatialBlend, t / dialogueFadeDuration);
         yield return null;
     }
@@ -883,7 +887,7 @@ private IEnumerator FadeOutAndInDialogueAudio(Transform attachTo, AudioClip newT
         for (float t = 0; t < dialogueFadeDuration; t += Time.deltaTime)
         {
             currentDialogueAudioSource.volume = Mathf.Lerp(startVolume, 0, t / dialogueFadeDuration);
-            currentDialogueAudioSource.pitch = Mathf.Lerp(startPitch, 0, t / dialogueFadeDuration);
+            //currentDialogueAudioSource.pitch = Mathf.Lerp(startPitch, 0, t / dialogueFadeDuration); // todo - Planned update to have pitch and volume controled seperately - disabled for now
             yield return null;
         }
 
@@ -929,7 +933,7 @@ private IEnumerator FadeOutAndInDialogueAudio(Transform attachTo, AudioClip newT
         for (float t = 0; t < dialogueFadeDuration; t += Time.deltaTime)
         {
             currentDialogueAudioSource.volume = Mathf.Lerp(startVolume, 0, t / dialogueFadeDuration);
-            currentDialogueAudioSource.pitch = Mathf.Lerp(startPitch, 0, t / dialogueFadeDuration);
+            //currentDialogueAudioSource.pitch = Mathf.Lerp(startPitch, 0, t / dialogueFadeDuration); // todo - Planned update to have pitch and volume controled seperately - disabled for now
             yield return null;
         }
 
@@ -949,7 +953,7 @@ private IEnumerator FadeOutAndInDialogueAudio(Transform attachTo, AudioClip newT
         for (float t = 0; t < dialogueFadeDuration; t += Time.deltaTime)
         {
             currentDialogueAudioSource.volume = Mathf.Lerp(0, targetVolume, t / dialogueFadeDuration);
-            currentDialogueAudioSource.pitch = Mathf.Lerp(0, targetPitch, t / dialogueFadeDuration);
+            //currentDialogueAudioSource.pitch = Mathf.Lerp(0, targetPitch, t / dialogueFadeDuration); // todo - Planned update to have pitch and volume controled seperately - disabled for now
             yield return null;
         }
 

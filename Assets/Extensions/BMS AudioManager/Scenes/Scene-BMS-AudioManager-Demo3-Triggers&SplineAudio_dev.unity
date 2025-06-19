@@ -1185,6 +1185,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7366141512683043284, guid: ccc2f9deca1fd8440a1f8646e2051deb,
         type: 3}
+      propertyPath: version
+      value: v1.2.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7366141512683043284, guid: ccc2f9deca1fd8440a1f8646e2051deb,
+        type: 3}
       propertyPath: dialogueAudioPrefab
       value: 
       objectReference: {fileID: 8822123416660145754, guid: 842d37e47371fda4b8e866e44529c44d,
