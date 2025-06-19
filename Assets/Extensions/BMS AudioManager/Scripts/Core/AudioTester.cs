@@ -57,7 +57,7 @@ public class AudioTester : MonoBehaviour
             //AudioEventManager.PlayBGM(0, "Music Name Here", 1.0f, FadeType.Crossfade, 2f,true);
             
             //example with parameters from the inspector
-            AudioEventManager.PlayBGM(musicTrackNumber, musicTrackName, bgmVolume, fadeType, fadeDuration, loopBGM, "null");
+            AudioEventManager.playBGMTrack(musicTrackNumber, musicTrackName, bgmVolume, fadeType, fadeDuration, loopBGM, "null");
         }
         
         //play sound effect when the space bar is pressed
@@ -74,7 +74,7 @@ public class AudioTester : MonoBehaviour
         if(Input.GetKeyDown(KeyCode.I))
         {
             //to play the event using the sender component - get the component (AudioEventSender_SFX) attached to the gameobject and play the event
-            IAudioEventSender sfxSender = GetComponent<AudioEventSender_SFX>();
+            IAudioEventSender sfxSender = GetComponent<AudioEventSenderSFX>();
             if (sfxSender != null)
             {
                 sfxSender.Play();

@@ -10,7 +10,7 @@ using UnityEngine;
 ///     or call the PlaySFX method with a Transform parameter to attach the sound to a different GameObject
 /// </summary>
 
-public class AudioEventSender_SFX : MonoBehaviour, IAudioEventSender
+public class AudioEventSenderSFX : MonoBehaviour, IAudioEventSender
 {
     
     [Space(20)]

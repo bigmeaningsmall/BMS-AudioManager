@@ -84,9 +84,9 @@ AudioMixerGroupController:
   m_GroupID: b8597eefffc7d1c4aa10eb6198c6baf0
   m_Children:
   - {fileID: 2268928712382745843}
-  - {fileID: 7842468050713168027}
   - {fileID: -7043283835160980907}
   - {fileID: 5139705278188082868}
+  - {fileID: 7842468050713168027}
   m_Volume: bc35f6c3acd8a6d4482fb176077e22e7
   m_Pitch: f857f90757be4564394eecf33af04a28
   m_Send: 00000000000000000000000000000000

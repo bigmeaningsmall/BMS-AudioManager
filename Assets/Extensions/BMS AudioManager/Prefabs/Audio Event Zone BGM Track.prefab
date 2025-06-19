@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 8663434988693664675}
   - component: {fileID: 2515585950701076189}
   m_Layer: 0
-  m_Name: Audio Event Zone BGM
+  m_Name: Audio Event Zone BGM Track
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

@@ -753,7 +753,7 @@ PrefabInstance:
     - target: {fileID: 7836191273684435627, guid: 139429739bafcec468e00f0d0a1a0a9f,
         type: 3}
       propertyPath: m_Name
-      value: Audio Event Zone BGM
+      value: Audio Event Zone BGM Track
       objectReference: {fileID: 0}
     - target: {fileID: 7836191273684435627, guid: 139429739bafcec468e00f0d0a1a0a9f,
         type: 3}
@@ -1795,12 +1795,12 @@ PrefabInstance:
     - target: {fileID: 620935151221146675, guid: ba89dcb19a3cf95418c455c01d332d04,
         type: 3}
       propertyPath: testMode
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 620935151221146675, guid: ba89dcb19a3cf95418c455c01d332d04,
         type: 3}
       propertyPath: stopOnExit
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 620935151221146675, guid: ba89dcb19a3cf95418c455c01d332d04,
         type: 3}
@@ -1815,7 +1815,7 @@ PrefabInstance:
     - target: {fileID: 5274121441138690220, guid: ba89dcb19a3cf95418c455c01d332d04,
         type: 3}
       propertyPath: m_Name
-      value: Audio Event Zone Ambience
+      value: Audio Event Zone Ambient Track
       objectReference: {fileID: 0}
     - target: {fileID: 5274121441138690220, guid: ba89dcb19a3cf95418c455c01d332d04,
         type: 3}
@@ -2003,7 +2003,7 @@ PrefabInstance:
     - target: {fileID: 999305839927590704, guid: 3312ccb5aaf9ed342abb38cb6f46a79c,
         type: 3}
       propertyPath: m_Name
-      value: Audio Event Zone Dialogue
+      value: Audio Event Zone Dialogue Track
       objectReference: {fileID: 0}
     - target: {fileID: 6385434301934274781, guid: 3312ccb5aaf9ed342abb38cb6f46a79c,
         type: 3}
@@ -2058,6 +2058,11 @@ PrefabInstance:
     - target: {fileID: 8771581298561452505, guid: 3312ccb5aaf9ed342abb38cb6f46a79c,
         type: 3}
       propertyPath: testMode
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8771581298561452505, guid: 3312ccb5aaf9ed342abb38cb6f46a79c,
+        type: 3}
+      propertyPath: stopOnExit
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8771581298561452505, guid: 3312ccb5aaf9ed342abb38cb6f46a79c,
@@ -2149,9 +2154,9 @@ SceneRoots:
   m_Roots:
   - {fileID: 961739753}
   - {fileID: 1024325076}
+  - {fileID: 846978592}
   - {fileID: 1809776765}
   - {fileID: 321655844322372680}
-  - {fileID: 846978592}
   - {fileID: 1711766959}
   - {fileID: 203844589}
   - {fileID: 1903994569}

@@ -13,7 +13,7 @@ using UnityEngine.Serialization;
 ///     
 /// </summary>
 
-public class AudioEventSender_BGM : MonoBehaviour, IAudioEventSender
+public class AudioEventSenderBGMTrack : MonoBehaviour, IAudioEventSender
 {
     [Space(20)]
     // USE THIS TO DETERMINE WHICH EVENT TO SEND (Mutiple scripts can be attached to the same object)
@@ -108,14 +108,14 @@ public class AudioEventSender_BGM : MonoBehaviour, IAudioEventSender
     private void PlayBGM()
     {
         //send the PlayBGM Event with parameters from the inspector
-        AudioEventManager.PlayBGM(musicTrackNumber, musicTrackName, volume, fadeType, fadeDuration, loopBGM, eventName);
+        AudioEventManager.playBGMTrack(musicTrackNumber, musicTrackName, volume, fadeType, fadeDuration, loopBGM, eventName);
     }
     
     private IEnumerator PlayBGM_Delayed(float delay)
     {
         yield return new WaitForSeconds(delay);
         //send the PlayBGM Event with parameters from the inspector
-        AudioEventManager.PlayBGM(musicTrackNumber, musicTrackName, volume, fadeType, fadeDuration, loopBGM, eventName);
+        AudioEventManager.playBGMTrack(musicTrackNumber, musicTrackName, volume, fadeType, fadeDuration, loopBGM, eventName);
        
     }
 
@@ -159,7 +159,7 @@ public class AudioEventSender_BGM : MonoBehaviour, IAudioEventSender
         else
         {
             // Send the StopBGM Event with parameters from the inspector
-            AudioEventManager.StopBGM(fadeDuration);
+            AudioEventManager.stopBGMTrack(fadeDuration);
         }
     }
 
@@ -177,7 +177,7 @@ public class AudioEventSender_BGM : MonoBehaviour, IAudioEventSender
             yield return null;
         }
         // Send the StopBGM Event with parameters from the inspector
-        AudioEventManager.StopBGM(fadeDuration);
+        AudioEventManager.stopBGMTrack(fadeDuration);
     }
     
     // pause the background music
@@ -195,13 +195,13 @@ public class AudioEventSender_BGM : MonoBehaviour, IAudioEventSender
     private void PauseBGM()
     {
         //send the PauseBGM Event with parameters from the inspector
-        AudioEventManager.PauseBGM(fadeDuration);
+        AudioEventManager.pauseBGMTrack(fadeDuration);
     }
     private IEnumerator PauseBGM_Delayed(float delay)
     {
         yield return new WaitForSeconds(delay);
         //send the PauseBGM Event with parameters from the inspector
-        AudioEventManager.PauseBGM(fadeDuration);
+        AudioEventManager.pauseBGMTrack(fadeDuration);
     }
     
     

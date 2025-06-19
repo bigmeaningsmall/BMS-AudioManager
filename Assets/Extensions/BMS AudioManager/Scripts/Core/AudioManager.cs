@@ -68,11 +68,11 @@ public class AudioManager : MonoBehaviour
     [Header("Available Ambient Audio Tracks")]
     [SerializeField] private List<string> ambientAudioTrackNames = new List<string>();
 
-    [Header("Available Sound Effects")]
-    [SerializeField] private List<string> soundEffectNames = new List<string>();
-    
     [Header("Available Dialogue Audio Tracks")]
     [SerializeField] private List<string> dialogueTrackNames = new List<string>();
+    
+    [Header("Available Sound Effects")]
+    [SerializeField] private List<string> soundEffectNames = new List<string>();
     #endregion
     // --------------------------------------------------------------------------------------------
 
@@ -99,30 +99,30 @@ public class AudioManager : MonoBehaviour
     #region Event Subscriptions ------------------------------------
     private void OnEnable()
     {
-        AudioEventManager.PlayBGM += PlayMusic;
-        AudioEventManager.StopBGM += StopMusic;
-        AudioEventManager.PauseBGM += PauseMusic;
+        AudioEventManager.playBGMTrack += PlayMusic;
+        AudioEventManager.stopBGMTrack += StopMusic;
+        AudioEventManager.pauseBGMTrack += PauseMusic;
         
-        AudioEventManager.PlayAmbientAudio += PlayAmbientAudio;
-        AudioEventManager.StopAmbientAudio += StopAmbientAudio;
-        AudioEventManager.PauseAmbientAudio += PauseAmbientAudio;
+        AudioEventManager.playAmbientAudioTrack += PlayAmbientAudio;
+        AudioEventManager.stopAmbientAudioTrack += StopAmbientAudio;
+        AudioEventManager.pauseAmbientAudioTrack += PauseAmbientAudio;
         
-        AudioEventManager.PlayDialogueAudio += PlayDialogueAudio;
-        AudioEventManager.StopDialogueAudio += StopDialogueAudio;
-        AudioEventManager.PauseDialogueAudio += PauseDialogueAudio;
+        AudioEventManager.playDialogueTrackAudio += PlayDialogueAudio;
+        AudioEventManager.stopDialogueTrackAudio += StopDialogueAudio;
+        AudioEventManager.pauseDialogueTrackAudio += PauseDialogueAudio;
         
         AudioEventManager.PlaySFX += PlaySoundEffect;
     }
 
     private void OnDisable()
     {
-        AudioEventManager.PlayBGM -= PlayMusic;
-        AudioEventManager.StopBGM -= StopMusic;
-        AudioEventManager.PauseBGM -= PauseMusic;
+        AudioEventManager.playBGMTrack -= PlayMusic;
+        AudioEventManager.stopBGMTrack -= StopMusic;
+        AudioEventManager.pauseBGMTrack -= PauseMusic;
         
-        AudioEventManager.PlayAmbientAudio -= PlayAmbientAudio;
-        AudioEventManager.StopAmbientAudio -= StopAmbientAudio;
-        AudioEventManager.PauseAmbientAudio -= PauseAmbientAudio;
+        AudioEventManager.playAmbientAudioTrack -= PlayAmbientAudio;
+        AudioEventManager.stopAmbientAudioTrack -= StopAmbientAudio;
+        AudioEventManager.pauseAmbientAudioTrack -= PauseAmbientAudio;
         
         AudioEventManager.PlaySFX -= PlaySoundEffect;
     }

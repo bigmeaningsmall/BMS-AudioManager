@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class AudioEventSender_Dialogue : MonoBehaviour, IAudioEventSender
+public class AudioEventSenderDialogueTrack : MonoBehaviour, IAudioEventSender
 {
     [Space(20)]
     ///  USE THIS TO DETERMINE WHICH EVENT TO SEND (Multiple scripts can be attached to the same object) //todo this is confusing currenlty as its not implemented and i cant remember the exact plan!!!
@@ -107,16 +107,16 @@ public class AudioEventSender_Dialogue : MonoBehaviour, IAudioEventSender
         if(!attachToThisTransform && transformToAttachTo == null){
             Debug.LogWarning("No Transform to attach to - using AudioManager");
             //send the PlayDialogue Event with parameters from the inspector
-            AudioEventManager.PlayDialogueAudio(null,dialogueTrackNumber, dialogueTrackName, volume, pitch, spatialBlend, fadeType, fadeDuration, loopDialogue, eventName);
+            AudioEventManager.playDialogueTrackAudio(null,dialogueTrackNumber, dialogueTrackName, volume, pitch, spatialBlend, fadeType, fadeDuration, loopDialogue, eventName);
         }
         
         if (attachToThisTransform){
             //send the PlayDialogue Event with parameters from the inspector
-            AudioEventManager.PlayDialogueAudio(this.transform,dialogueTrackNumber, dialogueTrackName, volume, pitch, spatialBlend, fadeType, fadeDuration, loopDialogue, eventName);
+            AudioEventManager.playDialogueTrackAudio(this.transform,dialogueTrackNumber, dialogueTrackName, volume, pitch, spatialBlend, fadeType, fadeDuration, loopDialogue, eventName);
         }
         if(transformToAttachTo != null){
             //send the PlayDialogue Event with parameters from the inspector
-            AudioEventManager.PlayDialogueAudio(transformToAttachTo, dialogueTrackNumber, dialogueTrackName, volume, pitch, spatialBlend, fadeType, fadeDuration, loopDialogue, eventName);
+            AudioEventManager.playDialogueTrackAudio(transformToAttachTo, dialogueTrackNumber, dialogueTrackName, volume, pitch, spatialBlend, fadeType, fadeDuration, loopDialogue, eventName);
         }
 
     }
@@ -128,16 +128,16 @@ public class AudioEventSender_Dialogue : MonoBehaviour, IAudioEventSender
         if(!attachToThisTransform && transformToAttachTo == null){
             Debug.LogWarning("No Transform to attach to - using AudioManager");
             //send the PlayDialogue Event with parameters from the inspector
-            AudioEventManager.PlayDialogueAudio(null,dialogueTrackNumber, dialogueTrackName, volume, pitch, spatialBlend, fadeType, fadeDuration, loopDialogue, eventName);
+            AudioEventManager.playDialogueTrackAudio(null,dialogueTrackNumber, dialogueTrackName, volume, pitch, spatialBlend, fadeType, fadeDuration, loopDialogue, eventName);
         }
         
         if (attachToThisTransform){
             //send the PlayDialogue Event with parameters from the inspector
-            AudioEventManager.PlayDialogueAudio(this.transform,dialogueTrackNumber, dialogueTrackName, volume, pitch, spatialBlend, fadeType, fadeDuration, loopDialogue, eventName);
+            AudioEventManager.playDialogueTrackAudio(this.transform,dialogueTrackNumber, dialogueTrackName, volume, pitch, spatialBlend, fadeType, fadeDuration, loopDialogue, eventName);
         }
         if(transformToAttachTo != null){
             //send the PlayDialogue Event with parameters from the inspector
-            AudioEventManager.PlayDialogueAudio(transformToAttachTo, dialogueTrackNumber, dialogueTrackName, volume, pitch, spatialBlend, fadeType, fadeDuration, loopDialogue, eventName);
+            AudioEventManager.playDialogueTrackAudio(transformToAttachTo, dialogueTrackNumber, dialogueTrackName, volume, pitch, spatialBlend, fadeType, fadeDuration, loopDialogue, eventName);
         }
     }
 
@@ -183,7 +183,7 @@ public class AudioEventSender_Dialogue : MonoBehaviour, IAudioEventSender
         else
         {
             // Send the StopDialogue Event with parameters from the inspector
-            AudioEventManager.StopDialogueAudio(fadeDuration);
+            AudioEventManager.stopDialogueTrackAudio(fadeDuration);
         }
     }
 
@@ -201,7 +201,7 @@ public class AudioEventSender_Dialogue : MonoBehaviour, IAudioEventSender
             yield return null;
         }
         // Send the StopDialogue Event with parameters from the inspector
-        AudioEventManager.StopDialogueAudio(fadeDuration);
+        AudioEventManager.stopDialogueTrackAudio(fadeDuration);
     }
 
     // pause the dialogue audio
@@ -220,14 +220,14 @@ public class AudioEventSender_Dialogue : MonoBehaviour, IAudioEventSender
     private void PauseDialogue()
     {
         //send the PauseDialogue Event with parameters from the inspector
-        AudioEventManager.PauseDialogueAudio(fadeDuration);
+        AudioEventManager.pauseDialogueTrackAudio(fadeDuration);
     }
 
     private IEnumerator PauseDialogue_Delayed(float delay)
     {
         yield return new WaitForSeconds(delay);
         //send the PauseDialogue Event with parameters from the inspector
-        AudioEventManager.PauseDialogueAudio(fadeDuration);
+        AudioEventManager.pauseDialogueTrackAudio(fadeDuration);
     }
 
     //----------------- EDITOR / TESTING-----------------
