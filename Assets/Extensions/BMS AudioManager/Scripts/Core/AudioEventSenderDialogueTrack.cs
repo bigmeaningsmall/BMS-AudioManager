@@ -2,6 +2,11 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// this event is currently only good to play a single dialogue one shot
+/// - todo - possible update to allow an array of dialog clips to be played in sequence - requires a bit of rethink of file management
+/// - todo more likely to make a dialog manager in a future update 
+/// </summary>
 public class AudioEventSenderDialogueTrack : MonoBehaviour, IAudioEventSender
 {
     [Space(20)]
@@ -41,6 +46,19 @@ public class AudioEventSenderDialogueTrack : MonoBehaviour, IAudioEventSender
     public CollisionType collisionType = CollisionType.Trigger;
     public string targetTag = "Player";
     public bool stopOnExit = true;
+
+    [Header("Trigger Zone Visualization")]
+    [Tooltip("Use transform scale and material for trigger zone visualization")]
+    public bool useTransformScale = true;
+    [Tooltip("Show trigger info labels in editor")]
+    public bool showTriggerInfo = true;
+    [Tooltip("Color when trigger is activated")]
+    public Color triggerActiveColor = new Color(1f, 0.5f, 0f, 0.8f); // Orange when active (dialogue theme)
+
+    // For showing activation feedback
+    private bool isTriggered = false;
+    private float triggerFeedbackTimer = 0f;
+    private const float TRIGGER_FEEDBACK_DURATION = 0.2f;
     
     [Space(20)]
     [Header("TestMode : 'M' to play dialogue, 'N' to stop, 'B' to pause")]
@@ -78,6 +96,7 @@ public class AudioEventSenderDialogueTrack : MonoBehaviour, IAudioEventSender
     {
         if (collisionType == CollisionType.Trigger && other.CompareTag(targetTag))
         {
+            TriggerActivation();
             Play();
         }
     }
@@ -86,7 +105,46 @@ public class AudioEventSenderDialogueTrack : MonoBehaviour, IAudioEventSender
     {
         if (collisionType == CollisionType.Collision && collision.collider.CompareTag(targetTag))
         {
+            TriggerActivation();
             Play();
+        }
+    }
+
+    private void TriggerActivation()
+    {
+        isTriggered = true;
+        triggerFeedbackTimer = TRIGGER_FEEDBACK_DURATION;
+    }
+
+    private void Update()
+    {
+        // Handle trigger feedback timer
+        if (isTriggered)
+        {
+            triggerFeedbackTimer -= Time.deltaTime;
+            if (triggerFeedbackTimer <= 0f)
+            {
+                isTriggered = false;
+            }
+        }
+
+        //----------------- EDITOR / TESTING-----------------
+        // This section is only used in the editor to test the events 
+        if (testMode)
+        {
+            if (Input.GetKeyDown(KeyCode.M))
+            {
+                TriggerActivation();
+                Play();
+            }
+            if (Input.GetKeyDown(KeyCode.N))
+            {
+                Stop();
+            }
+            if (Input.GetKeyDown(KeyCode.B))
+            {
+                Pause();
+            }
         }
     }
 
@@ -230,24 +288,150 @@ public class AudioEventSenderDialogueTrack : MonoBehaviour, IAudioEventSender
         AudioEventManager.pauseDialogueTrackAudio(fadeDuration);
     }
 
-    //----------------- EDITOR / TESTING-----------------
-    // This section is only used in the editor to test the events 
-    void Update()
+    #region Gizmo Visualization
+
+    private void OnDrawGizmosSelected()
     {
-        if (testMode)
+        if (!useTransformScale) return;
+        
+        // Draw trigger info and activation feedback
+        DrawTriggerInfo();
+        DrawActivationFeedback();
+    }
+
+    private void DrawTriggerInfo()
+    {
+        if (!showTriggerInfo) return;
+        
+        // Calculate label position based on object bounds
+        Bounds bounds = GetObjectBounds();
+        Vector3 labelPos = transform.position + Vector3.up * (bounds.size.y * 0.5f + 1f);
+        
+        #if UNITY_EDITOR
+        UnityEditor.Handles.color = Color.white;
+        string shapeInfo = GetShapeInfo();
+        UnityEditor.Handles.Label(labelPos, 
+            $"Dialogue: {eventName}\n" +
+            $"Track Name: {dialogueTrackName}\n" +
+            $"Shape: {shapeInfo}\n" +
+            $"Type: {collisionType}\n" +
+            $"Tag: {targetTag}\n" +
+            $"Scale: {transform.lossyScale}");
+        #endif
+    }
+
+    private void DrawActivationFeedback()
+    {
+        if (!isTriggered) return;
+        
+        // Draw activation pulse
+        Gizmos.color = triggerActiveColor;
+        Bounds bounds = GetObjectBounds();
+        float pulseSize = bounds.size.magnitude * 1.2f;
+        Gizmos.DrawWireSphere(transform.position, pulseSize);
+        
+        // Draw activation icon
+        #if UNITY_EDITOR
+        Vector3 iconPos = transform.position + Vector3.up * (bounds.size.y * 0.5f + 2f);
+        UnityEditor.Handles.color = triggerActiveColor;
+        UnityEditor.Handles.Label(iconPos, "💬 TRIGGERED 💬");
+        #endif
+    }
+
+    private Bounds GetObjectBounds()
+    {
+        Renderer renderer = GetComponent<Renderer>();
+        if (renderer != null)
         {
-            if (Input.GetKeyDown(KeyCode.M))
+            return renderer.bounds;
+        }
+        
+        Collider collider = GetComponent<Collider>();
+        if (collider != null)
+        {
+            return collider.bounds;
+        }
+        
+        // Fallback to transform scale
+        return new Bounds(transform.position, transform.lossyScale);
+    }
+
+    private string GetShapeInfo()
+    {
+        MeshFilter meshFilter = GetComponent<MeshFilter>();
+        if (meshFilter?.sharedMesh != null)
+        {
+            return meshFilter.sharedMesh.name;
+        }
+        
+        Collider col = GetComponent<Collider>();
+        if (col != null)
+        {
+            return col.GetType().Name;
+        }
+        
+        return "Unknown";
+    }
+
+    #endregion
+
+    #region Helper Methods for Collider Setup
+
+    [ContextMenu("Setup Collider to Match Transform")]
+    private void SetupColliderToMatchTransform()
+    {
+        Collider col = GetComponent<Collider>();
+        
+        // Detect best collider type based on mesh
+        System.Type bestColliderType = DetectBestColliderType();
+        
+        if (col == null || col.GetType() != bestColliderType)
+        {
+            // Remove existing collider if wrong type
+            if (col != null)
             {
-                Play();
+                DestroyImmediate(col);
             }
-            if (Input.GetKeyDown(KeyCode.N))
+            
+            // Add correct collider type
+            col = (Collider)gameObject.AddComponent(bestColliderType);
+        }
+        
+        // Set collider properties
+        col.isTrigger = (collisionType == CollisionType.Trigger);
+        
+        // The collider will automatically use the transform scale
+        
+        #if UNITY_EDITOR
+        UnityEditor.EditorUtility.SetDirty(this);
+        #endif
+        
+        Debug.Log($"Set up {bestColliderType.Name} to match transform scale. Use transform scale to adjust trigger zone size.");
+    }
+
+    private System.Type DetectBestColliderType()
+    {
+        MeshFilter meshFilter = GetComponent<MeshFilter>();
+        if (meshFilter?.sharedMesh != null)
+        {
+            string meshName = meshFilter.sharedMesh.name.ToLower();
+            if (meshName.Contains("sphere") || meshName.Contains("icosphere"))
             {
-                Stop();
+                return typeof(SphereCollider);
             }
-            if (Input.GetKeyDown(KeyCode.B))
+            else if (meshName.Contains("capsule"))
             {
-                Pause();
+                return typeof(CapsuleCollider);
+            }
+            else if (meshName.Contains("cube") || meshName.Contains("quad") || meshName.Contains("plane"))
+            {
+                return typeof(BoxCollider);
             }
         }
+        
+        // Default to box collider
+        return typeof(BoxCollider);
     }
+
+    #endregion
 }
