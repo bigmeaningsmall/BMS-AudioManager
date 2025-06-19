@@ -17,11 +17,11 @@ public class AudioManager : MonoBehaviour
     public static AudioManager Instance { get; private set; }
 
     // --------------------------------------------------------------------------------------------
-    [Header("Background Music Settings")]
-    public GameObject musicPrefab;
+    [Header("Background Music Track")]
+    [SerializeField] private GameObject musicPrefab;
     private float musicFadeDuration = 1.5f;
     private FadeType musicFadeType = FadeType.Crossfade;
-    public bool isFadingMusic = false; // Flag to prevent multiple fades at once
+    [HideInInspector] public bool isFadingMusic = false; // Flag to prevent multiple fades at once
     private bool isPausedMusic = false; // Tracks if the music is paused
 
     private Dictionary<int, AudioClip> musicTracks = new Dictionary<int, AudioClip>();
@@ -30,11 +30,11 @@ public class AudioManager : MonoBehaviour
 
     // --------------------------------------------------------------------------------------------
     
-    [Header("Ambient Audio Settings")]
-    public GameObject ambientAudioPrefab;
+    [Header("Ambient Audio Track")]
+    [SerializeField] private GameObject ambientAudioPrefab;
     private float ambientFadeDuration = 1.5f;
     private FadeType ambientFadeType = FadeType.Crossfade;
-    public bool isFadingAmbientAudio = false; // Flag to prevent multiple fades at once
+    [HideInInspector] public bool isFadingAmbientAudio = false; // Flag to prevent multiple fades at once
     private bool isPausedAmbientAudio = false; // Tracks if the ambient audio is paused
     
     private Dictionary<int, AudioClip> ambientAudioTracks = new Dictionary<int, AudioClip>();
@@ -43,11 +43,11 @@ public class AudioManager : MonoBehaviour
     
     // --------------------------------------------------------------------------------------------
     
-    [Header("Dialogue Audio Settings")] // Currently works the same as Ambient Audio
-    public GameObject dialogueAudioPrefab;
+    [Header("Dialogue Audio Track")] // Currently works the same as Ambient Audio
+    [SerializeField] private GameObject dialogueAudioPrefab;
     private float dialogueFadeDuration = 0.5f;
     private FadeType dialogueFadeType = FadeType.Crossfade;
-    public bool isFadingDialogueAudio = false; // Flag to prevent multiple fades at once
+    [HideInInspector] public bool isFadingDialogueAudio = false; // Flag to prevent multiple fades at once
     private bool isPausedDialogueAudio = false; // Tracks if the dialogue audio is paused
     
     private Dictionary<int, AudioClip> dialogueAudioTracks = new Dictionary<int, AudioClip>();
@@ -57,7 +57,7 @@ public class AudioManager : MonoBehaviour
     // --------------------------------------------------------------------------------------------
     
     [Header("Sound Effects Settings")]
-    public GameObject soundEffectPrefab;
+    [SerializeField] private GameObject soundEffectPrefab;
     private Dictionary<string, AudioClip> soundEffects = new Dictionary<string, AudioClip>();
 
     // --------------------------------------------------------------------------------------------
@@ -140,7 +140,7 @@ public class AudioManager : MonoBehaviour
             musicTrackNames.Add(bgmClips[i].name);
         }
         
-        AudioClip[] ambientClips = Resources.LoadAll<AudioClip>("Audio/Ambience-Music");
+        AudioClip[] ambientClips = Resources.LoadAll<AudioClip>("Audio/Ambient"); // ambient audio - music, drones etc..
         for (int i = 0; i < ambientClips.Length; i++)
         {
             ambientAudioTracks[i] = ambientClips[i];
