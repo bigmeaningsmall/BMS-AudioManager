@@ -799,9 +799,12 @@ private IEnumerator FadeOutAndInDialogueAudio(Transform attachTo, AudioClip newT
     if (currentDialogueAudioSource != null && currentDialogueAudioSource.isPlaying)
     {
         float startVolume = currentDialogueAudioSource.volume;
+        float startPitch = currentDialogueAudioSource.pitch;
+        
         for (float t = 0; t < dialogueFadeDuration; t += Time.deltaTime)
         {
             currentDialogueAudioSource.volume = Mathf.Lerp(startVolume, 0, t / dialogueFadeDuration);
+            currentDialogueAudioSource.pitch = Mathf.Lerp(startPitch, 0, t / dialogueFadeDuration);
             yield return null;
         }
         currentDialogueAudioSource.Stop();
@@ -856,11 +859,13 @@ private IEnumerator FadeOutAndInDialogueAudio(Transform attachTo, AudioClip newT
     {
         isFadingDialogueAudio = true;
         float startVolume = currentDialogueAudioSource.volume;
+        float startPitch = currentDialogueAudioSource.pitch;
 
         // Fade out over dialogueFadeDuration
         for (float t = 0; t < dialogueFadeDuration; t += Time.deltaTime)
         {
             currentDialogueAudioSource.volume = Mathf.Lerp(startVolume, 0, t / dialogueFadeDuration);
+            currentDialogueAudioSource.pitch = Mathf.Lerp(startPitch, 0, t / dialogueFadeDuration);
             yield return null;
         }
 
@@ -901,10 +906,12 @@ private IEnumerator FadeOutAndInDialogueAudio(Transform attachTo, AudioClip newT
     {
         isFadingDialogueAudio = true;
         float startVolume = currentDialogueAudioSource.volume;
+        float startPitch = currentDialogueAudioSource.pitch;
 
         for (float t = 0; t < dialogueFadeDuration; t += Time.deltaTime)
         {
             currentDialogueAudioSource.volume = Mathf.Lerp(startVolume, 0, t / dialogueFadeDuration);
+            currentDialogueAudioSource.pitch = Mathf.Lerp(startPitch, 0, t / dialogueFadeDuration);
             yield return null;
         }
 
@@ -917,10 +924,12 @@ private IEnumerator FadeOutAndInDialogueAudio(Transform attachTo, AudioClip newT
         isFadingDialogueAudio = true;
         currentDialogueAudioSource.UnPause(); // Resume the dialogue audio before fade-in
         float targetVolume = 1.0f; // Set to the desired full volume
+        float targetPitch = 1.0f; // Set to the desired full pitch
 
         for (float t = 0; t < dialogueFadeDuration; t += Time.deltaTime)
         {
             currentDialogueAudioSource.volume = Mathf.Lerp(0, targetVolume, t / dialogueFadeDuration);
+            currentDialogueAudioSource.pitch = Mathf.Lerp(0, targetPitch, t / dialogueFadeDuration);
             yield return null;
         }
 
