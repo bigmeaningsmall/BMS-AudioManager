@@ -172,6 +172,13 @@ public class AudioManager : MonoBehaviour
     public void PlayMusic(int trackNumber, string trackName, float volume, FadeType fadeType, float fadeDuration, bool loop, string eventName)
     {
         if (isFadingMusic) return; // Block if a fade/crossfade is already in progress
+        
+        // Block [action] if music is currently paused
+        if (isPausedMusic)
+        {
+            Debug.LogWarning("Cannot [action] background music while paused. Unpause first, then [action].");
+            return;
+        }
 
         musicFadeType = fadeType;
         musicFadeDuration = fadeDuration;
@@ -189,6 +196,13 @@ public class AudioManager : MonoBehaviour
     public void PlayMusic(int trackNumber, float volume, bool loop = true)
     {
         if (isFadingMusic) return; // Block if a fade/crossfade is already in progress
+        
+        // Block [action] if music is currently paused
+        if (isPausedMusic)
+        {
+            Debug.LogWarning("Cannot [action] background music while paused. Unpause first, then [action].");
+            return;
+        }
 
         if (!musicTracks.TryGetValue(trackNumber, out AudioClip newTrack)) return;
         isFadingMusic = true;
@@ -205,6 +219,13 @@ public class AudioManager : MonoBehaviour
     public void PlayMusic(string trackName, float volume, bool loop = true)
     {
         if (isFadingMusic) return; // Block if a fade/crossfade is already in progress
+        
+        // Block [action] if music is currently paused
+        if (isPausedMusic)
+        {
+            Debug.LogWarning("Cannot [action] background music while paused. Unpause first, then [action].");
+            return;
+        }
 
         foreach (var track in musicTracks)
         {
@@ -287,10 +308,17 @@ public class AudioManager : MonoBehaviour
     #endregion
     // --------------------------------------------------------------------------------------------
     
-    // --------------------------------------------------------------------------------------------
+ // --------------------------------------------------------------------------------------------
     #region StopBackgroundMusic ------------------------------------
     public void StopMusic(float fadeDuration)
     {
+        // Block stop if music is currently paused
+        if (isPausedMusic)
+        {
+            Debug.LogWarning("Cannot stop background music while paused. Unpause first, then stop.");
+            return;
+        }
+
         musicFadeDuration = fadeDuration;
         
         // Check if there's music playing and that it's not already fading
@@ -385,6 +413,13 @@ public class AudioManager : MonoBehaviour
     public void PlayAmbientAudio(Transform attachTo, int trackNumber, string trackName, float volume, float pitch, float spatialBlend, FadeType fadeType, float fadeDuration, bool loop, string eventName)
     {
         if (isFadingAmbientAudio) return; // Block if a fade/crossfade is already in progress
+        
+        // Block play if audio is currently paused
+        if (isPausedAmbientAudio)
+        {
+            Debug.LogWarning("Cannot play ambient audio while paused. Unpause first, then play new track.");
+            return;
+        }
 
         ambientFadeType = fadeType;
         ambientFadeDuration = fadeDuration;
@@ -402,6 +437,13 @@ public class AudioManager : MonoBehaviour
     public void PlayAmbientAudio(Transform attachTo, int trackNumber, float volume, float pitch, float spatialBlend, bool loop = true)
     {
         if (isFadingAmbientAudio) return; // Block if a fade/crossfade is already in progress
+        
+        // Block play if audio is currently paused
+        if (isPausedAmbientAudio)
+        {
+            Debug.LogWarning("Cannot play ambient audio while paused. Unpause first, then play new track.");
+            return;
+        }
 
         if (!ambientAudioTracks.TryGetValue(trackNumber, out AudioClip newTrack)) return;
         isFadingAmbientAudio = true;
@@ -418,6 +460,13 @@ public class AudioManager : MonoBehaviour
     public void PlayAmbientAudio(Transform attachTo, string trackName, float volume, float pitch, float spatialBlend, bool loop = true)
     {
         if (isFadingAmbientAudio) return; // Block if a fade/crossfade is already in progress
+        
+        // Block play if audio is currently paused
+        if (isPausedAmbientAudio)
+        {
+            Debug.LogWarning("Cannot play ambient audio while paused. Unpause first, then play new track.");
+            return;
+        }
 
         foreach (var track in ambientAudioTracks)
         {
@@ -487,6 +536,7 @@ private IEnumerator FadeOutAndInAmbientAudio(Transform attachTo, AudioClip newTr
     if (currentAmbientAudioSource != null && currentAmbientAudioSource.isPlaying)
     {
         float startVolume = currentAmbientAudioSource.volume;
+        
         for (float t = 0; t < ambientFadeDuration; t += Time.deltaTime)
         {
             currentAmbientAudioSource.volume = Mathf.Lerp(startVolume, 0, t / ambientFadeDuration);
@@ -520,12 +570,19 @@ private IEnumerator FadeOutAndInAmbientAudio(Transform attachTo, AudioClip newTr
     #endregion
     // --------------------------------------------------------------------------------------------
     
-    // --------------------------------------------------------------------------------------------
+  // --------------------------------------------------------------------------------------------
     #region StopAmbientAudio ------------------------------------
     public void StopAmbientAudio(float fadeDuration)
     {
+        // Block stop if audio is currently paused
+        if (isPausedAmbientAudio)
+        {
+            Debug.LogWarning("Cannot stop ambient audio while paused. Unpause first, then stop.");
+            return;
+        }
+
         ambientFadeDuration = fadeDuration;
-    
+
         // Check if there's ambient audio playing and that it's not already fading
         if (currentAmbientAudioSource != null && currentAmbientAudioSource.isPlaying && !isFadingAmbientAudio)
         {
@@ -619,6 +676,13 @@ private IEnumerator FadeOutAndInAmbientAudio(Transform attachTo, AudioClip newTr
     public void PlayDialogueAudio(Transform attachTo, int trackNumber, string trackName, float volume, float pitch, float spatialBlend, FadeType fadeType, float fadeDuration, bool loop, string eventName)
     {
         if (isFadingDialogueAudio) return; // Block if a fade/crossfade is already in progress
+        
+        // Block play if audio is currently paused
+        if (isPausedDialogueAudio)
+        {
+            Debug.LogWarning("Cannot play dialogue audio while paused. Unpause first, then play new track.");
+            return;
+        }
 
         dialogueFadeType = fadeType;
         dialogueFadeDuration = fadeDuration;
@@ -636,6 +700,13 @@ private IEnumerator FadeOutAndInAmbientAudio(Transform attachTo, AudioClip newTr
     public void PlayDialogueAudio(Transform attachTo, int trackNumber, float volume, float pitch, float spatialBlend, bool loop = false)
     {
         if (isFadingDialogueAudio) return; // Block if a fade/crossfade is already in progress
+        
+        // Block play if audio is currently paused
+        if (isPausedDialogueAudio)
+        {
+            Debug.LogWarning("Cannot play dialogue audio while paused. Unpause first, then play new track.");
+            return;
+        }
 
         if (!dialogueAudioTracks.TryGetValue(trackNumber, out AudioClip newTrack)) return;
         isFadingDialogueAudio = true;
@@ -652,6 +723,13 @@ private IEnumerator FadeOutAndInAmbientAudio(Transform attachTo, AudioClip newTr
     public void PlayDialogueAudio(Transform attachTo, string trackName, float volume, float pitch, float spatialBlend, bool loop = false)
     {
         if (isFadingDialogueAudio) return; // Block if a fade/crossfade is already in progress
+        
+        // Block play if audio is currently paused
+        if (isPausedDialogueAudio)
+        {
+            Debug.LogWarning("Cannot play dialogue audio while paused. Unpause first, then play new track.");
+            return;
+        }
 
         foreach (var track in dialogueAudioTracks)
         {
@@ -754,12 +832,19 @@ private IEnumerator FadeOutAndInDialogueAudio(Transform attachTo, AudioClip newT
     #endregion
     // --------------------------------------------------------------------------------------------
     
-    // --------------------------------------------------------------------------------------------
+  // --------------------------------------------------------------------------------------------
     #region StopDialogueAudio ------------------------------------
     public void StopDialogueAudio(float fadeDuration)
     {
+        // Block stop if audio is currently paused
+        if (isPausedDialogueAudio)
+        {
+            Debug.LogWarning("Cannot stop dialogue audio while paused. Unpause first, then stop.");
+            return;
+        }
+
         dialogueFadeDuration = fadeDuration;
-    
+
         // Check if there's dialogue audio playing and that it's not already fading
         if (currentDialogueAudioSource != null && currentDialogueAudioSource.isPlaying && !isFadingDialogueAudio)
         {
@@ -844,7 +929,6 @@ private IEnumerator FadeOutAndInDialogueAudio(Transform attachTo, AudioClip newT
     }
     #endregion
     // --------------------------------------------------------------------------------------------
-    
     
     // SFX Management ********************
     // --------------------------------------------------------------------------------------------
