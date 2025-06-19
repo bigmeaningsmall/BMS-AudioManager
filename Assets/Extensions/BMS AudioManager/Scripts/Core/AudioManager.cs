@@ -103,13 +103,13 @@ public class AudioManager : MonoBehaviour
         AudioEventManager.stopBGMTrack += StopMusic;
         AudioEventManager.pauseBGMTrack += PauseMusic;
         
-        AudioEventManager.playAmbientAudioTrack += PlayAmbientAudio;
-        AudioEventManager.stopAmbientAudioTrack += StopAmbientAudio;
-        AudioEventManager.pauseAmbientAudioTrack += PauseAmbientAudio;
+        AudioEventManager.playAmbientTrack += PlayAmbientAudio;
+        AudioEventManager.stopAmbientTrack += StopAmbientAudio;
+        AudioEventManager.pauseAmbientTrack += PauseAmbientAudio;
         
-        AudioEventManager.playDialogueTrackAudio += PlayDialogueAudio;
-        AudioEventManager.stopDialogueTrackAudio += StopDialogueAudio;
-        AudioEventManager.pauseDialogueTrackAudio += PauseDialogueAudio;
+        AudioEventManager.playDialogueTrack += PlayDialogueAudio;
+        AudioEventManager.stopDialogueTrack += StopDialogueAudio;
+        AudioEventManager.pauseDialogueTrack += PauseDialogueAudio;
         
         AudioEventManager.PlaySFX += PlaySoundEffect;
     }
@@ -120,9 +120,9 @@ public class AudioManager : MonoBehaviour
         AudioEventManager.stopBGMTrack -= StopMusic;
         AudioEventManager.pauseBGMTrack -= PauseMusic;
         
-        AudioEventManager.playAmbientAudioTrack -= PlayAmbientAudio;
-        AudioEventManager.stopAmbientAudioTrack -= StopAmbientAudio;
-        AudioEventManager.pauseAmbientAudioTrack -= PauseAmbientAudio;
+        AudioEventManager.playAmbientTrack -= PlayAmbientAudio;
+        AudioEventManager.stopAmbientTrack -= StopAmbientAudio;
+        AudioEventManager.pauseAmbientTrack -= PauseAmbientAudio;
         
         AudioEventManager.PlaySFX -= PlaySoundEffect;
     }

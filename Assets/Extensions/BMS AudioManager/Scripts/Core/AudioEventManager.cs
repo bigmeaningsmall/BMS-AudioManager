@@ -50,19 +50,19 @@ public static class AudioEventManager
     
     // --- Events --- Ambient Music - Single Track
     // playing ambient music
-    public static AudioEvent_PlayAmbientAudio_Track playAmbientAudioTrack;
+    public static AudioEvent_PlayAmbientAudio_Track playAmbientTrack;
     // stopping ambient music
-    public static AudioEvent_StopAmbientAudio_Track stopAmbientAudioTrack;
+    public static AudioEvent_StopAmbientAudio_Track stopAmbientTrack;
     // pausing ambient music
-    public static AudioEvent_PauseAmbientAudio_Track pauseAmbientAudioTrack;
+    public static AudioEvent_PauseAmbientAudio_Track pauseAmbientTrack;
     
     // --- Events --- Dialogue - Single Track
     // playing dialogue
-    public static AudioEvent_PlayDialogue_Track playDialogueTrackAudio;
+    public static AudioEvent_PlayDialogue_Track playDialogueTrack;
     // stopping dialogue
-    public static AudioEvent_StopDialogue_Track stopDialogueTrackAudio;
+    public static AudioEvent_StopDialogue_Track stopDialogueTrack;
     // pausing dialogue
-    public static AudioEvent_PauseDialogue_Track pauseDialogueTrackAudio;
+    public static AudioEvent_PauseDialogue_Track pauseDialogueTrack;
     
     // --- Events --- SFX - OneShots
     // Multi-delegate for playing sound effects
