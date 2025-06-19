@@ -27,7 +27,6 @@ public class AudioEventSenderDialogueTrack : MonoBehaviour, IAudioEventSender
 
     [Space(20)]
     public bool playOnEnabled = true;
-    public bool loopDialogue = false;
 
     [Space(10)]
     [Range(0, 1f)]
@@ -165,16 +164,16 @@ public class AudioEventSenderDialogueTrack : MonoBehaviour, IAudioEventSender
         if(!attachToThisTransform && transformToAttachTo == null){
             Debug.LogWarning("No Transform to attach to - using AudioManager");
             //send the PlayDialogue Event with parameters from the inspector
-            AudioEventManager.playDialogueTrack(null,dialogueTrackNumber, dialogueTrackName, volume, pitch, spatialBlend, fadeType, fadeDuration, loopDialogue, eventName);
+            AudioEventManager.playDialogueTrack(null,dialogueTrackNumber, dialogueTrackName, volume, pitch, spatialBlend, fadeType, fadeDuration, eventName);
         }
         
         if (attachToThisTransform){
             //send the PlayDialogue Event with parameters from the inspector
-            AudioEventManager.playDialogueTrack(this.transform,dialogueTrackNumber, dialogueTrackName, volume, pitch, spatialBlend, fadeType, fadeDuration, loopDialogue, eventName);
+            AudioEventManager.playDialogueTrack(this.transform,dialogueTrackNumber, dialogueTrackName, volume, pitch, spatialBlend, fadeType, fadeDuration, eventName);
         }
         if(transformToAttachTo != null){
             //send the PlayDialogue Event with parameters from the inspector
-            AudioEventManager.playDialogueTrack(transformToAttachTo, dialogueTrackNumber, dialogueTrackName, volume, pitch, spatialBlend, fadeType, fadeDuration, loopDialogue, eventName);
+            AudioEventManager.playDialogueTrack(transformToAttachTo, dialogueTrackNumber, dialogueTrackName, volume, pitch, spatialBlend, fadeType, fadeDuration, eventName);
         }
 
     }
@@ -186,16 +185,16 @@ public class AudioEventSenderDialogueTrack : MonoBehaviour, IAudioEventSender
         if(!attachToThisTransform && transformToAttachTo == null){
             Debug.LogWarning("No Transform to attach to - using AudioManager");
             //send the PlayDialogue Event with parameters from the inspector
-            AudioEventManager.playDialogueTrack(null,dialogueTrackNumber, dialogueTrackName, volume, pitch, spatialBlend, fadeType, fadeDuration, loopDialogue, eventName);
+            AudioEventManager.playDialogueTrack(null,dialogueTrackNumber, dialogueTrackName, volume, pitch, spatialBlend, fadeType, fadeDuration, eventName);
         }
         
         if (attachToThisTransform){
             //send the PlayDialogue Event with parameters from the inspector
-            AudioEventManager.playDialogueTrack(this.transform,dialogueTrackNumber, dialogueTrackName, volume, pitch, spatialBlend, fadeType, fadeDuration, loopDialogue, eventName);
+            AudioEventManager.playDialogueTrack(this.transform,dialogueTrackNumber, dialogueTrackName, volume, pitch, spatialBlend, fadeType, fadeDuration, eventName);
         }
         if(transformToAttachTo != null){
             //send the PlayDialogue Event with parameters from the inspector
-            AudioEventManager.playDialogueTrack(transformToAttachTo, dialogueTrackNumber, dialogueTrackName, volume, pitch, spatialBlend, fadeType, fadeDuration, loopDialogue, eventName);
+            AudioEventManager.playDialogueTrack(transformToAttachTo, dialogueTrackNumber, dialogueTrackName, volume, pitch, spatialBlend, fadeType, fadeDuration, eventName);
         }
     }
 

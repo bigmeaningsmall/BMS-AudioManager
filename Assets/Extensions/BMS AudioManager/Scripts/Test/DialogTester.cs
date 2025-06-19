@@ -45,7 +45,6 @@ public class DialogTester : MonoBehaviour
             0f, // Spatial blend
             FadeType.FadeInOut, // Fade type
             0.5f, // Fade duration
-            false, // Loop
             "TestEvent" // Event name
         );
 
