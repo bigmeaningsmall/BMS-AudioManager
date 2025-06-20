@@ -29,13 +29,21 @@ public class AudioEventSenderDialogueTrack : MonoBehaviour, IAudioEventSender
     public bool playOnEnabled = true;
 
     [Space(10)]
+    [Range(0, 1f)] public float spatialBlend = 0f;
+    
+    public FadeType fadeType = FadeType.FadeInOut;
+    
+    [Space(5)]
+    [Header("Volume Control")]
     [Range(0, 1f)]
     public float volume = 1.0f;
-    [Range(0, 2f)] public float pitch = 1.0f;
-    [Range(0, 1f)] public float spatialBlend = 0f;
-    public FadeType fadeType = FadeType.FadeInOut;
     [Range(0, 10f)]
-    public float fadeDuration = 0.5f;
+    public float volumeFadeDuration = 0.5f;
+    [Space(5)]
+    [Header("Pitch Control")]
+    [Range(0, 2f)] public float pitch = 1.0f;
+    [Range(0, 10f)]
+    public float pitchFadeDuration = 0.5f;
 
     [Space(10)] 
     [Range(0,5f)]
@@ -164,37 +172,33 @@ public class AudioEventSenderDialogueTrack : MonoBehaviour, IAudioEventSender
         if(!attachToThisTransform && transformToAttachTo == null){
             Debug.LogWarning("No Transform to attach to - using AudioManager");
             //send the PlayDialogue Event with parameters from the inspector
-            AudioEventManager.playDialogueTrack(null,dialogueTrackNumber, dialogueTrackName, volume, pitch, spatialBlend, fadeType, fadeDuration, eventName);
+            AudioEventManager.playDialogueTrack(null, dialogueTrackNumber, dialogueTrackName, volume, pitch, spatialBlend, fadeType, volumeFadeDuration, pitchFadeDuration, eventName);
         }
-        
+    
         if (attachToThisTransform){
             //send the PlayDialogue Event with parameters from the inspector
-            AudioEventManager.playDialogueTrack(this.transform,dialogueTrackNumber, dialogueTrackName, volume, pitch, spatialBlend, fadeType, fadeDuration, eventName);
+            AudioEventManager.playDialogueTrack(this.transform, dialogueTrackNumber, dialogueTrackName, volume, pitch, spatialBlend, fadeType, volumeFadeDuration, pitchFadeDuration, eventName);
         }
         if(transformToAttachTo != null){
             //send the PlayDialogue Event with parameters from the inspector
-            AudioEventManager.playDialogueTrack(transformToAttachTo, dialogueTrackNumber, dialogueTrackName, volume, pitch, spatialBlend, fadeType, fadeDuration, eventName);
+            AudioEventManager.playDialogueTrack(transformToAttachTo, dialogueTrackNumber, dialogueTrackName, volume, pitch, spatialBlend, fadeType, volumeFadeDuration, pitchFadeDuration, eventName);
         }
-
     }
 
     private IEnumerator PlayDialogue_Delayed(float delay)
     {
         yield return new WaitForSeconds(delay);
-        
+    
         if(!attachToThisTransform && transformToAttachTo == null){
             Debug.LogWarning("No Transform to attach to - using AudioManager");
-            //send the PlayDialogue Event with parameters from the inspector
-            AudioEventManager.playDialogueTrack(null,dialogueTrackNumber, dialogueTrackName, volume, pitch, spatialBlend, fadeType, fadeDuration, eventName);
+            AudioEventManager.playDialogueTrack(null, dialogueTrackNumber, dialogueTrackName, volume, pitch, spatialBlend, fadeType, volumeFadeDuration, pitchFadeDuration, eventName);
         }
-        
+    
         if (attachToThisTransform){
-            //send the PlayDialogue Event with parameters from the inspector
-            AudioEventManager.playDialogueTrack(this.transform,dialogueTrackNumber, dialogueTrackName, volume, pitch, spatialBlend, fadeType, fadeDuration, eventName);
+            AudioEventManager.playDialogueTrack(this.transform, dialogueTrackNumber, dialogueTrackName, volume, pitch, spatialBlend, fadeType, volumeFadeDuration, pitchFadeDuration, eventName);
         }
         if(transformToAttachTo != null){
-            //send the PlayDialogue Event with parameters from the inspector
-            AudioEventManager.playDialogueTrack(transformToAttachTo, dialogueTrackNumber, dialogueTrackName, volume, pitch, spatialBlend, fadeType, fadeDuration, eventName);
+            AudioEventManager.playDialogueTrack(transformToAttachTo, dialogueTrackNumber, dialogueTrackName, volume, pitch, spatialBlend, fadeType, volumeFadeDuration, pitchFadeDuration, eventName);
         }
     }
 
@@ -234,13 +238,11 @@ public class AudioEventSenderDialogueTrack : MonoBehaviour, IAudioEventSender
     {
         if (AudioManager.Instance.isFadingDialogueAudio)
         {
-            // Handle the stop request if the AudioManager is fading
             StartCoroutine(WaitForFadeAndStop());
         }
         else
         {
-            // Send the StopDialogue Event with parameters from the inspector
-            AudioEventManager.stopDialogueTrack(fadeDuration);
+            AudioEventManager.stopDialogueTrack(volumeFadeDuration, pitchFadeDuration);
         }
     }
 
@@ -252,13 +254,11 @@ public class AudioEventSenderDialogueTrack : MonoBehaviour, IAudioEventSender
 
     private IEnumerator WaitForFadeAndStop()
     {
-        // Wait until the AudioManager is no longer fading
         while (AudioManager.Instance.isFadingDialogueAudio)
         {
             yield return null;
         }
-        // Send the StopDialogue Event with parameters from the inspector
-        AudioEventManager.stopDialogueTrack(fadeDuration);
+        AudioEventManager.stopDialogueTrack(volumeFadeDuration, pitchFadeDuration);
     }
 
     // pause the dialogue audio
@@ -276,17 +276,16 @@ public class AudioEventSenderDialogueTrack : MonoBehaviour, IAudioEventSender
 
     private void PauseDialogue()
     {
-        //send the PauseDialogue Event with parameters from the inspector
-        AudioEventManager.pauseDialogueTrack(fadeDuration);
+        AudioEventManager.pauseDialogueTrack(volumeFadeDuration, pitchFadeDuration);
     }
 
     private IEnumerator PauseDialogue_Delayed(float delay)
     {
         yield return new WaitForSeconds(delay);
-        //send the PauseDialogue Event with parameters from the inspector
-        AudioEventManager.pauseDialogueTrack(fadeDuration);
+        AudioEventManager.pauseDialogueTrack(volumeFadeDuration, pitchFadeDuration);
     }
 
+    // Editor-only methods to visualize the trigger zone and info **********************************
     #region Gizmo Visualization
 
     private void OnDrawGizmosSelected()

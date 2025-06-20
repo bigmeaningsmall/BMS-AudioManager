@@ -30,9 +30,9 @@ public static class AudioEventManager
     
     
     // Define a delegate for audio events - Dialogue (works the same as Ambient for now)
-    public delegate void AudioEvent_PlayDialogue_Track(Transform attachTo, int index, string trackName, float volume, float pitch, float spatialBlend, FadeType fadeType, float fadeDuration, string eventName);
-    public delegate void AudioEvent_StopDialogue_Track(float fadeDuration);
-    public delegate void AudioEvent_PauseDialogue_Track(float fadeDuration);
+    public delegate void AudioEvent_PlayDialogue_Track(Transform attachTo, int index, string trackName, float volume, float pitch, float spatialBlend, FadeType fadeType, float volumeFadeDuration, float pitchFadeDuration, string eventName);
+    public delegate void AudioEvent_StopDialogue_Track(float volumeFadeDuration, float pitchFadeDuration);
+    public delegate void AudioEvent_PauseDialogue_Track(float volumeFadeDuration, float pitchFadeDuration);
     
     
     // Define a delegate for audio events - SFX

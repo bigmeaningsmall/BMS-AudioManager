@@ -35,7 +35,7 @@ public class DialogTester : MonoBehaviour
     {
         string dialogName = $"dialog{dialogNumber}";
 
-        // Play dialogue using AudioEventManager
+        /*// Play dialogue using AudioEventManager
         AudioEventManager.playDialogueTrack(
             null, // No transform to attach
             0, // Default track number
@@ -46,7 +46,7 @@ public class DialogTester : MonoBehaviour
             FadeType.FadeInOut, // Fade type
             0.5f, // Fade duration
             "TestEvent" // Event name
-        );
+        );*/
 
         Debug.Log($"Triggered {dialogName}");
     }
