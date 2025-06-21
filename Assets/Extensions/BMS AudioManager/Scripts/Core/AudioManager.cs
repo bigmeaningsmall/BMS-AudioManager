@@ -1041,7 +1041,7 @@ private IEnumerator FadeOutAndInAmbientAudio(Transform attachTo, AudioClip newTr
                 yield return null;
             }
         }
-
+        currentDialogueAudioSource.GetComponent<AutoDestroyAudioSource>()?.SetPausedStatus(false);
         currentDialogueAudioSource.Stop();
         Destroy(currentDialogueAudioSource.gameObject);
         currentDialogueAudioSource = null;
@@ -1057,6 +1057,14 @@ private IEnumerator FadeOutAndInAmbientAudio(Transform attachTo, AudioClip newTr
     {
         if (isFadingDialogueAudio) return;
 
+        // Safety check - if audio finished and destroyed itself, reset and exit
+        if (currentDialogueAudioSource == null)
+        {
+            Debug.Log("No dialogue audio to pause - audio may have finished");
+            isPausedDialogueAudio = false; // Reset pause state
+            return;
+        }
+        
         dialogueFadeDuration = fadeDuration;
         dialogueFadeTarget = fadeTarget;
 
@@ -1112,6 +1120,7 @@ private IEnumerator FadeOutAndInAmbientAudio(Transform attachTo, AudioClip newTr
         }
 
         currentDialogueAudioSource.Pause();
+        currentDialogueAudioSource.GetComponent<AutoDestroyAudioSource>()?.SetPausedStatus(true);
         isFadingDialogueAudio = false;
     }
 
@@ -1119,6 +1128,7 @@ private IEnumerator FadeOutAndInAmbientAudio(Transform attachTo, AudioClip newTr
     {
         isFadingDialogueAudio = true;
         currentDialogueAudioSource.UnPause();
+        currentDialogueAudioSource.GetComponent<AutoDestroyAudioSource>()?.SetPausedStatus(false);
 
         float targetVolume = dialogueTargetVolume;
         float targetPitch = dialogueTargetPitch;
@@ -1203,43 +1213,4 @@ private IEnumerator FadeOutAndInAmbientAudio(Transform attachTo, AudioClip newTr
     #endregion
     // --------------------------------------------------------------------------------------------
     
-    // Monitoring, Cleanup and Resetting ********************
-    // --------------------------------------------------------------------------------------------
-
-    #region Monitoring, Cleanup and Resetting ------------------------------------
-
-    private IEnumerator MonitorAudioSourceCompletion(AudioSource audioSource, System.Action onComplete)
-    {
-        // Wait until the audio source stops playing
-        while (audioSource != null && audioSource.isPlaying)
-        {
-            yield return null;
-        }
-    
-        // Audio finished or was destroyed
-        if (onComplete != null)
-        {
-            onComplete();
-        }
-    }
-    private void CleanupDialogueAudio()
-    {
-        if (currentDialogueAudioSource != null)
-        {
-            if (currentDialogueAudioSource.gameObject != null)
-            {
-                Destroy(currentDialogueAudioSource.gameObject);
-            }
-            currentDialogueAudioSource = null;
-        }
-    
-        // Reset states
-        isFadingDialogueAudio = false;
-        isPausedDialogueAudio = false;
-    
-        Debug.Log("Dialogue audio auto-cleaned up after completion");
-    }
-
-    #endregion
-    // ---------------------------------------------------------------------------------------------
 }
