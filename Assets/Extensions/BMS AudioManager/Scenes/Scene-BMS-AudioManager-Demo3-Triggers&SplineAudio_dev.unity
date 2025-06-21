@@ -2127,11 +2127,21 @@ PrefabInstance:
     - target: {fileID: 8771581298561452505, guid: 3312ccb5aaf9ed342abb38cb6f46a79c,
         type: 3}
       propertyPath: volume
-      value: 0.817
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8771581298561452505, guid: 3312ccb5aaf9ed342abb38cb6f46a79c,
         type: 3}
       propertyPath: testMode
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8771581298561452505, guid: 3312ccb5aaf9ed342abb38cb6f46a79c,
+        type: 3}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8771581298561452505, guid: 3312ccb5aaf9ed342abb38cb6f46a79c,
+        type: 3}
+      propertyPath: eventDelay
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8771581298561452505, guid: 3312ccb5aaf9ed342abb38cb6f46a79c,
@@ -2147,7 +2157,17 @@ PrefabInstance:
     - target: {fileID: 8771581298561452505, guid: 3312ccb5aaf9ed342abb38cb6f46a79c,
         type: 3}
       propertyPath: dialogueTrackName
-      value: dialog2
+      value: D
+      objectReference: {fileID: 0}
+    - target: {fileID: 8771581298561452505, guid: 3312ccb5aaf9ed342abb38cb6f46a79c,
+        type: 3}
+      propertyPath: pitchFadeDuration
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8771581298561452505, guid: 3312ccb5aaf9ed342abb38cb6f46a79c,
+        type: 3}
+      propertyPath: volumeFadeDuration
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 9148101888368860369, guid: 3312ccb5aaf9ed342abb38cb6f46a79c,
         type: 3}

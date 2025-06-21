@@ -774,102 +774,191 @@ private IEnumerator FadeOutAndInAmbientAudio(Transform attachTo, AudioClip newTr
         Debug.Log($"Dialogue audio track '{trackName}' not found in Resources/Audio/Dialogue!");
     }
 
-    private IEnumerator CrossfadeDialogueAudio(Transform attachTo, AudioClip newTrack, float targetVolume, float targetPitch, float targetSpatialBlend)
+private IEnumerator CrossfadeDialogueAudio(Transform attachTo, AudioClip newTrack, float targetVolume, float targetPitch, float targetSpatialBlend)
+{
+    // Calculate total duration - use longer of the two, or minimum if both are 0
+    float totalDuration = Mathf.Max(dialogueVolumeFadeDuration, dialoguePitchFadeDuration);
+    if (totalDuration <= 0) totalDuration = 0.01f; // Minimum duration to prevent infinite loop
+
+    if (attachTo == null)
     {
-        // Use the longer of the two durations for the crossfade timing
-        float crossfadeDuration = Mathf.Max(dialogueVolumeFadeDuration, dialoguePitchFadeDuration);
+        attachTo = transform;
+    }
 
-        if (attachTo == null)
+    GameObject dialogueObject = Instantiate(dialogueAudioPrefab, attachTo.position, Quaternion.identity, attachTo);
+    nextDialogueAudioSource = dialogueObject.GetComponent<AudioSource>();
+    nextDialogueAudioSource.clip = newTrack;
+    nextDialogueAudioSource.volume = 0;
+    nextDialogueAudioSource.pitch = 0;
+    nextDialogueAudioSource.spatialBlend = targetSpatialBlend;
+    nextDialogueAudioSource.Play();
+
+    if (currentDialogueAudioSource != null && currentDialogueAudioSource.isPlaying)
+    {
+        float startVolume = currentDialogueAudioSource.volume;
+        float startPitch = currentDialogueAudioSource.pitch;
+        
+        for (float t = 0; t < totalDuration; t += Time.deltaTime)
         {
-            attachTo = transform;
-        }
-
-        GameObject dialogueObject = Instantiate(dialogueAudioPrefab, attachTo.position, Quaternion.identity, attachTo);
-        nextDialogueAudioSource = dialogueObject.GetComponent<AudioSource>();
-        nextDialogueAudioSource.clip = newTrack;
-        nextDialogueAudioSource.volume = 0;
-        nextDialogueAudioSource.pitch = dialogueTargetPitch; // Start with current pitch
-        nextDialogueAudioSource.spatialBlend = targetSpatialBlend;
-        nextDialogueAudioSource.Play();
-
-        if (currentDialogueAudioSource != null && currentDialogueAudioSource.isPlaying)
-        {
-            float startVolume = currentDialogueAudioSource.volume;
-            float startPitch = currentDialogueAudioSource.pitch;
-            
-            for (float t = 0; t < crossfadeDuration; t += Time.deltaTime)
+            // Volume fade - handle zero duration
+            if (dialogueVolumeFadeDuration > 0)
             {
-                // Volume fade
                 float volumeProgress = Mathf.Clamp01(t / dialogueVolumeFadeDuration);
                 currentDialogueAudioSource.volume = Mathf.Lerp(startVolume, 0, volumeProgress);
                 nextDialogueAudioSource.volume = Mathf.Lerp(0, targetVolume, volumeProgress);
-                
-                // Pitch fade
-                float pitchProgress = Mathf.Clamp01(t / dialoguePitchFadeDuration);
-                currentDialogueAudioSource.pitch = Mathf.Lerp(startPitch, startPitch, pitchProgress); // Keep current pitch
-                nextDialogueAudioSource.pitch = Mathf.Lerp(dialogueTargetPitch, targetPitch, pitchProgress);
-                
-                yield return null;
             }
-            Destroy(currentDialogueAudioSource.gameObject);
-        }
-
-        nextDialogueAudioSource.volume = targetVolume;
-        nextDialogueAudioSource.pitch = targetPitch;
-        currentDialogueAudioSource = nextDialogueAudioSource;
-        isFadingDialogueAudio = false;
-    }
-
-    private IEnumerator FadeOutAndInDialogueAudio(Transform attachTo, AudioClip newTrack, float targetVolume, float targetPitch, float targetSpatialBlend)
-    {
-        if (attachTo == null)
-        {
-            attachTo = transform;
-        }
-
-        if (currentDialogueAudioSource != null && currentDialogueAudioSource.isPlaying)
-        {
-            float startVolume = currentDialogueAudioSource.volume;
-            float startPitch = currentDialogueAudioSource.pitch;
-            float fadeOutDuration = Mathf.Max(dialogueVolumeFadeDuration, dialoguePitchFadeDuration);
-            
-            for (float t = 0; t < fadeOutDuration; t += Time.deltaTime)
+            else
             {
-                float volumeProgress = Mathf.Clamp01(t / dialogueVolumeFadeDuration);
-                float pitchProgress = Mathf.Clamp01(t / dialoguePitchFadeDuration);
-                
-                currentDialogueAudioSource.volume = Mathf.Lerp(startVolume, 0, volumeProgress);
-                currentDialogueAudioSource.pitch = Mathf.Lerp(startPitch, startPitch, pitchProgress); // Keep pitch during fade out
-                yield return null;
+                // Instant volume change
+                currentDialogueAudioSource.volume = 0;
+                nextDialogueAudioSource.volume = targetVolume;
             }
-            currentDialogueAudioSource.Stop();
-            Destroy(currentDialogueAudioSource.gameObject);
-        }
-
-        GameObject dialogueObject = Instantiate(dialogueAudioPrefab, attachTo.position, Quaternion.identity, attachTo);
-        nextDialogueAudioSource = dialogueObject.GetComponent<AudioSource>();
-        nextDialogueAudioSource.clip = newTrack;
-        nextDialogueAudioSource.volume = 0;
-        nextDialogueAudioSource.pitch = dialogueTargetPitch; // Start with previous pitch
-        nextDialogueAudioSource.spatialBlend = targetSpatialBlend;
-        nextDialogueAudioSource.Play();
-
-        float fadeInDuration = Mathf.Max(dialogueVolumeFadeDuration, dialoguePitchFadeDuration);
-        for (float t = 0; t < fadeInDuration; t += Time.deltaTime)
-        {
-            float volumeProgress = Mathf.Clamp01(t / dialogueVolumeFadeDuration);
-            float pitchProgress = Mathf.Clamp01(t / dialoguePitchFadeDuration);
             
-            nextDialogueAudioSource.volume = Mathf.Lerp(0, targetVolume, volumeProgress);
-            nextDialogueAudioSource.pitch = Mathf.Lerp(dialogueTargetPitch, targetPitch, pitchProgress);
+            // Pitch fade - handle zero duration
+            if (dialoguePitchFadeDuration > 0)
+            {
+                float pitchProgress = Mathf.Clamp01(t / dialoguePitchFadeDuration);
+                currentDialogueAudioSource.pitch = startPitch; // Keep current pitch
+                nextDialogueAudioSource.pitch = Mathf.Lerp(0, targetPitch, pitchProgress);
+            }
+            else
+            {
+                // Instant pitch change
+                currentDialogueAudioSource.pitch = startPitch;
+                nextDialogueAudioSource.pitch = targetPitch;
+            }
+            
             yield return null;
         }
-
-        nextDialogueAudioSource.volume = targetVolume;
-        nextDialogueAudioSource.pitch = targetPitch;
-        currentDialogueAudioSource = nextDialogueAudioSource;
-        isFadingDialogueAudio = false;
+        Destroy(currentDialogueAudioSource.gameObject);
     }
+    else
+    {
+        // No current source, just fade in the new one
+        for (float t = 0; t < totalDuration; t += Time.deltaTime)
+        {
+            if (dialogueVolumeFadeDuration > 0)
+            {
+                float volumeProgress = Mathf.Clamp01(t / dialogueVolumeFadeDuration);
+                nextDialogueAudioSource.volume = Mathf.Lerp(0, targetVolume, volumeProgress);
+            }
+            else
+            {
+                nextDialogueAudioSource.volume = targetVolume;
+            }
+            
+            if (dialoguePitchFadeDuration > 0)
+            {
+                float pitchProgress = Mathf.Clamp01(t / dialoguePitchFadeDuration);
+                nextDialogueAudioSource.pitch = Mathf.Lerp(0, targetPitch, pitchProgress);
+            }
+            else
+            {
+                nextDialogueAudioSource.pitch = targetPitch;
+            }
+            
+            yield return null;
+        }
+    }
+
+    // Ensure final values are set
+    nextDialogueAudioSource.volume = targetVolume;
+    nextDialogueAudioSource.pitch = targetPitch;
+    currentDialogueAudioSource = nextDialogueAudioSource;
+    isFadingDialogueAudio = false;
+}
+
+  private IEnumerator FadeOutAndInDialogueAudio(Transform attachTo, AudioClip newTrack, float targetVolume, float targetPitch, float targetSpatialBlend)
+{
+    if (attachTo == null)
+    {
+        attachTo = transform;
+    }
+
+    // === FADE OUT PHASE ===
+    if (currentDialogueAudioSource != null && currentDialogueAudioSource.isPlaying)
+    {
+        float startVolume = currentDialogueAudioSource.volume;
+        float startPitch = currentDialogueAudioSource.pitch;
+        
+        float fadeOutDuration = Mathf.Max(dialogueVolumeFadeDuration, dialoguePitchFadeDuration);
+        if (fadeOutDuration <= 0) fadeOutDuration = 0.01f;
+        
+        for (float t = 0; t < fadeOutDuration; t += Time.deltaTime)
+        {
+            // Volume fade out
+            if (dialogueVolumeFadeDuration > 0)
+            {
+                float volumeProgress = Mathf.Clamp01(t / dialogueVolumeFadeDuration);
+                currentDialogueAudioSource.volume = Mathf.Lerp(startVolume, 0, volumeProgress);
+            }
+            else
+            {
+                currentDialogueAudioSource.volume = 0;
+            }
+            
+            // Pitch fade out
+            if (dialoguePitchFadeDuration > 0)
+            {
+                float pitchProgress = Mathf.Clamp01(t / dialoguePitchFadeDuration);
+                currentDialogueAudioSource.pitch = Mathf.Lerp(startPitch, 0, pitchProgress);
+            }
+            else
+            {
+                currentDialogueAudioSource.pitch = 0;
+            }
+            
+            yield return null;
+        }
+        currentDialogueAudioSource.Stop();
+        Destroy(currentDialogueAudioSource.gameObject);
+    }
+
+    // === FADE IN PHASE ===
+    GameObject dialogueObject = Instantiate(dialogueAudioPrefab, attachTo.position, Quaternion.identity, attachTo);
+    nextDialogueAudioSource = dialogueObject.GetComponent<AudioSource>();
+    nextDialogueAudioSource.clip = newTrack;
+    nextDialogueAudioSource.volume = 0;
+    nextDialogueAudioSource.pitch = 0;
+    nextDialogueAudioSource.spatialBlend = targetSpatialBlend;
+    nextDialogueAudioSource.Play();
+
+    float fadeInDuration = Mathf.Max(dialogueVolumeFadeDuration, dialoguePitchFadeDuration);
+    if (fadeInDuration <= 0) fadeInDuration = 0.01f;
+    
+    for (float t = 0; t < fadeInDuration; t += Time.deltaTime)
+    {
+        // Volume fade in
+        if (dialogueVolumeFadeDuration > 0)
+        {
+            float volumeProgress = Mathf.Clamp01(t / dialogueVolumeFadeDuration);
+            nextDialogueAudioSource.volume = Mathf.Lerp(0, targetVolume, volumeProgress);
+        }
+        else
+        {
+            nextDialogueAudioSource.volume = targetVolume;
+        }
+        
+        // Pitch fade in
+        if (dialoguePitchFadeDuration > 0)
+        {
+            float pitchProgress = Mathf.Clamp01(t / dialoguePitchFadeDuration);
+            nextDialogueAudioSource.pitch = Mathf.Lerp(0, targetPitch, pitchProgress);
+        }
+        else
+        {
+            nextDialogueAudioSource.pitch = targetPitch;
+        }
+        
+        yield return null;
+    }
+
+    // Ensure final values are set
+    nextDialogueAudioSource.volume = targetVolume;
+    nextDialogueAudioSource.pitch = targetPitch;
+    currentDialogueAudioSource = nextDialogueAudioSource;
+    isFadingDialogueAudio = false;
+}
     #endregion
     // --------------------------------------------------------------------------------------------
     
@@ -897,15 +986,34 @@ private IEnumerator FadeOutAndInAmbientAudio(Transform attachTo, AudioClip newTr
         isFadingDialogueAudio = true;
         float startVolume = currentDialogueAudioSource.volume;
         float startPitch = currentDialogueAudioSource.pitch;
+    
         float fadeDuration = Mathf.Max(dialogueVolumeFadeDuration, dialoguePitchFadeDuration);
+        if (fadeDuration <= 0) fadeDuration = 0.01f;
 
         for (float t = 0; t < fadeDuration; t += Time.deltaTime)
         {
-            float volumeProgress = Mathf.Clamp01(t / dialogueVolumeFadeDuration);
-            float pitchProgress = Mathf.Clamp01(t / dialoguePitchFadeDuration);
+            // Volume fade
+            if (dialogueVolumeFadeDuration > 0)
+            {
+                float volumeProgress = Mathf.Clamp01(t / dialogueVolumeFadeDuration);
+                currentDialogueAudioSource.volume = Mathf.Lerp(startVolume, 0, volumeProgress);
+            }
+            else
+            {
+                currentDialogueAudioSource.volume = 0;
+            }
         
-            currentDialogueAudioSource.volume = Mathf.Lerp(startVolume, 0, volumeProgress);
-            currentDialogueAudioSource.pitch = Mathf.Lerp(startPitch, 0, pitchProgress); // Fade pitch to 0 on stop
+            // Pitch fade
+            if (dialoguePitchFadeDuration > 0)
+            {
+                float pitchProgress = Mathf.Clamp01(t / dialoguePitchFadeDuration);
+                currentDialogueAudioSource.pitch = Mathf.Lerp(startPitch, 0, pitchProgress);
+            }
+            else
+            {
+                currentDialogueAudioSource.pitch = 0;
+            }
+        
             yield return null;
         }
 
@@ -943,15 +1051,34 @@ private IEnumerator FadeOutAndInAmbientAudio(Transform attachTo, AudioClip newTr
         isFadingDialogueAudio = true;
         float startVolume = currentDialogueAudioSource.volume;
         float startPitch = currentDialogueAudioSource.pitch;
+    
         float fadeDuration = Mathf.Max(dialogueVolumeFadeDuration, dialoguePitchFadeDuration);
+        if (fadeDuration <= 0) fadeDuration = 0.01f;
 
         for (float t = 0; t < fadeDuration; t += Time.deltaTime)
         {
-            float volumeProgress = Mathf.Clamp01(t / dialogueVolumeFadeDuration);
-            float pitchProgress = Mathf.Clamp01(t / dialoguePitchFadeDuration);
+            // Volume fade
+            if (dialogueVolumeFadeDuration > 0)
+            {
+                float volumeProgress = Mathf.Clamp01(t / dialogueVolumeFadeDuration);
+                currentDialogueAudioSource.volume = Mathf.Lerp(startVolume, 0, volumeProgress);
+            }
+            else
+            {
+                currentDialogueAudioSource.volume = 0;
+            }
         
-            currentDialogueAudioSource.volume = Mathf.Lerp(startVolume, 0, volumeProgress);
-            currentDialogueAudioSource.pitch = Mathf.Lerp(startPitch, 0, pitchProgress); // Fade pitch down on pause
+            // Pitch fade
+            if (dialoguePitchFadeDuration > 0)
+            {
+                float pitchProgress = Mathf.Clamp01(t / dialoguePitchFadeDuration);
+                currentDialogueAudioSource.pitch = Mathf.Lerp(startPitch, 0, pitchProgress);
+            }
+            else
+            {
+                currentDialogueAudioSource.pitch = 0;
+            }
+        
             yield return null;
         }
 
@@ -966,15 +1093,34 @@ private IEnumerator FadeOutAndInAmbientAudio(Transform attachTo, AudioClip newTr
     
         float targetVolume = dialogueTargetVolume;
         float targetPitch = dialogueTargetPitch;
+    
         float fadeDuration = Mathf.Max(dialogueVolumeFadeDuration, dialoguePitchFadeDuration);
+        if (fadeDuration <= 0) fadeDuration = 0.01f;
 
         for (float t = 0; t < fadeDuration; t += Time.deltaTime)
         {
-            float volumeProgress = Mathf.Clamp01(t / dialogueVolumeFadeDuration);
-            float pitchProgress = Mathf.Clamp01(t / dialoguePitchFadeDuration);
+            // Volume fade
+            if (dialogueVolumeFadeDuration > 0)
+            {
+                float volumeProgress = Mathf.Clamp01(t / dialogueVolumeFadeDuration);
+                currentDialogueAudioSource.volume = Mathf.Lerp(0, targetVolume, volumeProgress);
+            }
+            else
+            {
+                currentDialogueAudioSource.volume = targetVolume;
+            }
         
-            currentDialogueAudioSource.volume = Mathf.Lerp(0, targetVolume, volumeProgress);
-            currentDialogueAudioSource.pitch = Mathf.Lerp(0, targetPitch, pitchProgress); // Fade pitch back up
+            // Pitch fade
+            if (dialoguePitchFadeDuration > 0)
+            {
+                float pitchProgress = Mathf.Clamp01(t / dialoguePitchFadeDuration);
+                currentDialogueAudioSource.pitch = Mathf.Lerp(0, targetPitch, pitchProgress);
+            }
+            else
+            {
+                currentDialogueAudioSource.pitch = targetPitch;
+            }
+        
             yield return null;
         }
 
