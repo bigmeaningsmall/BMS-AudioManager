@@ -1055,7 +1055,7 @@ private IEnumerator FadeOutAndInAmbientAudio(Transform attachTo, AudioClip newTr
     #region PauseDialogueAudio ------------------------------------
     public void PauseDialogueAudio(float fadeDuration, FadeTarget fadeTarget)
     {
-        if (isFadingDialogueAudio) return;
+        //if (isFadingDialogueAudio) return;
 
         // Safety check - if audio finished and destroyed itself, reset and exit
         if (currentDialogueAudioSource == null)
@@ -1063,6 +1063,13 @@ private IEnumerator FadeOutAndInAmbientAudio(Transform attachTo, AudioClip newTr
             Debug.Log("No dialogue audio to pause - audio may have finished");
             isPausedDialogueAudio = false; // Reset pause state
             return;
+        }
+        
+        // If currently fading, just stop all coroutines and handle the pause immediately
+        if (isFadingDialogueAudio)
+        {
+            StopAllCoroutines(); // Nuclear option - stops all fades
+            isFadingDialogueAudio = false;
         }
         
         dialogueFadeDuration = fadeDuration;
@@ -1080,52 +1087,85 @@ private IEnumerator FadeOutAndInAmbientAudio(Transform attachTo, AudioClip newTr
         isPausedDialogueAudio = !isPausedDialogueAudio;
     }
 
-    private IEnumerator FadeOutAndPauseDialogueAudio()
+private IEnumerator FadeOutAndPauseDialogueAudio()
+{
+    // Safety check at start
+    if (currentDialogueAudioSource == null)
     {
-        isFadingDialogueAudio = true;
-        float startVolume = currentDialogueAudioSource.volume;
-        float startPitch = currentDialogueAudioSource.pitch;
+        isFadingDialogueAudio = false;
+        isPausedDialogueAudio = false;
+        yield break;
+    }
 
-        if (dialogueFadeTarget == FadeTarget.Ignore)
+    isFadingDialogueAudio = true;
+    float startVolume = currentDialogueAudioSource.volume;
+    float startPitch = currentDialogueAudioSource.pitch;
+
+    if (dialogueFadeTarget == FadeTarget.Ignore)
+    {
+        currentDialogueAudioSource.volume = 0;
+        currentDialogueAudioSource.pitch = 0;
+    }
+    else
+    {
+        for (float t = 0; t < dialogueFadeDuration; t += Time.deltaTime)
         {
-            currentDialogueAudioSource.volume = 0;
-            currentDialogueAudioSource.pitch = 0;
-        }
-        else
-        {
-            for (float t = 0; t < dialogueFadeDuration; t += Time.deltaTime)
+            // ADD NULL CHECK HERE - audio can be destroyed mid-fade
+            if (currentDialogueAudioSource == null)
             {
-                float progress = t / dialogueFadeDuration;
-            
-                switch (dialogueFadeTarget)
-                {
-                    case FadeTarget.FadeVolume:
-                        currentDialogueAudioSource.volume = Mathf.Lerp(startVolume, 0, progress);
-                        currentDialogueAudioSource.pitch = startPitch;
-                        break;
-                    
-                    case FadeTarget.FadePitch:
-                        currentDialogueAudioSource.volume = startVolume;
-                        currentDialogueAudioSource.pitch = Mathf.Lerp(startPitch, 0, progress);
-                        break;
-                    
-                    case FadeTarget.FadeBoth:
-                        currentDialogueAudioSource.volume = Mathf.Lerp(startVolume, 0, progress);
-                        currentDialogueAudioSource.pitch = Mathf.Lerp(startPitch, 0, progress);
-                        break;
-                }
-            
-                yield return null;
+                isFadingDialogueAudio = false;
+                isPausedDialogueAudio = false;
+                yield break;
             }
+            
+            float progress = t / dialogueFadeDuration;
+        
+            switch (dialogueFadeTarget)
+            {
+                case FadeTarget.FadeVolume:
+                    currentDialogueAudioSource.volume = Mathf.Lerp(startVolume, 0, progress);
+                    currentDialogueAudioSource.pitch = startPitch;
+                    break;
+                
+                case FadeTarget.FadePitch:
+                    currentDialogueAudioSource.volume = startVolume;
+                    currentDialogueAudioSource.pitch = Mathf.Lerp(startPitch, 0, progress);
+                    break;
+                
+                case FadeTarget.FadeBoth:
+                    currentDialogueAudioSource.volume = Mathf.Lerp(startVolume, 0, progress);
+                    currentDialogueAudioSource.pitch = Mathf.Lerp(startPitch, 0, progress);
+                    break;
+            }
+        
+            yield return null;
         }
+    }
 
+    // Final null check before pause
+    if (currentDialogueAudioSource != null)
+    {
         currentDialogueAudioSource.Pause();
         currentDialogueAudioSource.GetComponent<AutoDestroyAudioSource>()?.SetPausedStatus(true);
-        isFadingDialogueAudio = false;
     }
+    else
+    {
+        isPausedDialogueAudio = false; // Reset pause state if audio was destroyed
+    }
+    
+    isFadingDialogueAudio = false;
+}
 
     private IEnumerator FadeInDialogueAudio()
     {
+        // Safety check at start
+        if (currentDialogueAudioSource == null)
+        {
+            isFadingDialogueAudio = false;
+            isPausedDialogueAudio = false;
+            yield break;
+        }
+
         isFadingDialogueAudio = true;
         currentDialogueAudioSource.UnPause();
         currentDialogueAudioSource.GetComponent<AutoDestroyAudioSource>()?.SetPausedStatus(false);
@@ -1142,6 +1182,14 @@ private IEnumerator FadeOutAndInAmbientAudio(Transform attachTo, AudioClip newTr
         {
             for (float t = 0; t < dialogueFadeDuration; t += Time.deltaTime)
             {
+                // ADD NULL CHECK HERE - audio can be destroyed mid-fade
+                if (currentDialogueAudioSource == null)
+                {
+                    isFadingDialogueAudio = false;
+                    isPausedDialogueAudio = false;
+                    yield break;
+                }
+                
                 float progress = t / dialogueFadeDuration;
             
                 switch (dialogueFadeTarget)
@@ -1166,8 +1214,13 @@ private IEnumerator FadeOutAndInAmbientAudio(Transform attachTo, AudioClip newTr
             }
         }
 
-        currentDialogueAudioSource.volume = targetVolume;
-        currentDialogueAudioSource.pitch = targetPitch;
+        // Final null check before setting final values
+        if (currentDialogueAudioSource != null)
+        {
+            currentDialogueAudioSource.volume = targetVolume;
+            currentDialogueAudioSource.pitch = targetPitch;
+        }
+        
         isFadingDialogueAudio = false;
     }
 
