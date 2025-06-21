@@ -34,16 +34,18 @@ public class AudioEventSenderDialogueTrack : MonoBehaviour, IAudioEventSender
     public FadeType fadeType = FadeType.FadeInOut;
     
     [Space(5)]
+    [Header("Fade Control")]
+    [Range(0, 10f)]
+    public float fadeDuration = 0.5f;
+    public FadeTarget fadeTarget = FadeTarget.FadeBoth;
+    
+    [Space(5)]
     [Header("Volume Control")]
     [Range(0, 1f)]
     public float volume = 1.0f;
-    [Range(0, 10f)]
-    public float volumeFadeDuration = 0.5f;
     [Space(5)]
     [Header("Pitch Control")]
     [Range(0, 2f)] public float pitch = 1.0f;
-    [Range(0, 10f)]
-    public float pitchFadeDuration = 0.5f;
 
     [Space(10)] 
     [Range(0,5f)]
@@ -172,16 +174,16 @@ public class AudioEventSenderDialogueTrack : MonoBehaviour, IAudioEventSender
         if(!attachToThisTransform && transformToAttachTo == null){
             Debug.LogWarning("No Transform to attach to - using AudioManager");
             //send the PlayDialogue Event with parameters from the inspector
-            AudioEventManager.playDialogueTrack(null, dialogueTrackNumber, dialogueTrackName, volume, pitch, spatialBlend, fadeType, volumeFadeDuration, pitchFadeDuration, eventName);
+            AudioEventManager.playDialogueTrack(null, dialogueTrackNumber, dialogueTrackName, volume, pitch, spatialBlend, fadeType, fadeDuration, fadeTarget, eventName);
         }
     
         if (attachToThisTransform){
             //send the PlayDialogue Event with parameters from the inspector
-            AudioEventManager.playDialogueTrack(this.transform, dialogueTrackNumber, dialogueTrackName, volume, pitch, spatialBlend, fadeType, volumeFadeDuration, pitchFadeDuration, eventName);
+            AudioEventManager.playDialogueTrack(null, dialogueTrackNumber, dialogueTrackName, volume, pitch, spatialBlend, fadeType, fadeDuration, fadeTarget, eventName);
         }
         if(transformToAttachTo != null){
             //send the PlayDialogue Event with parameters from the inspector
-            AudioEventManager.playDialogueTrack(transformToAttachTo, dialogueTrackNumber, dialogueTrackName, volume, pitch, spatialBlend, fadeType, volumeFadeDuration, pitchFadeDuration, eventName);
+            AudioEventManager.playDialogueTrack(null, dialogueTrackNumber, dialogueTrackName, volume, pitch, spatialBlend, fadeType, fadeDuration, fadeTarget, eventName);
         }
     }
 
@@ -191,14 +193,14 @@ public class AudioEventSenderDialogueTrack : MonoBehaviour, IAudioEventSender
     
         if(!attachToThisTransform && transformToAttachTo == null){
             Debug.LogWarning("No Transform to attach to - using AudioManager");
-            AudioEventManager.playDialogueTrack(null, dialogueTrackNumber, dialogueTrackName, volume, pitch, spatialBlend, fadeType, volumeFadeDuration, pitchFadeDuration, eventName);
+            AudioEventManager.playDialogueTrack(transformToAttachTo, dialogueTrackNumber, dialogueTrackName, volume, pitch, spatialBlend, fadeType, fadeDuration, fadeTarget, eventName);
         }
     
         if (attachToThisTransform){
-            AudioEventManager.playDialogueTrack(this.transform, dialogueTrackNumber, dialogueTrackName, volume, pitch, spatialBlend, fadeType, volumeFadeDuration, pitchFadeDuration, eventName);
+            AudioEventManager.playDialogueTrack(transformToAttachTo, dialogueTrackNumber, dialogueTrackName, volume, pitch, spatialBlend, fadeType, fadeDuration, fadeTarget, eventName);
         }
         if(transformToAttachTo != null){
-            AudioEventManager.playDialogueTrack(transformToAttachTo, dialogueTrackNumber, dialogueTrackName, volume, pitch, spatialBlend, fadeType, volumeFadeDuration, pitchFadeDuration, eventName);
+            AudioEventManager.playDialogueTrack(transformToAttachTo, dialogueTrackNumber, dialogueTrackName, volume, pitch, spatialBlend, fadeType, fadeDuration, fadeTarget, eventName);
         }
     }
 
@@ -242,7 +244,7 @@ public class AudioEventSenderDialogueTrack : MonoBehaviour, IAudioEventSender
         }
         else
         {
-            AudioEventManager.stopDialogueTrack(volumeFadeDuration, pitchFadeDuration);
+            AudioEventManager.stopDialogueTrack(fadeDuration, fadeTarget);
         }
     }
 
@@ -258,7 +260,7 @@ public class AudioEventSenderDialogueTrack : MonoBehaviour, IAudioEventSender
         {
             yield return null;
         }
-        AudioEventManager.stopDialogueTrack(volumeFadeDuration, pitchFadeDuration);
+        AudioEventManager.stopDialogueTrack(fadeDuration, fadeTarget);
     }
 
     // pause the dialogue audio
@@ -276,15 +278,15 @@ public class AudioEventSenderDialogueTrack : MonoBehaviour, IAudioEventSender
 
     private void PauseDialogue()
     {
-        AudioEventManager.pauseDialogueTrack(volumeFadeDuration, pitchFadeDuration);
+        AudioEventManager.pauseDialogueTrack(fadeDuration, fadeTarget);
     }
 
     private IEnumerator PauseDialogue_Delayed(float delay)
     {
         yield return new WaitForSeconds(delay);
-        AudioEventManager.pauseDialogueTrack(volumeFadeDuration, pitchFadeDuration);
+        AudioEventManager.pauseDialogueTrack(fadeDuration, fadeTarget);
     }
-
+    
     // Editor-only methods to visualize the trigger zone and info **********************************
     #region Gizmo Visualization
 
