@@ -575,18 +575,19 @@ public class AudioManager : MonoBehaviour
                             currentAmbientAudioSource.pitch = startPitch;
                             nextAmbientAudioSource.pitch = targetPitch;
                             break;
-                            
+        
                         case FadeTarget.FadePitch:
-                            currentAmbientAudioSource.volume = 0;
-                            nextAmbientAudioSource.volume = targetVolume;
-                            currentAmbientAudioSource.pitch = startPitch;
+                            // FIXED: Don't kill volume during crossfade - keep both audible
+                            currentAmbientAudioSource.volume = startVolume; // Keep original volume
+                            nextAmbientAudioSource.volume = targetVolume;   // Set target volume
+                            currentAmbientAudioSource.pitch = Mathf.Lerp(startPitch, 0, progress);
                             nextAmbientAudioSource.pitch = Mathf.Lerp(0, targetPitch, progress);
                             break;
-                            
+        
                         case FadeTarget.FadeBoth:
                             currentAmbientAudioSource.volume = Mathf.Lerp(startVolume, 0, progress);
                             nextAmbientAudioSource.volume = Mathf.Lerp(0, targetVolume, progress);
-                            currentAmbientAudioSource.pitch = startPitch;
+                            currentAmbientAudioSource.pitch = Mathf.Lerp(startPitch, 0, progress);
                             nextAmbientAudioSource.pitch = Mathf.Lerp(0, targetPitch, progress);
                             break;
                     }
