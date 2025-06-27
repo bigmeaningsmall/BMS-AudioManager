@@ -49,7 +49,7 @@ public class AudioManager : MonoBehaviour
     private AudioSource currentAmbientAudioSource;
     private AudioSource nextAmbientAudioSource;
     
-    //private Coroutine currentAmbientFadeCoroutine = null;
+    private Coroutine currentAmbientFadeCoroutine = null;
     
     // --------------------------------------------------------------------------------------------
     
@@ -481,11 +481,11 @@ public class AudioManager : MonoBehaviour
         isFadingAmbientAudio = true;
         if (ambientFadeType == FadeType.Crossfade)
         {
-            StartCoroutine(CrossfadeAmbient(attachTo, newTrack, volume, pitch, spatialBlend, loop));
+            currentAmbientFadeCoroutine = StartCoroutine(CrossfadeAmbient(attachTo, newTrack, volume, pitch, spatialBlend, loop));
         }
         else
         {
-            StartCoroutine(FadeOutAndInAmbient(attachTo, newTrack, volume, pitch, spatialBlend, loop));
+            currentAmbientFadeCoroutine = StartCoroutine(FadeOutAndInAmbient(attachTo, newTrack, volume, pitch, spatialBlend, loop));
         }
     }
 
@@ -512,11 +512,11 @@ public class AudioManager : MonoBehaviour
                 isFadingAmbientAudio = true;
                 if (ambientFadeType == FadeType.Crossfade)
                 {
-                    StartCoroutine(CrossfadeAmbient(attachTo, track.Value, volume, pitch, spatialBlend, loop));
+                    currentAmbientFadeCoroutine = StartCoroutine(CrossfadeAmbient(attachTo, track.Value, volume, pitch, spatialBlend, loop));
                 }
                 else
                 {
-                    StartCoroutine(FadeOutAndInAmbient(attachTo, track.Value, volume, pitch, spatialBlend, loop));
+                    currentAmbientFadeCoroutine = StartCoroutine(FadeOutAndInAmbient(attachTo, track.Value, volume, pitch, spatialBlend, loop));
                 }
                 return;
             }
@@ -757,54 +757,138 @@ public class AudioManager : MonoBehaviour
     #region Stop Ambient ------------------------------------
     public void StopAmbient(float fadeDuration, FadeTarget fadeTarget)
     {
-        if (isPausedAmbientAudio)
-        {
-            Debug.Log("Cannot stop ambient audio while paused. Unpause first, then stop.");
-            return;
-        }
+        // ALLOW STOPPING WHILE PAUSED - Remove the pause check
+        // if (isPausedAmbientAudio) { return; } // ← DELETE THIS LINE
 
         ambientFadeDuration = fadeDuration;
         ambientFadeTarget = fadeTarget;
 
-        // AGGRESSIVE STOP - works regardless of current state
+        // KILL ANY RUNNING FADE COROUTINE FIRST
+        if (isFadingAmbientAudio && currentAmbientFadeCoroutine != null)
+        {
+            Debug.Log("Stopping current fade to begin stop fade");
+            StopCoroutine(currentAmbientFadeCoroutine);
+            currentAmbientFadeCoroutine = null;
+            isFadingAmbientAudio = false;
+            
+            // HAND OFF TO AUDIOFADECONTROLLER FOR SMOOTH TRANSITION
+            if (currentAmbientAudioSource != null)
+            {
+                Debug.Log("Handing off current audio source to AudioFadeController");
+                AudioFadeController fader = AudioFadeController.FadeOut(currentAmbientAudioSource, fadeDuration, fadeTarget);
+                fader.transform.SetParent(transform); // Keep it in the hierarchy
+                currentAmbientAudioSource = null; // Release ownership
+            }
+            
+            if (nextAmbientAudioSource != null)
+            {
+                Debug.Log("Handing off next audio source to AudioFadeController");
+                AudioFadeController fader = AudioFadeController.FadeOut(nextAmbientAudioSource, fadeDuration, fadeTarget);
+                fader.transform.SetParent(transform); // Keep it in the hierarchy
+                nextAmbientAudioSource = null; // Release ownership
+            }
+            
+            // RESET ALL STATE - AudioManager is now free
+            isPausedAmbientAudio = false;
+            return; // Exit early - controllers handle everything
+        }
+
+        // HANDLE BOTH AUDIO SOURCES (for crossfade scenarios)
+        AudioSource sourceToFadeOut = null;
+        
+        // Determine which source(s) to stop
         if (currentAmbientAudioSource != null && currentAmbientAudioSource.isPlaying)
         {
-            // If currently fading, kill the fade first
-            if (isFadingAmbientAudio)
-            {
-                Debug.Log("Interrupting current fade to stop ambient audio");
-                // We could add specific coroutine stopping here later, but for now just set the flag
-                isFadingAmbientAudio = false;
-            }
+            sourceToFadeOut = currentAmbientAudioSource;
+        }
+        else if (nextAmbientAudioSource != null && nextAmbientAudioSource.isPlaying)
+        {
+            // If current is null but next exists, use next
+            sourceToFadeOut = nextAmbientAudioSource;
+            currentAmbientAudioSource = nextAmbientAudioSource; // Move it for the fade-out
+        }
         
-            // Always start the stop fade
-            StartCoroutine(FadeOutCurrentAmbient());
+        // USE AUDIOFADECONTROLLER FOR EXTRA SOURCE (the other one in crossfade)
+        if (nextAmbientAudioSource != null && nextAmbientAudioSource != sourceToFadeOut)
+        {
+            Debug.Log("Using AudioFadeController to fade out and destroy the extra audio source from crossfade");
+            AudioFadeController fader = AudioFadeController.FadeOut(nextAmbientAudioSource, ambientFadeDuration, ambientFadeTarget);
+            fader.transform.SetParent(transform); // Keep it in the hierarchy
+            nextAmbientAudioSource = null; // Clear reference since controller owns it now
+        }
+        
+        if (currentAmbientAudioSource != null && currentAmbientAudioSource != sourceToFadeOut)
+        {
+            Debug.Log("Using AudioFadeController for extra current audio source");
+            AudioFadeController fader = AudioFadeController.FadeOut(currentAmbientAudioSource, ambientFadeDuration, ambientFadeTarget);
+            fader.transform.SetParent(transform); // Keep it in the hierarchy
+            currentAmbientAudioSource = sourceToFadeOut; // Keep the one we want to fade out
+        }
+
+        // Now fade out the remaining source using AudioFadeController too for consistency
+        if (sourceToFadeOut != null)
+        {
+            Debug.Log("Using AudioFadeController for remaining source");
+            AudioFadeController fader = AudioFadeController.FadeOut(sourceToFadeOut, ambientFadeDuration, ambientFadeTarget);
+            fader.transform.SetParent(transform); // Keep it in the hierarchy
+            currentAmbientAudioSource = null; // Clear reference
+            
+            // RESET STATE - AudioManager is free
+            isPausedAmbientAudio = false;
+            isFadingAmbientAudio = false;
+        }
+        else
+        {
+            Debug.Log("No audio source to stop");
+            // Still reset state in case we're in a weird state
+            isPausedAmbientAudio = false;
+            isFadingAmbientAudio = false;
         }
     }
 
-    private IEnumerator FadeOutCurrentAmbient()
+     private IEnumerator FadeOutCurrentAmbient()
     {
+        Debug.Log("=== FadeOutCurrentAmbient coroutine started ===");
         isFadingAmbientAudio = true;
+        
+        if (currentAmbientAudioSource == null)
+        {
+            Debug.Log("ERROR: currentAmbientAudioSource is null at start of fade out");
+            isFadingAmbientAudio = false;
+            yield break;
+        }
+        
         float startVolume = currentAmbientAudioSource.volume;
         float startPitch = currentAmbientAudioSource.pitch;
 
+        Debug.Log($"Starting fade out from volume: {startVolume}, pitch: {startPitch}");
+        Debug.Log($"Fade duration: {ambientFadeDuration}, target: {ambientFadeTarget}");
+
         if (ambientFadeTarget == FadeTarget.Ignore)
         {
+            Debug.Log("Using Ignore - setting volume/pitch to 0 instantly");
             currentAmbientAudioSource.volume = 0;
             currentAmbientAudioSource.pitch = 0;
         }
         else
         {
+            Debug.Log("Starting fade loop");
             for (float t = 0; t < ambientFadeDuration; t += Time.deltaTime)
             {
-                // Null check - audio can be destroyed mid-fade
                 if (currentAmbientAudioSource == null)
                 {
+                    Debug.Log("Audio source became null during fade");
                     isFadingAmbientAudio = false;
                     yield break;
                 }
             
                 float progress = t / ambientFadeDuration;
+                
+                // Log every second
+                if (Mathf.FloorToInt(t) != Mathf.FloorToInt(t - Time.deltaTime))
+                {
+                    Debug.Log($"Fade progress: {progress:F2}, volume: {currentAmbientAudioSource.volume:F2}");
+                }
         
                 switch (ambientFadeTarget)
                 {
@@ -826,13 +910,16 @@ public class AudioManager : MonoBehaviour
         
                 yield return null;
             }
+            Debug.Log("Fade loop completed");
         }
-    
+
+        Debug.Log("Stopping and destroying audio source");
         currentAmbientAudioSource.GetComponent<AutoDestroyAudioSource>()?.SetPausedStatus(false);
         currentAmbientAudioSource.Stop();
         Destroy(currentAmbientAudioSource.gameObject);
         currentAmbientAudioSource = null;
         isFadingAmbientAudio = false;
+        Debug.Log("=== FadeOutCurrentAmbient completed ===");
     }
     #endregion
     // --------------------------------------------------------------------------------------------
