@@ -31,9 +31,10 @@ public static class AudioEventManager
     public delegate void AudioEvent_PauseBGM_Track(float fadeDuration);
     
     //define a delegate for audio events - Ambient Music
-    public delegate void AudioEvent_PlayAmbientAudio_Track(Transform attachTo, int index, string trackName, float volume, float pitch, float spatialBlend, FadeType fadeType, float fadeDuration, bool loopAmbient, string eventName);
-    public delegate void AudioEvent_StopAmbientAudio_Track(float fadeDuration);
-    public delegate void AudioEvent_PauseAmbientAudio_Track(float fadeDuration);
+//define a delegate for audio events - Ambient Music
+    public delegate void AudioEvent_PlayAmbientAudio_Track(Transform attachTo, int index, string trackName, float volume, float pitch, float spatialBlend, FadeType fadeType, float fadeDuration, FadeTarget fadeTarget, bool loopAmbient, string eventName);
+    public delegate void AudioEvent_StopAmbientAudio_Track(float fadeDuration, FadeTarget fadeTarget);
+    public delegate void AudioEvent_PauseAmbientAudio_Track(float fadeDuration, FadeTarget fadeTarget);
     
     
     // Define a delegate for audio events - Dialogue
@@ -42,7 +43,7 @@ public static class AudioEventManager
     public delegate void AudioEvent_PauseDialogue_Track(float fadeDuration, FadeTarget fadeTarget);
     
     
-    // Define a delegate for audio events - SFX
+    // Define a delegate for audio events - SFX // todo add delay
     public delegate void AudioEvent_PlaySFX(Transform attachTo, string soundName, float volume, float pitch, bool randomizePitch, float pitchRange,  float spatialBlend, string eventName);
     
     
