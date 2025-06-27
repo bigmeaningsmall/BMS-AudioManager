@@ -433,13 +433,11 @@ public class AudioManager : MonoBehaviour
     // Event Method - Play ambient by track number or name with optional volume and loop settings - calls appropriate overload based on parameters
     public void PlayAmbient(Transform attachTo, int trackNumber, string trackName, float volume, float pitch, float spatialBlend, FadeType fadeType, float fadeDuration, FadeTarget fadeTarget, bool loop, string eventName)
     {
-        // Handle override behavior
+        // Block new calls while fading - SAME AS OTHER METHODS
         if (isFadingAmbientAudio) 
         {
-            Debug.Log("Interrupting current ambient fade for new ambient");
-            StopAllCoroutines(); // Kill current fade
-            isFadingAmbientAudio = false;
-            // Continue to play new ambient...
+            Debug.Log("Cannot play new ambient audio while previous is fading - request ignored");
+            return;
         }
 
         if (isPausedAmbientAudio)
@@ -463,16 +461,15 @@ public class AudioManager : MonoBehaviour
             PlayAmbient(attachTo, trackName, volume, pitch, spatialBlend, loop);
         }
     }
-
     public void PlayAmbient(Transform attachTo, int trackNumber, float volume, float pitch, float spatialBlend, bool loop = true)
     {
-        // Handle override behavior
+        // Block new calls while fading
         if (isFadingAmbientAudio) 
         {
-            StopAllCoroutines();
-            isFadingAmbientAudio = false;
+            Debug.Log("Cannot play new ambient audio while previous is fading - request ignored");
+            return;
         }
-    
+
         // Block play if audio is currently paused
         if (isPausedAmbientAudio)
         {
@@ -494,13 +491,13 @@ public class AudioManager : MonoBehaviour
 
     public void PlayAmbient(Transform attachTo, string trackName, float volume, float pitch, float spatialBlend, bool loop = true)
     {
-        // Handle override behavior
+        // Block new calls while fading
         if (isFadingAmbientAudio) 
         {
-            StopAllCoroutines();
-            isFadingAmbientAudio = false;
+            Debug.Log("Cannot play new ambient audio while previous is fading - request ignored");
+            return;
         }
-    
+
         // Block play if audio is currently paused
         if (isPausedAmbientAudio)
         {
@@ -769,8 +766,18 @@ public class AudioManager : MonoBehaviour
         ambientFadeDuration = fadeDuration;
         ambientFadeTarget = fadeTarget;
 
-        if (currentAmbientAudioSource != null && currentAmbientAudioSource.isPlaying && !isFadingAmbientAudio)
+        // AGGRESSIVE STOP - works regardless of current state
+        if (currentAmbientAudioSource != null && currentAmbientAudioSource.isPlaying)
         {
+            // If currently fading, kill the fade first
+            if (isFadingAmbientAudio)
+            {
+                Debug.Log("Interrupting current fade to stop ambient audio");
+                // We could add specific coroutine stopping here later, but for now just set the flag
+                isFadingAmbientAudio = false;
+            }
+        
+            // Always start the stop fade
             StartCoroutine(FadeOutCurrentAmbient());
         }
     }
@@ -841,14 +848,14 @@ public class AudioManager : MonoBehaviour
             isPausedAmbientAudio = false; // Reset pause state
             return;
         }
-    
-        // If currently fading, just stop all coroutines and handle the pause immediately
+
+        // Block if currently fading - OPTION 1 STYLE
         if (isFadingAmbientAudio)
         {
-            StopAllCoroutines(); // Nuclear option - stops all fades
-            isFadingAmbientAudio = false;
+            Debug.Log("Cannot pause ambient audio while fading - request ignored");
+            return;
         }
-    
+
         ambientFadeDuration = fadeDuration;
         ambientFadeTarget = fadeTarget;
 
@@ -1011,13 +1018,11 @@ public class AudioManager : MonoBehaviour
     // Event Method - Play dialogue by track number or name with optional volume settings - calls appropriate overload based on parameters
     public void PlayDialogue(Transform attachTo, int trackNumber, string trackName, float volume, float pitch, float spatialBlend, FadeType fadeType, float fadeDuration, FadeTarget fadeTarget, string eventName)
     {
-        // Handle override behavior
+        // Block new calls while fading - SAME AS OTHER METHODS
         if (isFadingDialogueAudio) 
         {
-            Debug.Log("Interrupting current dialogue fade for new dialogue");
-            StopAllCoroutines(); // Kill current fade
-            isFadingDialogueAudio = false;
-            // Continue to play new dialogue...
+            Debug.Log("Cannot play new dialogue audio while previous is fading - request ignored");
+            return;
         }
 
         if (isPausedDialogueAudio)
@@ -1044,13 +1049,13 @@ public class AudioManager : MonoBehaviour
 
     public void PlayDialogue(Transform attachTo, int trackNumber, float volume, float pitch, float spatialBlend)
     {
-        // Handle override behavior
+        // Block new calls while fading
         if (isFadingDialogueAudio) 
         {
-            StopAllCoroutines();
-            isFadingDialogueAudio = false;
+            Debug.Log("Cannot play new dialogue audio while previous is fading - request ignored");
+            return;
         }
-    
+
         // Block play if audio is currently paused
         if (isPausedDialogueAudio)
         {
@@ -1072,13 +1077,13 @@ public class AudioManager : MonoBehaviour
 
     public void PlayDialogue(Transform attachTo, string trackName, float volume, float pitch, float spatialBlend)
     {
-        // Handle override behavior
+        // Block new calls while fading
         if (isFadingDialogueAudio) 
         {
-            StopAllCoroutines();
-            isFadingDialogueAudio = false;
+            Debug.Log("Cannot play new dialogue audio while previous is fading - request ignored");
+            return;
         }
-    
+
         // Block play if audio is currently paused
         if (isPausedDialogueAudio)
         {
@@ -1386,8 +1391,6 @@ public class AudioManager : MonoBehaviour
     #region Pause Dialogue ------------------------------------
     public void PauseDialogue(float fadeDuration, FadeTarget fadeTarget)
     {
-        //if (isFadingDialogueAudio) return;
-
         // Safety check - if audio finished and destroyed itself, reset and exit
         if (currentDialogueAudioSource == null)
         {
@@ -1395,14 +1398,14 @@ public class AudioManager : MonoBehaviour
             isPausedDialogueAudio = false; // Reset pause state
             return;
         }
-        
-        // If currently fading, just stop all coroutines and handle the pause immediately
+    
+        // Block if currently fading
         if (isFadingDialogueAudio)
         {
-            StopAllCoroutines(); // Nuclear option - stops all fades
-            isFadingDialogueAudio = false;
+            Debug.Log("Cannot pause dialogue audio while fading - request ignored");
+            return;
         }
-        
+    
         dialogueFadeDuration = fadeDuration;
         dialogueFadeTarget = fadeTarget;
 

@@ -15,7 +15,7 @@ public class AutoDestroyAudioSource : MonoBehaviour
         // Only destroy if stopped AND not paused by manager
         if (audioSource != null && !audioSource.isPlaying && !isPausedByManager)
         {
-            Destroy(gameObject);
+            Destroy(gameObject); // todo might add annother fade here so its not cut off instantly
         }
     }
     
