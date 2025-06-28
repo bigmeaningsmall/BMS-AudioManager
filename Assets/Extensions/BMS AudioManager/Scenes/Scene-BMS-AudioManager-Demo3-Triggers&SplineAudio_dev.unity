@@ -1997,7 +1997,7 @@ PrefabInstance:
     - target: {fileID: 620935151221146675, guid: ba89dcb19a3cf95418c455c01d332d04,
         type: 3}
       propertyPath: fadeType
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 620935151221146675, guid: ba89dcb19a3cf95418c455c01d332d04,
         type: 3}
@@ -2016,13 +2016,28 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 620935151221146675, guid: ba89dcb19a3cf95418c455c01d332d04,
         type: 3}
+      propertyPath: loopAmbient
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 620935151221146675, guid: ba89dcb19a3cf95418c455c01d332d04,
+        type: 3}
+      propertyPath: fadeDuration
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 620935151221146675, guid: ba89dcb19a3cf95418c455c01d332d04,
+        type: 3}
+      propertyPath: spatialBlend
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 620935151221146675, guid: ba89dcb19a3cf95418c455c01d332d04,
+        type: 3}
       propertyPath: playOnEnabled
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 620935151221146675, guid: ba89dcb19a3cf95418c455c01d332d04,
         type: 3}
       propertyPath: ambientTrackName
-      value: Rhubarb_sample
+      value: NormConnors_VaporStarship
       objectReference: {fileID: 0}
     - target: {fileID: 5274121441138690220, guid: ba89dcb19a3cf95418c455c01d332d04,
         type: 3}
@@ -2032,7 +2047,7 @@ PrefabInstance:
     - target: {fileID: 5274121441138690220, guid: ba89dcb19a3cf95418c455c01d332d04,
         type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6014174656882223073, guid: ba89dcb19a3cf95418c455c01d332d04,
         type: 3}
@@ -2220,7 +2235,7 @@ PrefabInstance:
     - target: {fileID: 999305839927590704, guid: 3312ccb5aaf9ed342abb38cb6f46a79c,
         type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6385434301934274781, guid: 3312ccb5aaf9ed342abb38cb6f46a79c,
         type: 3}
