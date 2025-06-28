@@ -1,6 +1,7 @@
 
 ---
-
+#### currently rearchitecting the audiomanager! 1.2 package is working but repo is in a fluid state atm..
+---
 # BMS Audio Manager
 
 The BMS Audio Manager is a Unity-based audio management system that allows you to play, pause, and stop background music (BGM), ambient audio, and sound effects (SFX) using event-based triggers or direct method calls from your scripts.
