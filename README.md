@@ -230,5 +230,7 @@ The BMS Audio Manager provides a flexible and easy-to-use system for managing au
 
 # UML
 
-![BMS-AudioManager-UML](https://github.com/user-attachments/assets/cf7f9d82-f85a-4596-926a-d7ab2ef794ae)
+
+<img width="793" height="1169" alt="bms audio manager uml" src="https://github.com/user-attachments/assets/918971a4-d278-4af4-8025-5e323deb12bf" />
+
 
