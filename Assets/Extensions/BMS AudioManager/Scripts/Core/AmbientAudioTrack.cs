@@ -117,66 +117,62 @@ public class AmbientAudioTrack : MonoBehaviour
     
     // ==================== 3-SOURCE SAFETY METHODS ====================
     
-    private void HandlePlayDuringCrossfade(AudioClip clip, float volume, float pitch, float spatialBlend,
-        FadeType fadeType, float fadeDuration, FadeTarget fadeTarget, bool loop, Transform attachTo)
-    {
-        Debug.Log("[AmbientTrack] Handling Play during crossfade - 3-source safety engaged");
+private void HandlePlayDuringCrossfade(AudioClip clip, float volume, float pitch, float spatialBlend,
+    FadeType fadeType, float fadeDuration, FadeTarget fadeTarget, bool loop, Transform attachTo)
+{
+    Debug.Log("[AmbientTrack] Handling Play during crossfade - 3-source safety engaged");
 
-        // STOP ALL COROUTINES FIRST
-        if (mainCoroutine != null)
-        {
-            StopCoroutine(mainCoroutine);
-            mainCoroutine = null;
-        }
-    
-        if (cueCoroutine != null)
-        {
-            StopCoroutine(cueCoroutine);
-            cueCoroutine = null;
-        }
-    
+    // 1. Clean up any existing outgoing source (safety)
+    if (outgoingSource != null)
+    {
         if (outgoingCoroutine != null)
         {
             StopCoroutine(outgoingCoroutine);
             outgoingCoroutine = null;
         }
-
-        // DESTROY ALL SOURCES IMMEDIATELY
-        if (outgoingSource != null)
-        {
-            outgoingSource.Stop();
-            Destroy(outgoingSource.gameObject);
-            outgoingSource = null;
-        }
-
-        if (mainSource != null)
-        {
-            mainSource.Stop();
-            Destroy(mainSource.gameObject);
-            mainSource = null;
-        }
-
-        if (cueSource != null)
-        {
-            cueSource.Stop();
-            Destroy(cueSource.gameObject);
-            cueSource = null;
-        }
-
-        // NOW create only the new cue
-        cueSource = CreateAudioSource(attachTo);
-        if (cueSource == null) return;
-
-        cueSource.clip = clip;
-        cueSource.loop = loop;
-        cueSource.spatialBlend = spatialBlend;
-        cueSource.volume = (fadeTarget == FadeTarget.FadeVolume || fadeTarget == FadeTarget.FadeBoth) ? 0f : volume;
-        cueSource.pitch = (fadeTarget == FadeTarget.FadePitch || fadeTarget == FadeTarget.FadeBoth) ? 0f : pitch;
-        cueSource.Play();
-
-        currentState = AmbientState.FadingIn;
-        cueCoroutine = StartCoroutine(FadeInCue(fadeDuration, fadeTarget, volume, pitch));
+        outgoingSource.Stop();
+        Destroy(outgoingSource.gameObject);
+        outgoingSource = null;
     }
+
+    // 2. Stop the current cue fade
+    if (cueCoroutine != null)
+    {
+        StopCoroutine(cueCoroutine);
+        cueCoroutine = null;
+    }
+
+    // 3. Move current cue to outgoing (it will fade out)
+    if (cueSource != null)
+    {
+        outgoingSource = cueSource;
+        cueSource = null;
+        // Start fade out on the demoted cue
+        outgoingCoroutine = StartCoroutine(FadeOutAndDestroy(outgoingSource, fadeDuration, fadeTarget));
+    }
+    // 4. If no cue but there's a main, move main to outgoing
+    else if (mainSource != null)
+    {
+        outgoingSource = mainSource;
+        mainSource = null;
+        outgoingCoroutine = StartCoroutine(FadeOutAndDestroy(outgoingSource, fadeDuration, fadeTarget));
+    }
+
+    // 5. Create new cue source for the new track
+    cueSource = CreateAudioSource(attachTo);
+    if (cueSource == null) return;
+
+    cueSource.clip = clip;
+    cueSource.loop = loop;
+    cueSource.spatialBlend = spatialBlend;
+    cueSource.volume = (fadeTarget == FadeTarget.FadeVolume || fadeTarget == FadeTarget.FadeBoth) ? 0f : volume;
+    cueSource.pitch = (fadeTarget == FadeTarget.FadePitch || fadeTarget == FadeTarget.FadeBoth) ? 0f : pitch;
+    cueSource.Play();
+
+    // 6. Start fade in on new cue
+    currentState = AmbientState.Crossfading;
+    cueCoroutine = StartCoroutine(FadeInCue(fadeDuration, fadeTarget, volume, pitch));
+}
     
     // ==================== STATE TRANSITION METHODS ====================
     
