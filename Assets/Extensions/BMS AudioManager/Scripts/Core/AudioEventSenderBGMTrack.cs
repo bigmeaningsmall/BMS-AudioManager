@@ -1,4 +1,4 @@
-using System;
+/*using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -160,14 +160,14 @@ public class AudioEventSenderBGMTrack : MonoBehaviour, IAudioEventSender
     private void PlayBGM()
     {
         //send the PlayBGM Event with parameters from the inspector
-        AudioEventManager.playBGMTrack(musicTrackNumber, musicTrackName, volume, fadeType, fadeDuration, loopBGM, eventName);
+        //AudioEventManager.playBGMTrack(musicTrackNumber, musicTrackName, volume, fadeType, fadeDuration, loopBGM, eventName); //TODO: Uncomment this line when AudioEventManager is implemented
     }
     
     private IEnumerator PlayBGM_Delayed(float delay)
     {
         yield return new WaitForSeconds(delay);
         //send the PlayBGM Event with parameters from the inspector
-        AudioEventManager.playBGMTrack(musicTrackNumber, musicTrackName, volume, fadeType, fadeDuration, loopBGM, eventName);
+       //AudioEventManager.playBGMTrack(musicTrackNumber, musicTrackName, volume, fadeType, fadeDuration, loopBGM, eventName); //TODO: Uncomment this line when AudioEventManager is implemented
        
     }
 
@@ -211,7 +211,7 @@ public class AudioEventSenderBGMTrack : MonoBehaviour, IAudioEventSender
         else
         {
             // Send the StopBGM Event with parameters from the inspector
-            AudioEventManager.stopBGMTrack(fadeDuration);
+            // AudioEventManager.stopBGMTrack(fadeDuration); //TODO: Uncomment this line when AudioEventManager is implemented
         }
     }
 
@@ -229,7 +229,7 @@ public class AudioEventSenderBGMTrack : MonoBehaviour, IAudioEventSender
             yield return null;
         }
         // Send the StopBGM Event with parameters from the inspector
-        AudioEventManager.stopBGMTrack(fadeDuration);
+        // AudioEventManager.stopBGMTrack(fadeDuration);//TODO: Uncomment this line when AudioEventManager is implemented
     }
     
     // pause the background music
@@ -247,13 +247,13 @@ public class AudioEventSenderBGMTrack : MonoBehaviour, IAudioEventSender
     private void PauseBGM()
     {
         //send the PauseBGM Event with parameters from the inspector
-        AudioEventManager.pauseBGMTrack(fadeDuration);
+        //AudioEventManager.pauseBGMTrack(fadeDuration); //TODO: Uncomment this line when AudioEventManager is implemented
     }
     private IEnumerator PauseBGM_Delayed(float delay)
     {
         yield return new WaitForSeconds(delay);
         //send the PauseBGM Event with parameters from the inspector
-        AudioEventManager.pauseBGMTrack(fadeDuration);
+        // AudioEventManager.pauseBGMTrack(fadeDuration); //TODO: Uncomment this line when AudioEventManager is implemented
     }
 
     #region Gizmo Visualization
@@ -402,4 +402,4 @@ public class AudioEventSenderBGMTrack : MonoBehaviour, IAudioEventSender
     }
 
     #endregion
-}
+}*/
