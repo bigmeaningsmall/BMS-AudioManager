@@ -132,6 +132,7 @@ private void HandlePlayDuringCrossfade(AudioClip clip, float volume, float pitch
     // Store current outgoing source fade values for inheritance
     float inheritVolume = 0f;
     float inheritPitch = 0f;
+    float inheritFadeDuration = fadeDuration; // Default to new fade duration
     bool hasInheritance = false;
 
     if (outgoingSource != null)
@@ -140,6 +141,20 @@ private void HandlePlayDuringCrossfade(AudioClip clip, float volume, float pitch
         inheritVolume = outgoingSource.volume;
         inheritPitch = outgoingSource.pitch;
         hasInheritance = true;
+
+        // Try to inherit remaining fade time from the current outgoing coroutine
+        if (outgoingCoroutine != null)
+        {
+            // Calculate remaining fade time based on current volume/pitch progress
+            // Assuming fade is linear and we're fading to 0
+            float fadeProgress = 1f - (outgoingSource.volume / targetVolume);
+            if (fadeProgress > 0f && fadeProgress < 1f)
+            {
+                // Estimate remaining time based on progress
+                inheritFadeDuration = fadeDuration * (1f - fadeProgress);
+                Debug.Log($"[AmbientTrack] Inheriting fade duration: {inheritFadeDuration:F2}s (progress: {fadeProgress:F2})");
+            }
+        }
 
         // Clean up existing outgoing source
         if (outgoingCoroutine != null)
@@ -172,8 +187,8 @@ private void HandlePlayDuringCrossfade(AudioClip clip, float volume, float pitch
             outgoingSource.pitch = inheritPitch;
         }
 
-        // Start fade out on the demoted cue (from its current/inherited values)
-        outgoingCoroutine = StartCoroutine(FadeOutAndDestroy(outgoingSource, fadeDuration, fadeTarget));
+        // Start fade out on the demoted cue using inherited fade duration
+        outgoingCoroutine = StartCoroutine(FadeOutAndDestroy(outgoingSource, inheritFadeDuration, fadeTarget));
     }
     // If no cue but there's a main, move main to outgoing
     else if (mainSource != null)

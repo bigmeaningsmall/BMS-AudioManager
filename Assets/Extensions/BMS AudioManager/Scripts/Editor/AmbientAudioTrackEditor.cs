@@ -81,7 +81,7 @@ public class AmbientAudioTrackEditor : Editor
         if (track.MainSource != null)
         {
             Handles.color = Color.green;
-            Handles.Label(labelPos, $"Main: Vol {track.MainSource.volume:F1} | Pitch {track.MainSource.pitch:F1}");
+            Handles.Label(labelPos, $"Main: Vol {track.MainSource.volume:F2} | Pitch {track.MainSource.pitch:F2}");
             labelPos += Vector3.down * 0.8f;
         }
         
@@ -89,7 +89,7 @@ public class AmbientAudioTrackEditor : Editor
         if (track.CueSource != null)
         {
             Handles.color = Color.yellow;
-            Handles.Label(labelPos, $"Cue: Vol {track.CueSource.volume:F1} | Pitch {track.CueSource.pitch:F1}");
+            Handles.Label(labelPos, $"Cue: Vol {track.CueSource.volume:F2} | Pitch {track.CueSource.pitch:F2}");
             labelPos += Vector3.down * 0.4f;
         }
         
@@ -97,7 +97,7 @@ public class AmbientAudioTrackEditor : Editor
         if (track.OutgoingSource != null)
         {
             Handles.color = Color.cyan;
-            Handles.Label(labelPos, $"Out: Vol {track.OutgoingSource.volume:F1} | Pitch {track.OutgoingSource.pitch:F1}");
+            Handles.Label(labelPos, $"Out: Vol {track.OutgoingSource.volume:F2} | Pitch {track.OutgoingSource.pitch:F2}");
         }
     }
 }
