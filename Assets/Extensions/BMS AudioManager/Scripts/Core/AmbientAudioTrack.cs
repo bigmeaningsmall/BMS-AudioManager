@@ -129,121 +129,150 @@ public class AmbientAudioTrack : MonoBehaviour
     }
 
     /// <summary>
-/// Toggle pause/unpause. Can be safely spammed - will toggle between pause/resume states
-/// </summary>
-public void TogglePause(float fadeDuration = 0f, FadeTarget fadeTarget = FadeTarget.FadeVolume)
-{
-    if (currentState == AmbientState.Paused)
+    /// Toggle pause/unpause. Can be safely spammed - will toggle between pause/resume states
+    /// </summary>
+    public void TogglePause(float fadeDuration = 0f, FadeTarget fadeTarget = FadeTarget.FadeVolume)
     {
-        Resume(fadeDuration, fadeTarget);
-    }
-    else
-    {
-        Pause(fadeDuration, fadeTarget);
-    }
-}
-
-/// <summary>
-/// Pause the current audio with optional fade
-/// </summary>
-public void Pause(float fadeDuration = 0f, FadeTarget fadeTarget = FadeTarget.FadeVolume)
-{
-    Debug.Log($"[AmbientTrack] Pause called - Current State: {currentState}");
-
-    // Can only pause if we're in a playing state
-    if (currentState == AmbientState.Stopped || currentState == AmbientState.Paused)
-    {
-        Debug.LogWarning($"[AmbientTrack] Cannot pause from state: {currentState}");
-        return;
-    }
-
-    // Stop any active fade coroutines but keep sources
-    if (cueCoroutine != null)
-    {
-        StopCoroutine(cueCoroutine);
-        cueCoroutine = null;
-    }
-
-    if (outgoingCoroutine != null)
-    {
-        StopCoroutine(outgoingCoroutine);
-        outgoingCoroutine = null;
-    }
-
-    // Clean up outgoing source since it was fading out anyway
-    if (outgoingSource != null)
-    {
-        outgoingSource.Stop();
-        Destroy(outgoingSource.gameObject);
-        outgoingSource = null;
-    }
-
-    // If we have a cue that was fading in, promote it to main first
-    if (cueSource != null)
-    {
-        if (mainSource != null)
+        if (currentState == AmbientState.Paused)
         {
-            mainSource.Stop();
-            Destroy(mainSource.gameObject);
+            Resume(fadeDuration, fadeTarget);
         }
-        mainSource = cueSource;
-        cueSource = null;
-    }
-
-    // Now pause the main source
-    if (mainSource != null)
-    {
-        if (fadeDuration <= 0f)
+        else if (currentState == AmbientState.FadingOut && mainCoroutine != null)
         {
-            // Instant pause
-            mainSource.Pause();
-            currentState = AmbientState.Paused;
+            // Interrupt fade-to-pause and reverse to fade-from-pause
+            StopCoroutine(mainCoroutine);
+            mainCoroutine = null;
+        
+            if (mainSource != null)
+            {
+                mainSource.UnPause(); // Make sure it's unpaused
+                currentState = AmbientState.FadingIn;
+                mainCoroutine = StartCoroutine(FadeFromPause(fadeDuration, fadeTarget));
+            }
         }
-        else
+        else if (currentState == AmbientState.FadingIn && mainCoroutine != null)
         {
-            // Fade to pause
+            // Interrupt fade-from-pause and reverse to fade-to-pause
+            StopCoroutine(mainCoroutine);
+            mainCoroutine = null;
+        
             currentState = AmbientState.FadingOut;
             mainCoroutine = StartCoroutine(FadeToPause(fadeDuration, fadeTarget));
         }
-    }
-}
-
-/// <summary>
-/// Resume from pause with optional fade
-/// </summary>
-public void Resume(float fadeDuration = 0f, FadeTarget fadeTarget = FadeTarget.FadeVolume)
-{
-    Debug.Log($"[AmbientTrack] Resume called - Current State: {currentState}");
-
-    if (currentState != AmbientState.Paused)
-    {
-        Debug.LogWarning($"[AmbientTrack] Cannot resume from state: {currentState}");
-        return;
+        else
+        {
+            Pause(fadeDuration, fadeTarget);
+        }
     }
 
-    if (mainSource == null)
+    /// <summary>
+    /// Pause the current audio with optional fade - Called by TogglePause
+    /// </summary>
+    private void Pause(float fadeDuration = 0f, FadeTarget fadeTarget = FadeTarget.FadeVolume)
     {
-        Debug.LogWarning("[AmbientTrack] No paused source to resume");
-        currentState = AmbientState.Stopped;
-        return;
+        Debug.Log($"[AmbientTrack] Pause called - Current State: {currentState}");
+
+        // Can only pause if we're in a playing state
+        if (currentState == AmbientState.Stopped || currentState == AmbientState.Paused)
+        {
+            Debug.LogWarning($"[AmbientTrack] Cannot pause from state: {currentState}");
+            return;
+        }
+
+        // Stop any active main coroutine (fade interruption)
+        if (mainCoroutine != null)
+        {
+            StopCoroutine(mainCoroutine);
+            mainCoroutine = null;
+        }
+
+        // Stop any active fade coroutines but keep sources
+        if (cueCoroutine != null)
+        {
+            StopCoroutine(cueCoroutine);
+            cueCoroutine = null;
+        }
+
+        if (outgoingCoroutine != null)
+        {
+            StopCoroutine(outgoingCoroutine);
+            outgoingCoroutine = null;
+        }
+
+        // Clean up outgoing source since it was fading out anyway
+        if (outgoingSource != null)
+        {
+            outgoingSource.Stop();
+            Destroy(outgoingSource.gameObject);
+            outgoingSource = null;
+        }
+
+        // If we have a cue that was fading in, promote it to main first
+        if (cueSource != null)
+        {
+            if (mainSource != null)
+            {
+                mainSource.Stop();
+                Destroy(mainSource.gameObject);
+            }
+            mainSource = cueSource;
+            cueSource = null;
+        }
+
+        // Now pause the main source
+        if (mainSource != null)
+        {
+            if (fadeDuration <= 0f)
+            {
+                // Instant pause
+                mainSource.Pause();
+                currentState = AmbientState.Paused;
+            }
+            else
+            {
+                // Fade to pause - starts from CURRENT values
+                currentState = AmbientState.FadingOut;
+                mainCoroutine = StartCoroutine(FadeToPause(fadeDuration, fadeTarget));
+            }
+        }
     }
 
-    if (fadeDuration <= 0f)
+    /// <summary>
+    /// Resume from pause with optional fade - Called by TogglePause
+    /// </summary>
+    private void Resume(float fadeDuration = 0f, FadeTarget fadeTarget = FadeTarget.FadeVolume)
     {
-        // Instant resume
-        mainSource.UnPause();
-        mainSource.volume = targetVolume;
-        mainSource.pitch = targetPitch;
-        currentState = AmbientState.Playing;
+        Debug.Log($"[AmbientTrack] Resume called - Current State: {currentState}");
+
+        if (currentState != AmbientState.Paused)
+        {
+            Debug.LogWarning($"[AmbientTrack] Cannot resume from state: {currentState}");
+            return;
+        }
+
+        if (mainSource == null)
+        {
+            Debug.LogWarning("[AmbientTrack] No paused source to resume");
+            currentState = AmbientState.Stopped;
+            return;
+        }
+
+        if (fadeDuration <= 0f)
+        {
+            // Instant resume
+            mainSource.UnPause();
+            mainSource.volume = targetVolume;
+            mainSource.pitch = targetPitch;
+            currentState = AmbientState.Playing;
+        }
+        else
+        {
+            // Fade from pause - starts from CURRENT values
+            mainSource.UnPause();
+            currentState = AmbientState.FadingIn;
+            mainCoroutine = StartCoroutine(FadeFromPause(fadeDuration, fadeTarget));
+        }
     }
-    else
-    {
-        // Fade from pause
-        mainSource.UnPause();
-        currentState = AmbientState.FadingIn;
-        mainCoroutine = StartCoroutine(FadeFromPause(fadeDuration, fadeTarget));
-    }
-}
      
     #endregion
 
