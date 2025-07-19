@@ -172,6 +172,7 @@ public class AudioManager : MonoBehaviour
             return;
         }
         //ambientTrack.Pause(fadeDuration, fadeTarget); //todo: Uncomment when Pause method is implemented
+        ambientTrack.TogglePause(fadeDuration, fadeTarget);
     }
 
     // SFX Management (UNCHANGED)

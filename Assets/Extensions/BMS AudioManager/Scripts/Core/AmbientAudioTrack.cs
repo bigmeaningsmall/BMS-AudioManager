@@ -20,12 +20,15 @@ public class AmbientAudioTrack : MonoBehaviour
     
     private Coroutine mainCoroutine;  // Add this field at the top
     
-    // Add these properties for editor debugging
-#if UNITY_EDITOR
-    public AudioSource MainSource => mainSource;
-    public AudioSource CueSource => cueSource;
-    public AudioSource OutgoingSource => outgoingSource;
-#endif
+    #region Editor Sctuff
+    // properties for editor debugging
+    #if UNITY_EDITOR
+        public AudioSource MainSource => mainSource;
+        public AudioSource CueSource => cueSource;
+        public AudioSource OutgoingSource => outgoingSource;
+    #endif
+    
+    #endregion
     
     [Header("State")]
     [SerializeField] private AmbientState currentState = AmbientState.Stopped;
@@ -45,15 +48,18 @@ public class AmbientAudioTrack : MonoBehaviour
     
     private void Awake()
     {
-        audioManager = GetComponentInParent<AudioManager>();
+        audioManager = GetComponent<AudioManager>();
         if (audioManager == null)
         {
             Debug.LogError("AmbientAudioTrack must be a child of AudioManager!");
         }
     }
-    
-    /// <summary>
-    /// STATE BASED - Play method with 3-source safety system 
+
+    // ==================== PUBLIC METHODS ====================
+    #region PUBLIC METHODS
+
+     /// <summary>
+    /// Play method with 3-source safety system - STATE BASED -
     /// </summary>
     public void Play(int trackNumber, string trackName, float volume, float pitch, float spatialBlend, 
                      FadeType fadeType, float fadeDuration, FadeTarget fadeTarget, bool loop, Transform attachTo)
@@ -121,6 +127,126 @@ public class AmbientAudioTrack : MonoBehaviour
                 break;
         }
     }
+
+    /// <summary>
+/// Toggle pause/unpause. Can be safely spammed - will toggle between pause/resume states
+/// </summary>
+public void TogglePause(float fadeDuration = 0f, FadeTarget fadeTarget = FadeTarget.FadeVolume)
+{
+    if (currentState == AmbientState.Paused)
+    {
+        Resume(fadeDuration, fadeTarget);
+    }
+    else
+    {
+        Pause(fadeDuration, fadeTarget);
+    }
+}
+
+/// <summary>
+/// Pause the current audio with optional fade
+/// </summary>
+public void Pause(float fadeDuration = 0f, FadeTarget fadeTarget = FadeTarget.FadeVolume)
+{
+    Debug.Log($"[AmbientTrack] Pause called - Current State: {currentState}");
+
+    // Can only pause if we're in a playing state
+    if (currentState == AmbientState.Stopped || currentState == AmbientState.Paused)
+    {
+        Debug.LogWarning($"[AmbientTrack] Cannot pause from state: {currentState}");
+        return;
+    }
+
+    // Stop any active fade coroutines but keep sources
+    if (cueCoroutine != null)
+    {
+        StopCoroutine(cueCoroutine);
+        cueCoroutine = null;
+    }
+
+    if (outgoingCoroutine != null)
+    {
+        StopCoroutine(outgoingCoroutine);
+        outgoingCoroutine = null;
+    }
+
+    // Clean up outgoing source since it was fading out anyway
+    if (outgoingSource != null)
+    {
+        outgoingSource.Stop();
+        Destroy(outgoingSource.gameObject);
+        outgoingSource = null;
+    }
+
+    // If we have a cue that was fading in, promote it to main first
+    if (cueSource != null)
+    {
+        if (mainSource != null)
+        {
+            mainSource.Stop();
+            Destroy(mainSource.gameObject);
+        }
+        mainSource = cueSource;
+        cueSource = null;
+    }
+
+    // Now pause the main source
+    if (mainSource != null)
+    {
+        if (fadeDuration <= 0f)
+        {
+            // Instant pause
+            mainSource.Pause();
+            currentState = AmbientState.Paused;
+        }
+        else
+        {
+            // Fade to pause
+            currentState = AmbientState.FadingOut;
+            mainCoroutine = StartCoroutine(FadeToPause(fadeDuration, fadeTarget));
+        }
+    }
+}
+
+/// <summary>
+/// Resume from pause with optional fade
+/// </summary>
+public void Resume(float fadeDuration = 0f, FadeTarget fadeTarget = FadeTarget.FadeVolume)
+{
+    Debug.Log($"[AmbientTrack] Resume called - Current State: {currentState}");
+
+    if (currentState != AmbientState.Paused)
+    {
+        Debug.LogWarning($"[AmbientTrack] Cannot resume from state: {currentState}");
+        return;
+    }
+
+    if (mainSource == null)
+    {
+        Debug.LogWarning("[AmbientTrack] No paused source to resume");
+        currentState = AmbientState.Stopped;
+        return;
+    }
+
+    if (fadeDuration <= 0f)
+    {
+        // Instant resume
+        mainSource.UnPause();
+        mainSource.volume = targetVolume;
+        mainSource.pitch = targetPitch;
+        currentState = AmbientState.Playing;
+    }
+    else
+    {
+        // Fade from pause
+        mainSource.UnPause();
+        currentState = AmbientState.FadingIn;
+        mainCoroutine = StartCoroutine(FadeFromPause(fadeDuration, fadeTarget));
+    }
+}
+     
+    #endregion
+
     
     // ==================== 3-SOURCE SAFETY METHODS ====================
     
@@ -551,8 +677,79 @@ public class AmbientAudioTrack : MonoBehaviour
         outgoingCoroutine = null;
     }
     
-    // ==================== HELPER METHODS ====================
     
+    //Pause
+    private IEnumerator FadeToPause(float duration, FadeTarget fadeTarget)
+    {
+        if (mainSource == null) yield break;
+
+        float elapsed = 0f;
+        float startVol = mainSource.volume;
+        float startPit = mainSource.pitch;
+
+        while (elapsed < duration && mainSource != null)
+        {
+            elapsed += Time.deltaTime;
+            float t = elapsed / duration;
+
+            if (fadeTarget == FadeTarget.FadeVolume || fadeTarget == FadeTarget.FadeBoth)
+                mainSource.volume = Mathf.Lerp(startVol, 0f, t);
+
+            if (fadeTarget == FadeTarget.FadePitch || fadeTarget == FadeTarget.FadeBoth)
+                mainSource.pitch = Mathf.Lerp(startPit, 0f, t);
+
+            yield return null;
+        }
+
+        // Pause at the end of fade
+        if (mainSource != null)
+        {
+            mainSource.Pause();
+            currentState = AmbientState.Paused;
+        }
+
+        mainCoroutine = null;
+    }
+
+    private IEnumerator FadeFromPause(float duration, FadeTarget fadeTarget)
+    {
+        if (mainSource == null) yield break;
+
+        float elapsed = 0f;
+        float startVol = mainSource.volume;
+        float startPit = mainSource.pitch;
+
+        while (elapsed < duration && mainSource != null)
+        {
+            elapsed += Time.deltaTime;
+            float t = elapsed / duration;
+
+            if (fadeTarget == FadeTarget.FadeVolume || fadeTarget == FadeTarget.FadeBoth)
+                mainSource.volume = Mathf.Lerp(startVol, targetVolume, t);
+
+            if (fadeTarget == FadeTarget.FadePitch || fadeTarget == FadeTarget.FadeBoth)
+                mainSource.pitch = Mathf.Lerp(startPit, targetPitch, t);
+
+            yield return null;
+        }
+
+        // Ensure final values
+        if (mainSource != null)
+        {
+            if (fadeTarget == FadeTarget.FadeVolume || fadeTarget == FadeTarget.FadeBoth)
+                mainSource.volume = targetVolume;
+            if (fadeTarget == FadeTarget.FadePitch || fadeTarget == FadeTarget.FadeBoth)
+                mainSource.pitch = targetPitch;
+
+            currentState = AmbientState.Playing;
+        }
+
+        mainCoroutine = null;
+    }
+    
+    // ==================== HELPER METHODS ====================
+    #region HELPER METHODS
+
     private AudioClip ResolveAudioClip(int trackNumber, string trackName)
     {
         if (!string.IsNullOrEmpty(trackName))
@@ -582,12 +779,20 @@ public class AmbientAudioTrack : MonoBehaviour
         GameObject audioObj = Instantiate(prefab, parent.position, Quaternion.identity, parent);
         return audioObj.GetComponent<AudioSource>();
     }
+
+    #endregion
+    
     
     // ==================== PUBLIC PROPERTIES ====================
-    
+    #region PUBLIC PROPERTIES
+
     public AmbientState CurrentState => currentState;
     public bool IsPlaying => mainSource != null && mainSource.isPlaying;
     public bool IsCrossfading => currentState == AmbientState.Crossfading;
+
+    #endregion
+    
+
     
     // Debug helpers---------------------------------------------------------
     public string DebugInfo => $"State: {currentState}, Main: {(mainSource != null)}, Cue: {(cueSource != null)}, Outgoing: {(outgoingSource != null)}";
