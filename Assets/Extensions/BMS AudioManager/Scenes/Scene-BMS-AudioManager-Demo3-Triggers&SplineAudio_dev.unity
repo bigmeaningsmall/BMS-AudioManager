@@ -284,6 +284,28 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 50, y: -30, z: 0}
+--- !u!1 &225177037 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5737640405453547409, guid: ccc2f9deca1fd8440a1f8646e2051deb,
+    type: 3}
+  m_PrefabInstance: {fileID: 1024325076}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &225177040
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 225177037}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7382d7b606514ed45ad25b2811994a0c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  mainSource: {fileID: 0}
+  cueSource: {fileID: 0}
+  outgoingSource: {fileID: 0}
+  currentState: 0
 --- !u!1001 &469305101
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -812,7 +834,7 @@ PrefabInstance:
     - target: {fileID: 7836191273684435627, guid: 139429739bafcec468e00f0d0a1a0a9f,
         type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8936076557747694269, guid: 139429739bafcec468e00f0d0a1a0a9f,
         type: 3}
@@ -1186,8 +1208,13 @@ PrefabInstance:
     - target: {fileID: 7366141512683043284, guid: ccc2f9deca1fd8440a1f8646e2051deb,
         type: 3}
       propertyPath: version
-      value: v1.2.1
+      value: v1.3
       objectReference: {fileID: 0}
+    - target: {fileID: 7366141512683043284, guid: ccc2f9deca1fd8440a1f8646e2051deb,
+        type: 3}
+      propertyPath: ambientTrack
+      value: 
+      objectReference: {fileID: 225177040}
     - target: {fileID: 7366141512683043284, guid: ccc2f9deca1fd8440a1f8646e2051deb,
         type: 3}
       propertyPath: dialogueAudioPrefab
@@ -1202,7 +1229,11 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 5737640405453547409, guid: ccc2f9deca1fd8440a1f8646e2051deb,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 225177040}
   m_SourcePrefab: {fileID: 100100000, guid: ccc2f9deca1fd8440a1f8646e2051deb, type: 3}
 --- !u!1 &1308476517 stripped
 GameObject:
@@ -2007,7 +2038,7 @@ PrefabInstance:
     - target: {fileID: 620935151221146675, guid: ba89dcb19a3cf95418c455c01d332d04,
         type: 3}
       propertyPath: fadeTarget
-      value: 1
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 620935151221146675, guid: ba89dcb19a3cf95418c455c01d332d04,
         type: 3}
