@@ -20,6 +20,13 @@ public class AmbientAudioTrack : MonoBehaviour
     
     private Coroutine mainCoroutine;  // Add this field at the top
     
+    // Add these properties for editor debugging
+#if UNITY_EDITOR
+    public AudioSource MainSource => mainSource;
+    public AudioSource CueSource => cueSource;
+    public AudioSource OutgoingSource => outgoingSource;
+#endif
+    
     [Header("State")]
     [SerializeField] private AmbientState currentState = AmbientState.Stopped;
     
@@ -122,9 +129,19 @@ private void HandlePlayDuringCrossfade(AudioClip clip, float volume, float pitch
 {
     Debug.Log("[AmbientTrack] Handling Play during crossfade - 3-source safety engaged");
 
-    // 1. Clean up any existing outgoing source (safety)
+    // Store current outgoing source fade values for inheritance
+    float inheritVolume = 0f;
+    float inheritPitch = 0f;
+    bool hasInheritance = false;
+
     if (outgoingSource != null)
     {
+        // Capture current fade values from the outgoing source
+        inheritVolume = outgoingSource.volume;
+        inheritPitch = outgoingSource.pitch;
+        hasInheritance = true;
+
+        // Clean up existing outgoing source
         if (outgoingCoroutine != null)
         {
             StopCoroutine(outgoingCoroutine);
@@ -135,22 +152,30 @@ private void HandlePlayDuringCrossfade(AudioClip clip, float volume, float pitch
         outgoingSource = null;
     }
 
-    // 2. Stop the current cue fade
+    // Stop the current cue fade
     if (cueCoroutine != null)
     {
         StopCoroutine(cueCoroutine);
         cueCoroutine = null;
     }
 
-    // 3. Move current cue to outgoing (it will fade out)
+    // Move current cue to outgoing (it will fade out)
     if (cueSource != null)
     {
         outgoingSource = cueSource;
         cueSource = null;
-        // Start fade out on the demoted cue
+
+        // Apply inherited values if available
+        if (hasInheritance)
+        {
+            outgoingSource.volume = inheritVolume;
+            outgoingSource.pitch = inheritPitch;
+        }
+
+        // Start fade out on the demoted cue (from its current/inherited values)
         outgoingCoroutine = StartCoroutine(FadeOutAndDestroy(outgoingSource, fadeDuration, fadeTarget));
     }
-    // 4. If no cue but there's a main, move main to outgoing
+    // If no cue but there's a main, move main to outgoing
     else if (mainSource != null)
     {
         outgoingSource = mainSource;
@@ -158,7 +183,7 @@ private void HandlePlayDuringCrossfade(AudioClip clip, float volume, float pitch
         outgoingCoroutine = StartCoroutine(FadeOutAndDestroy(outgoingSource, fadeDuration, fadeTarget));
     }
 
-    // 5. Create new cue source for the new track
+    // Create new cue source for the new track
     cueSource = CreateAudioSource(attachTo);
     if (cueSource == null) return;
 
@@ -169,7 +194,7 @@ private void HandlePlayDuringCrossfade(AudioClip clip, float volume, float pitch
     cueSource.pitch = (fadeTarget == FadeTarget.FadePitch || fadeTarget == FadeTarget.FadeBoth) ? 0f : pitch;
     cueSource.Play();
 
-    // 6. Start fade in on new cue
+    // Start fade in on new cue
     currentState = AmbientState.Crossfading;
     cueCoroutine = StartCoroutine(FadeInCue(fadeDuration, fadeTarget, volume, pitch));
 }
@@ -420,6 +445,8 @@ private void HandlePlayDuringCrossfade(AudioClip clip, float volume, float pitch
     public bool IsPlaying => mainSource != null && mainSource.isPlaying;
     public bool IsCrossfading => currentState == AmbientState.Crossfading;
     
-    // Debug helpers
+    // Debug helpers---------------------------------------------------------
     public string DebugInfo => $"State: {currentState}, Main: {(mainSource != null)}, Cue: {(cueSource != null)}, Outgoing: {(outgoingSource != null)}";
+    
+    
 }
