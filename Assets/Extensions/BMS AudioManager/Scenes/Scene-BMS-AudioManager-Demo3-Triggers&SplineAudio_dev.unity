@@ -2028,7 +2028,7 @@ PrefabInstance:
     - target: {fileID: 620935151221146675, guid: ba89dcb19a3cf95418c455c01d332d04,
         type: 3}
       propertyPath: fadeType
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 620935151221146675, guid: ba89dcb19a3cf95418c455c01d332d04,
         type: 3}
@@ -2053,7 +2053,7 @@ PrefabInstance:
     - target: {fileID: 620935151221146675, guid: ba89dcb19a3cf95418c455c01d332d04,
         type: 3}
       propertyPath: fadeDuration
-      value: 1
+      value: 2.9
       objectReference: {fileID: 0}
     - target: {fileID: 620935151221146675, guid: ba89dcb19a3cf95418c455c01d332d04,
         type: 3}
@@ -2068,7 +2068,7 @@ PrefabInstance:
     - target: {fileID: 620935151221146675, guid: ba89dcb19a3cf95418c455c01d332d04,
         type: 3}
       propertyPath: ambientTrackName
-      value: Rhubarb_sample
+      value: NormConnors_VaporStarship
       objectReference: {fileID: 0}
     - target: {fileID: 5274121441138690220, guid: ba89dcb19a3cf95418c455c01d332d04,
         type: 3}
