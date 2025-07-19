@@ -55,7 +55,7 @@ public class AmbientAudioTrack : MonoBehaviour
         }
     }
 
-    // ==================== PUBLIC METHODS ====================
+    // ==================== PUBLIC CALL METHODS ====================
     #region PUBLIC METHODS
 
      /// <summary>
@@ -131,7 +131,7 @@ public class AmbientAudioTrack : MonoBehaviour
     /// <summary>
     /// Toggle pause/unpause. Can be safely spammed - will toggle between pause/resume states
     /// </summary>
-    public void TogglePause(float fadeDuration = 0f, FadeTarget fadeTarget = FadeTarget.FadeVolume)
+    public void PauseToggle(float fadeDuration = 0f, FadeTarget fadeTarget = FadeTarget.FadeVolume)
     {
         if (currentState == AmbientState.Paused)
         {
@@ -274,6 +274,83 @@ public class AmbientAudioTrack : MonoBehaviour
         }
     }
      
+    /// <summary>
+    /// Stop all audio immediately or with fade. Overrides everything and cleans up all sources.
+    /// </summary>
+private bool stopRequested = false;
+
+public void Stop(float fadeDuration = 0f, FadeTarget fadeTarget = FadeTarget.FadeVolume)
+{
+    Debug.Log($"[AmbientTrack] Stop called - Current State: {currentState}");
+    
+    // Set the stop flag FIRST - this prevents any fade coroutines from continuing
+    stopRequested = true;
+    
+    // Stop all active coroutines
+    if (mainCoroutine != null)
+    {
+        StopCoroutine(mainCoroutine);
+        mainCoroutine = null;
+    }
+    
+    if (cueCoroutine != null)
+    {
+        StopCoroutine(cueCoroutine);
+        cueCoroutine = null;
+    }
+    
+    if (outgoingCoroutine != null)
+    {
+        StopCoroutine(outgoingCoroutine);
+        outgoingCoroutine = null;
+    }
+    
+    if (fadeDuration <= 0f)
+    {
+        InstantStop();
+    }
+    else
+    {
+        currentState = AmbientState.FadingOut;
+        mainCoroutine = StartCoroutine(FadeAllToStop(fadeDuration, fadeTarget));
+    }
+}
+
+    
+    /// <summary>
+    /// Instantly stop and destroy all sources
+    /// </summary>
+    private void InstantStop()
+    {
+        // Clean up main source
+        if (mainSource != null)
+        {
+            mainSource.Stop();
+            Destroy(mainSource.gameObject);
+            mainSource = null;
+        }
+
+        // Clean up cue source
+        if (cueSource != null)
+        {
+            cueSource.Stop();
+            Destroy(cueSource.gameObject);
+            cueSource = null;
+        }
+
+        // Clean up outgoing source
+        if (outgoingSource != null)
+        {
+            outgoingSource.Stop();
+            Destroy(outgoingSource.gameObject);
+            outgoingSource = null;
+        }
+
+        currentState = AmbientState.Stopped;
+        Debug.Log("[AmbientTrack] Instant stop complete");
+    }
+    
+    
     #endregion
 
     
@@ -517,31 +594,34 @@ public class AmbientAudioTrack : MonoBehaviour
         float elapsed = 0f;
         float startVol = mainSource.volume;
         float startPit = mainSource.pitch;
-        
+
         while (elapsed < duration && mainSource != null)
         {
+            // Check stop flag FIRST - exit immediately if stop was called
+            if (stopRequested) yield break;
+
             elapsed += Time.deltaTime;
             float t = elapsed / duration;
-            
+
             if (fadeTarget == FadeTarget.FadeVolume || fadeTarget == FadeTarget.FadeBoth)
                 mainSource.volume = Mathf.Lerp(startVol, targetVol, t);
-                
+
             if (fadeTarget == FadeTarget.FadePitch || fadeTarget == FadeTarget.FadeBoth)
                 mainSource.pitch = Mathf.Lerp(startPit, targetPit, t);
-                
+
             yield return null;
         }
-        
-        // Ensure final values
-        if (mainSource != null)
+
+        // Only finish if not stopped
+        if (!stopRequested && mainSource != null)
         {
             if (fadeTarget == FadeTarget.FadeVolume || fadeTarget == FadeTarget.FadeBoth)
                 mainSource.volume = targetVol;
             if (fadeTarget == FadeTarget.FadePitch || fadeTarget == FadeTarget.FadeBoth)
                 mainSource.pitch = targetPit;
+
+            currentState = AmbientState.Playing;
         }
-        
-        currentState = AmbientState.Playing;
     }
     
     private IEnumerator FadeInCue(float duration, FadeTarget fadeTarget, float targetVol, float targetPit)
@@ -775,6 +855,78 @@ public class AmbientAudioTrack : MonoBehaviour
 
         mainCoroutine = null;
     }
+    
+    
+ private IEnumerator FadeAllToStop(float duration, FadeTarget fadeTarget)
+{
+    stopRequested = false; // Reset flag for this fade operation
+    
+    // Collect all active sources and capture their CURRENT VALUES
+    var activeSources = new System.Collections.Generic.List<(AudioSource source, float startVol, float startPit)>();
+
+    if (mainSource != null)
+        activeSources.Add((mainSource, mainSource.volume, mainSource.pitch));
+
+    if (cueSource != null)
+        activeSources.Add((cueSource, cueSource.volume, cueSource.pitch));
+
+    if (outgoingSource != null)
+        activeSources.Add((outgoingSource, outgoingSource.volume, outgoingSource.pitch));
+
+    if (activeSources.Count == 0)
+    {
+        currentState = AmbientState.Stopped;
+        mainCoroutine = null;
+        yield break;
+    }
+
+    Debug.Log($"[AmbientTrack] Fading {activeSources.Count} sources to stop over {duration}s");
+
+    // Fade from the captured values - FORCE OVERRIDE every frame
+    float elapsed = 0f;
+    while (elapsed < duration)
+    {
+        elapsed += Time.deltaTime;
+        float t = elapsed / duration;
+
+        for (int i = activeSources.Count - 1; i >= 0; i--)
+        {
+            var (source, startVol, startPit) = activeSources[i];
+
+            if (source == null)
+            {
+                activeSources.RemoveAt(i);
+                continue;
+            }
+
+            // FORCE these values every frame - overrides any other coroutines
+            if (fadeTarget == FadeTarget.FadeVolume || fadeTarget == FadeTarget.FadeBoth)
+            {
+                float targetVol = Mathf.Lerp(startVol, 0f, t);
+                source.volume = targetVol;
+                // Force it again to ensure it sticks
+                source.volume = targetVol;
+            }
+
+            if (fadeTarget == FadeTarget.FadePitch || fadeTarget == FadeTarget.FadeBoth)
+            {
+                float targetPit = Mathf.Lerp(startPit, 0f, t);
+                source.pitch = targetPit;
+                // Force it again to ensure it sticks
+                source.pitch = targetPit;
+            }
+        }
+
+        if (activeSources.Count == 0)
+            break;
+
+        yield return null;
+    }
+
+    InstantStop();
+    Debug.Log("[AmbientTrack] Fade stop complete");
+    mainCoroutine = null;
+}
     
     // ==================== HELPER METHODS ====================
     #region HELPER METHODS
