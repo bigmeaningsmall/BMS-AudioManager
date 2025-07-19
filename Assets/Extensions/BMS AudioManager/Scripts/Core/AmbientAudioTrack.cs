@@ -463,9 +463,20 @@ public class AmbientAudioTrack : MonoBehaviour
         }
     }
     
-    private IEnumerator FadeOutThenFadeIn(AudioSource fadeOutSource, AudioClip newClip, float volume, 
+    private IEnumerator FadeOutThenFadeIn(AudioSource fadeOutSource, AudioClip newClip, float volume,
         float pitch, float spatialBlend, float fadeDuration, FadeTarget fadeTarget, bool loop, Transform attachTo)
     {
+        // Pre-create the incoming source as cue (but don't play yet)
+        cueSource = CreateAudioSource(attachTo);
+        if (cueSource == null) yield break;
+
+        cueSource.clip = newClip;
+        cueSource.loop = loop;
+        cueSource.spatialBlend = spatialBlend;
+        cueSource.volume = (fadeTarget == FadeTarget.FadeVolume || fadeTarget == FadeTarget.FadeBoth) ? 0f : volume;
+        cueSource.pitch = (fadeTarget == FadeTarget.FadePitch || fadeTarget == FadeTarget.FadeBoth) ? 0f : pitch;
+        // Don't play yet - it's waiting as cue
+
         // Phase 1: Fade out the current source
         if (fadeOutSource != null)
         {
@@ -496,47 +507,44 @@ public class AmbientAudioTrack : MonoBehaviour
             }
         }
 
-        // Phase 2: Start new audio with fade in
-        mainSource = CreateAudioSource(attachTo);
-        if (mainSource == null) yield break;
-
-        mainSource.clip = newClip;
-        mainSource.loop = loop;
-        mainSource.spatialBlend = spatialBlend;
-
-        // Set starting fade values
-        mainSource.volume = (fadeTarget == FadeTarget.FadeVolume || fadeTarget == FadeTarget.FadeBoth) ? 0f : volume;
-        mainSource.pitch = (fadeTarget == FadeTarget.FadePitch || fadeTarget == FadeTarget.FadeBoth) ? 0f : pitch;
-        mainSource.Play();
-
-        currentState = AmbientState.FadingIn;
-
-        // Fade in the new source
-        float elapsed2 = 0f;
-        float startVol2 = mainSource.volume;
-        float startPit2 = mainSource.pitch;
-
-        while (elapsed2 < fadeDuration && mainSource != null)
+        // Phase 2: Promote cue to main IMMEDIATELY when it starts playing
+        if (cueSource != null)
         {
-            elapsed2 += Time.deltaTime;
-            float t = elapsed2 / fadeDuration;
+            cueSource.Play();
+            
+            // PROMOTE CUE TO MAIN RIGHT AWAY - prevents bypass issues
+            mainSource = cueSource;
+            cueSource = null;
+            
+            currentState = AmbientState.FadingIn;
 
-            if (fadeTarget == FadeTarget.FadeVolume || fadeTarget == FadeTarget.FadeBoth)
-                mainSource.volume = Mathf.Lerp(startVol2, volume, t);
+            // Fade in the now-main source
+            float elapsed2 = 0f;
+            float startVol2 = mainSource.volume;
+            float startPit2 = mainSource.pitch;
 
-            if (fadeTarget == FadeTarget.FadePitch || fadeTarget == FadeTarget.FadeBoth)
-                mainSource.pitch = Mathf.Lerp(startPit2, pitch, t);
+            while (elapsed2 < fadeDuration && mainSource != null)
+            {
+                elapsed2 += Time.deltaTime;
+                float t = elapsed2 / fadeDuration;
 
-            yield return null;
-        }
+                if (fadeTarget == FadeTarget.FadeVolume || fadeTarget == FadeTarget.FadeBoth)
+                    mainSource.volume = Mathf.Lerp(startVol2, volume, t);
 
-        // Ensure final values
-        if (mainSource != null)
-        {
-            if (fadeTarget == FadeTarget.FadeVolume || fadeTarget == FadeTarget.FadeBoth)
-                mainSource.volume = volume;
-            if (fadeTarget == FadeTarget.FadePitch || fadeTarget == FadeTarget.FadeBoth)
-                mainSource.pitch = pitch;
+                if (fadeTarget == FadeTarget.FadePitch || fadeTarget == FadeTarget.FadeBoth)
+                    mainSource.pitch = Mathf.Lerp(startPit2, pitch, t);
+
+                yield return null;
+            }
+
+            // Ensure final values
+            if (mainSource != null)
+            {
+                if (fadeTarget == FadeTarget.FadeVolume || fadeTarget == FadeTarget.FadeBoth)
+                    mainSource.volume = volume;
+                if (fadeTarget == FadeTarget.FadePitch || fadeTarget == FadeTarget.FadeBoth)
+                    mainSource.pitch = pitch;
+            }
         }
 
         currentState = AmbientState.Playing;
