@@ -311,26 +311,28 @@ public class AmbientAudioTrack : MonoBehaviour
     {
         Debug.Log("[AmbientTrack] Starting Fade Out/In transition");
 
-        // Clean up any existing sources (safety)
+        // IMMEDIATE cleanup of any existing sources (safety)
+        if (outgoingCoroutine != null)
+        {
+            StopCoroutine(outgoingCoroutine);
+            outgoingCoroutine = null;
+        }
+    
         if (outgoingSource != null)
         {
-            if (outgoingCoroutine != null)
-            {
-                StopCoroutine(outgoingCoroutine);
-                outgoingCoroutine = null;
-            }
             outgoingSource.Stop();
             Destroy(outgoingSource.gameObject);
             outgoingSource = null;
         }
 
+        if (cueCoroutine != null)
+        {
+            StopCoroutine(cueCoroutine);
+            cueCoroutine = null;
+        }
+    
         if (cueSource != null)
         {
-            if (cueCoroutine != null)
-            {
-                StopCoroutine(cueCoroutine);
-                cueCoroutine = null;
-            }
             cueSource.Stop();
             Destroy(cueSource.gameObject);
             cueSource = null;
@@ -344,7 +346,7 @@ public class AmbientAudioTrack : MonoBehaviour
 
             // Start fade out, then fade in when complete
             currentState = AmbientState.FadingOut;
-            outgoingCoroutine = StartCoroutine(FadeOutThenFadeIn(outgoingSource, clip, volume, pitch, 
+            outgoingCoroutine = StartCoroutine(FadeOutThenFadeIn(outgoingSource, clip, volume, pitch,
                 spatialBlend, fadeDuration, fadeTarget, loop, attachTo));
         }
         else
