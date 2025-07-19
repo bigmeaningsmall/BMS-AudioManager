@@ -15,6 +15,7 @@ AudioMixerGroupController:
   m_Send: 00000000000000000000000000000000
   m_Effects:
   - {fileID: -5384948489965248949}
+  - {fileID: 6520595568123448050}
   m_UserColorIndex: 0
   m_Mute: 0
   m_Solo: 0
@@ -122,10 +123,13 @@ AudioMixerSnapshotController:
   m_FloatValues:
     01e1ba91a6d3aef4ca75799d52930417: 0.0767
     51d730036c290d3498f9b2461b704789: 0.3945702
+    5e6f6f0348dc3844b89fc1fbf302e72b: 5.6
     d5003123c1c4c0941bd05c0eeb0c87e8: 12370
     fe58bd3377622a946aa350deaef40b57: 0
     429750442ec7bde409e02585d2f0e39b: -1186
+    346322160c5ac7b4a8174c084909e591: -3270
     4e75e226bf0da8145bcf325c833748f1: 564
+    376ba8565ec29fc488d8fdebc1179a63: 2000
     be413517c4d31af4289a8007f5eb940c: 0
     d26649087474e904baf45571cc2058a3: -785
     a2b317589ba5f5a48892154b38778d69: -4284
@@ -216,6 +220,48 @@ AudioMixerGroupController:
   m_Mute: 0
   m_Solo: 0
   m_BypassEffects: 0
+--- !u!244 &6520595568123448050
+AudioMixerEffectController:
+  m_ObjectHideFlags: 3
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: 
+  m_EffectID: 86280b4596bc79a40a75ebc054e8e2ab
+  m_EffectName: SFX Reverb
+  m_MixLevel: 1c0840d13c4daa547a9617ea40257fc9
+  m_Parameters:
+  - m_ParameterName: Dry Level
+    m_GUID: 03d249161287ab34ca3cfce3d4547ec7
+  - m_ParameterName: Room
+    m_GUID: 346322160c5ac7b4a8174c084909e591
+  - m_ParameterName: Room HF
+    m_GUID: 48365b34f6fe65c4e92e5f540feb7d24
+  - m_ParameterName: Decay Time
+    m_GUID: 5e6f6f0348dc3844b89fc1fbf302e72b
+  - m_ParameterName: Decay HF Ratio
+    m_GUID: d15d9eb8a6b945f448678e70b7e02302
+  - m_ParameterName: Reflections
+    m_GUID: dd31d21cdef045549829d8297e59211b
+  - m_ParameterName: Reflect Delay
+    m_GUID: 9576bbb4e6cc59e4fa5a96e68c08018c
+  - m_ParameterName: Reverb
+    m_GUID: 376ba8565ec29fc488d8fdebc1179a63
+  - m_ParameterName: Reverb Delay
+    m_GUID: 390d1eeb8b09f7c48b47c8bb227273d1
+  - m_ParameterName: Diffusion
+    m_GUID: 1bf69ff36fc5c4046835f452c7eec5f5
+  - m_ParameterName: Density
+    m_GUID: 99942b01a3f4f114da410a769ad2e690
+  - m_ParameterName: HF Reference
+    m_GUID: bdad3a2c9c23743479ec89cd55293117
+  - m_ParameterName: Room LF
+    m_GUID: 0d345ae4e664a604c8a6ec6273c85b78
+  - m_ParameterName: LF Reference
+    m_GUID: e0936d57fbf77164ca8eb3f7002a0675
+  m_SendTarget: {fileID: 0}
+  m_EnableWetMix: 0
+  m_Bypass: 1
 --- !u!243 &7842468050713168027
 AudioMixerGroupController:
   m_ObjectHideFlags: 0
