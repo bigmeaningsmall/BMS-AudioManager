@@ -238,16 +238,16 @@ public class AudioEventSenderAmbientTrack : MonoBehaviour, IAudioEventSender
 
     private void StopAmbient()
     {
-        // if (AudioManager.Instance.isFadingAmbientAudio)
-        // {
+        if (AudioManager.Instance.isFadingAmbientAudio)
+        {
             // Handle the stop request if the AudioManager is fading
             AudioEventManager.stopAmbientTrack(fadeDuration, fadeTarget);
-        // }
-        // else
-        // {
+        }
+        else
+        {
             // Send the StopAmbient Event with parameters from the inspector
             AudioEventManager.stopAmbientTrack(fadeDuration, fadeTarget);
-        // }
+        }
     }
 
     private IEnumerator StopAmbient_Delayed(float delay)
@@ -259,10 +259,10 @@ public class AudioEventSenderAmbientTrack : MonoBehaviour, IAudioEventSender
     private IEnumerator WaitForFadeAndStop()
     {
         // Wait until the AudioManager is no longer fading
-        // while (AudioManager.Instance.isFadingAmbientAudio)
-        // {
+        while (AudioManager.Instance.isFadingAmbientAudio)
+        {
             yield return null;
-        // }
+        }
         // Send the StopAmbient Event with parameters from the inspector
         AudioEventManager.stopAmbientTrack(fadeDuration, fadeTarget);
     }
