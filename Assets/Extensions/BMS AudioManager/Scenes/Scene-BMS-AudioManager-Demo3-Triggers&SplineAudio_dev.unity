@@ -2022,18 +2022,28 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 620935151221146675, guid: ba89dcb19a3cf95418c455c01d332d04,
         type: 3}
+      propertyPath: pitch
+      value: 1.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 620935151221146675, guid: ba89dcb19a3cf95418c455c01d332d04,
+        type: 3}
       propertyPath: volume
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 620935151221146675, guid: ba89dcb19a3cf95418c455c01d332d04,
         type: 3}
       propertyPath: fadeType
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 620935151221146675, guid: ba89dcb19a3cf95418c455c01d332d04,
         type: 3}
       propertyPath: testMode
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 620935151221146675, guid: ba89dcb19a3cf95418c455c01d332d04,
+        type: 3}
+      propertyPath: eventDelay
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 620935151221146675, guid: ba89dcb19a3cf95418c455c01d332d04,
         type: 3}
@@ -2053,7 +2063,7 @@ PrefabInstance:
     - target: {fileID: 620935151221146675, guid: ba89dcb19a3cf95418c455c01d332d04,
         type: 3}
       propertyPath: fadeDuration
-      value: 2.9
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 620935151221146675, guid: ba89dcb19a3cf95418c455c01d332d04,
         type: 3}

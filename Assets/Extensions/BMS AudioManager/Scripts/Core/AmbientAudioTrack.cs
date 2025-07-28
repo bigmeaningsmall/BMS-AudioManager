@@ -451,31 +451,39 @@ public void Stop(float fadeDuration = 0f, FadeTarget fadeTarget = FadeTarget.Fad
     private void StartFromStopped(AudioClip clip, float volume, float pitch, float spatialBlend,
         float fadeDuration, FadeTarget fadeTarget, bool loop, Transform attachTo)
     {
+        Debug.Log($"[DEBUG] StartFromStopped called - fadeTarget: {fadeTarget}, fadeDuration: {fadeDuration}");
+    
         mainSource = CreateAudioSource(attachTo);
         if (mainSource == null) return;
-        
+    
         mainSource.clip = clip;
         mainSource.loop = loop;
         mainSource.spatialBlend = spatialBlend;
-        
+    
         if (fadeTarget == FadeTarget.Ignore || fadeDuration <= 0)
         {
+            Debug.Log("[DEBUG] Taking INSTANT play path");
             // Instant play
             mainSource.volume = volume;
             mainSource.pitch = pitch;
             mainSource.Play();
             currentState = AmbientState.Playing;
-            mainCoroutine = StartCoroutine(FadeInMain(fadeDuration, fadeTarget, volume, pitch)); // BUG: This shouldn't run!
         }
         else
         {
+            Debug.Log($"[DEBUG] Taking FADE play path - setting initial volume to: {(fadeTarget == FadeTarget.FadeVolume || fadeTarget == FadeTarget.FadeBoth ? 0f : volume)}");
+        
             // Fade in
             mainSource.volume = (fadeTarget == FadeTarget.FadeVolume || fadeTarget == FadeTarget.FadeBoth) ? 0f : volume;
             mainSource.pitch = (fadeTarget == FadeTarget.FadePitch || fadeTarget == FadeTarget.FadeBoth) ? 0f : pitch;
             mainSource.Play();
-            
+        
+            Debug.Log($"[DEBUG] Audio source playing: {mainSource.isPlaying}, volume: {mainSource.volume}");
+        
             currentState = AmbientState.FadingIn;
-            StartCoroutine(FadeInMain(fadeDuration, fadeTarget, volume, pitch));
+            mainCoroutine = StartCoroutine(FadeInMain(fadeDuration, fadeTarget, volume, pitch));
+        
+            Debug.Log("[DEBUG] Started FadeInMain coroutine");
         }
     }
     
@@ -597,8 +605,12 @@ public void Stop(float fadeDuration = 0f, FadeTarget fadeTarget = FadeTarget.Fad
 
         while (elapsed < duration && mainSource != null)
         {
-            // Check stop flag FIRST - exit immediately if stop was called
-            if (stopRequested) yield break;
+            // Check for stop interruption only - mainCoroutine assignment happens after StartCoroutine
+            if (stopRequested) 
+            {
+                Debug.Log("[AmbientTrack] FadeInMain interrupted by stop - exiting cleanly");
+                yield break;
+            }
 
             elapsed += Time.deltaTime;
             float t = elapsed / duration;
@@ -612,8 +624,8 @@ public void Stop(float fadeDuration = 0f, FadeTarget fadeTarget = FadeTarget.Fad
             yield return null;
         }
 
-        // Only finish if not stopped
-        if (!stopRequested && mainSource != null)
+        // Only finish if not interrupted - check AGAIN before setting final values
+        if (!stopRequested && mainSource != null && mainCoroutine != null)
         {
             if (fadeTarget == FadeTarget.FadeVolume || fadeTarget == FadeTarget.FadeBoth)
                 mainSource.volume = targetVol;
@@ -621,6 +633,11 @@ public void Stop(float fadeDuration = 0f, FadeTarget fadeTarget = FadeTarget.Fad
                 mainSource.pitch = targetPit;
 
             currentState = AmbientState.Playing;
+            Debug.Log("[AmbientTrack] FadeInMain completed successfully");
+        }
+        else
+        {
+            Debug.Log("[AmbientTrack] FadeInMain was interrupted - skipping final state change");
         }
     }
     
