@@ -14,20 +14,20 @@ public enum AmbientState
 public class AmbientAudioTrack : MonoBehaviour
 {
     [Header("Audio Sources (3-Source System)")]
-    [SerializeField] private AudioSource mainSource;      // Currently playing at target volume
-    [SerializeField] private AudioSource cueSource;       // Incoming audio (fading in)
-    [SerializeField] private AudioSource outgoingSource;  // Audio being faded out
+    private AudioSource mainSource;      // Currently playing at target volume
+    private AudioSource cueSource;       // Incoming audio (fading in)
+    private AudioSource outgoingSource;  // Audio being faded out
     
     private Coroutine mainCoroutine;  // Add this field at the top
     
-    #region Editor Sctuff
+
+    #region Editor Stuff
     // properties for editor debugging
     #if UNITY_EDITOR
-        public AudioSource MainSource => mainSource;
-        public AudioSource CueSource => cueSource;
-        public AudioSource OutgoingSource => outgoingSource;
+        public AudioSource MainSource => mainSource != null && mainSource ? mainSource : null;
+        public AudioSource CueSource => cueSource != null && cueSource ? cueSource : null;
+        public AudioSource OutgoingSource => outgoingSource != null && outgoingSource ? outgoingSource : null;
     #endif
-    
     #endregion
     
     [Header("State")]
