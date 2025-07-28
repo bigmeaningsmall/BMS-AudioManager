@@ -873,77 +873,77 @@ public void Stop(float fadeDuration = 0f, FadeTarget fadeTarget = FadeTarget.Fad
         mainCoroutine = null;
     }
     
-    
- private IEnumerator FadeAllToStop(float duration, FadeTarget fadeTarget)
-{
-    stopRequested = false; // Reset flag for this fade operation
-    
-    // Collect all active sources and capture their CURRENT VALUES
-    var activeSources = new System.Collections.Generic.List<(AudioSource source, float startVol, float startPit)>();
-
-    if (mainSource != null)
-        activeSources.Add((mainSource, mainSource.volume, mainSource.pitch));
-
-    if (cueSource != null)
-        activeSources.Add((cueSource, cueSource.volume, cueSource.pitch));
-
-    if (outgoingSource != null)
-        activeSources.Add((outgoingSource, outgoingSource.volume, outgoingSource.pitch));
-
-    if (activeSources.Count == 0)
+        
+     private IEnumerator FadeAllToStop(float duration, FadeTarget fadeTarget)
     {
-        currentState = AmbientState.Stopped;
-        mainCoroutine = null;
-        yield break;
-    }
+        stopRequested = false; // Reset flag for this fade operation
+        
+        // Collect all active sources and capture their CURRENT VALUES
+        var activeSources = new System.Collections.Generic.List<(AudioSource source, float startVol, float startPit)>();
 
-    Debug.Log($"[AmbientTrack] Fading {activeSources.Count} sources to stop over {duration}s");
+        if (mainSource != null)
+            activeSources.Add((mainSource, mainSource.volume, mainSource.pitch));
 
-    // Fade from the captured values - FORCE OVERRIDE every frame
-    float elapsed = 0f;
-    while (elapsed < duration)
-    {
-        elapsed += Time.deltaTime;
-        float t = elapsed / duration;
+        if (cueSource != null)
+            activeSources.Add((cueSource, cueSource.volume, cueSource.pitch));
 
-        for (int i = activeSources.Count - 1; i >= 0; i--)
-        {
-            var (source, startVol, startPit) = activeSources[i];
-
-            if (source == null)
-            {
-                activeSources.RemoveAt(i);
-                continue;
-            }
-
-            // FORCE these values every frame - overrides any other coroutines
-            if (fadeTarget == FadeTarget.FadeVolume || fadeTarget == FadeTarget.FadeBoth)
-            {
-                float targetVol = Mathf.Lerp(startVol, 0f, t);
-                source.volume = targetVol;
-                // Force it again to ensure it sticks
-                source.volume = targetVol;
-            }
-
-            if (fadeTarget == FadeTarget.FadePitch || fadeTarget == FadeTarget.FadeBoth)
-            {
-                float targetPit = Mathf.Lerp(startPit, 0f, t);
-                source.pitch = targetPit;
-                // Force it again to ensure it sticks
-                source.pitch = targetPit;
-            }
-        }
+        if (outgoingSource != null)
+            activeSources.Add((outgoingSource, outgoingSource.volume, outgoingSource.pitch));
 
         if (activeSources.Count == 0)
-            break;
+        {
+            currentState = AmbientState.Stopped;
+            mainCoroutine = null;
+            yield break;
+        }
 
-        yield return null;
+        Debug.Log($"[AmbientTrack] Fading {activeSources.Count} sources to stop over {duration}s");
+
+        // Fade from the captured values - FORCE OVERRIDE every frame
+        float elapsed = 0f;
+        while (elapsed < duration)
+        {
+            elapsed += Time.deltaTime;
+            float t = elapsed / duration;
+
+            for (int i = activeSources.Count - 1; i >= 0; i--)
+            {
+                var (source, startVol, startPit) = activeSources[i];
+
+                if (source == null)
+                {
+                    activeSources.RemoveAt(i);
+                    continue;
+                }
+
+                // FORCE these values every frame - overrides any other coroutines
+                if (fadeTarget == FadeTarget.FadeVolume || fadeTarget == FadeTarget.FadeBoth)
+                {
+                    float targetVol = Mathf.Lerp(startVol, 0f, t);
+                    source.volume = targetVol;
+                    // Force it again to ensure it sticks
+                    source.volume = targetVol;
+                }
+
+                if (fadeTarget == FadeTarget.FadePitch || fadeTarget == FadeTarget.FadeBoth)
+                {
+                    float targetPit = Mathf.Lerp(startPit, 0f, t);
+                    source.pitch = targetPit;
+                    // Force it again to ensure it sticks
+                    source.pitch = targetPit;
+                }
+            }
+
+            if (activeSources.Count == 0)
+                break;
+
+            yield return null;
+        }
+
+        InstantStop();
+        Debug.Log("[AmbientTrack] Fade stop complete");
+        mainCoroutine = null;
     }
-
-    InstantStop();
-    Debug.Log("[AmbientTrack] Fade stop complete");
-    mainCoroutine = null;
-}
     
     // ==================== HELPER METHODS ====================
     #region HELPER METHODS
@@ -972,8 +972,9 @@ public void Stop(float fadeDuration = 0f, FadeTarget fadeTarget = FadeTarget.Fad
             Debug.LogError("No ambient audio prefab set in AudioManager!");
             return null;
         }
-        
-        Transform parent = attachTo ?? transform;
+    
+        // If attachTo is null, use AudioManager's transform as default
+        Transform parent = attachTo ?? audioManager.transform;
         GameObject audioObj = Instantiate(prefab, parent.position, Quaternion.identity, parent);
         return audioObj.GetComponent<AudioSource>();
     }

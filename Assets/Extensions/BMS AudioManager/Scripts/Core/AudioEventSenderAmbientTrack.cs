@@ -167,19 +167,30 @@ public class AudioEventSenderAmbientTrack : MonoBehaviour, IAudioEventSender
 
     private void PlayAmbient()
     {
+        Transform targetTransform = null;
+    
+        if (attachToThisTransform)
+        {
+            targetTransform = this.transform;
+        }
+        else if (transformToAttachTo != null)
+        {
+            targetTransform = transformToAttachTo;
+        }
+
         if(!attachToThisTransform && transformToAttachTo == null){
             Debug.LogWarning("No Transform to attach to - using AudioManager");
             //send the PlayAmbient Event with parameters from the inspector
-            AudioEventManager.playAmbientTrack(null, ambientTrackNumber, ambientTrackName, volume, pitch, spatialBlend, fadeType, fadeDuration, fadeTarget, loopAmbient, eventName);
+            AudioEventManager.playAmbientTrack(targetTransform, ambientTrackNumber, ambientTrackName, volume, pitch, spatialBlend, fadeType, fadeDuration, fadeTarget, loopAmbient, eventName);
         }
         
         if (attachToThisTransform){
             //send the PlayAmbient Event with parameters from the inspector
-            AudioEventManager.playAmbientTrack(null, ambientTrackNumber, ambientTrackName, volume, pitch, spatialBlend, fadeType, fadeDuration, fadeTarget, loopAmbient, eventName);
+            AudioEventManager.playAmbientTrack(targetTransform, ambientTrackNumber, ambientTrackName, volume, pitch, spatialBlend, fadeType, fadeDuration, fadeTarget, loopAmbient, eventName);
         }
         if(transformToAttachTo != null){
             //send the PlayAmbient Event with parameters from the inspector
-            AudioEventManager.playAmbientTrack(null, ambientTrackNumber, ambientTrackName, volume, pitch, spatialBlend, fadeType, fadeDuration, fadeTarget, loopAmbient, eventName);
+            AudioEventManager.playAmbientTrack(targetTransform, ambientTrackNumber, ambientTrackName, volume, pitch, spatialBlend, fadeType, fadeDuration, fadeTarget, loopAmbient, eventName);
         }
 
     }
@@ -188,19 +199,30 @@ public class AudioEventSenderAmbientTrack : MonoBehaviour, IAudioEventSender
     {
         yield return new WaitForSeconds(delay);
         
+        Transform targetTransform = null;
+    
+        if (attachToThisTransform)
+        {
+            targetTransform = this.transform;
+        }
+        else if (transformToAttachTo != null)
+        {
+            targetTransform = transformToAttachTo;
+        }
+        
         if(!attachToThisTransform && transformToAttachTo == null){
             Debug.LogWarning("No Transform to attach to - using AudioManager");
             //send the PlayAmbient Event with parameters from the inspector
-            AudioEventManager.playAmbientTrack(transformToAttachTo, ambientTrackNumber, ambientTrackName, volume, pitch, spatialBlend, fadeType, fadeDuration, fadeTarget, loopAmbient, eventName);
+            AudioEventManager.playAmbientTrack(targetTransform, ambientTrackNumber, ambientTrackName, volume, pitch, spatialBlend, fadeType, fadeDuration, fadeTarget, loopAmbient, eventName);
         }
         
         if (attachToThisTransform){
             //send the PlayAmbient Event with parameters from the inspector
-            AudioEventManager.playAmbientTrack(transformToAttachTo, ambientTrackNumber, ambientTrackName, volume, pitch, spatialBlend, fadeType, fadeDuration, fadeTarget, loopAmbient, eventName);
+            AudioEventManager.playAmbientTrack(targetTransform, ambientTrackNumber, ambientTrackName, volume, pitch, spatialBlend, fadeType, fadeDuration, fadeTarget, loopAmbient, eventName);
         }
         if(transformToAttachTo != null){
             //send the PlayAmbient Event with parameters from the inspector
-            AudioEventManager.playAmbientTrack(transformToAttachTo, ambientTrackNumber, ambientTrackName, volume, pitch, spatialBlend, fadeType, fadeDuration, fadeTarget, loopAmbient, eventName);
+            AudioEventManager.playAmbientTrack(targetTransform, ambientTrackNumber, ambientTrackName, volume, pitch, spatialBlend, fadeType, fadeDuration, fadeTarget, loopAmbient, eventName);
         }
     }
 

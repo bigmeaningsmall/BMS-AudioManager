@@ -68,32 +68,34 @@ public class AmbientAudioTrackEditor : Editor
     private void OnSceneGUI()
     {
         AmbientAudioTrack track = (AmbientAudioTrack)target;
-        
-        // Scene view labels
-        Vector3 labelPos = track.transform.position + Vector3.up * 2f;
-        
+    
+        // Use HandleUtility.GetHandleSize for proper camera-relative scaling
+        float handleSize = HandleUtility.GetHandleSize(track.transform.position);
+        float spacing = handleSize * 0.5f; // Adjust this multiplier as needed
+    
+        // Scene view labels - start higher and use consistent spacing
+        Vector3 labelPos = track.transform.position + Vector3.up * (handleSize * 2f);
+    
+        // Fixed header spacing
         Handles.color = Color.white;
         Handles.Label(labelPos, $"Ambient Debug:\nState: {track.CurrentState}");
-        
-        labelPos += Vector3.down * 0.5f;
-        
-        // Main Source
+        labelPos += Vector3.down * (spacing * 0.5f); // Extra space for 2-line header
+    
+        // Dynamic source labels with consistent spacing
         if (track.MainSource != null)
         {
             Handles.color = Color.green;
             Handles.Label(labelPos, $"Main: Vol {track.MainSource.volume:F2} | Pitch {track.MainSource.pitch:F2}");
-            labelPos += Vector3.down * 0.8f;
+            labelPos += Vector3.down * spacing;
         }
-        
-        // Cue Source  
+    
         if (track.CueSource != null)
         {
             Handles.color = Color.yellow;
             Handles.Label(labelPos, $"Cue: Vol {track.CueSource.volume:F2} | Pitch {track.CueSource.pitch:F2}");
-            labelPos += Vector3.down * 0.4f;
+            labelPos += Vector3.down * spacing;
         }
-        
-        // Outgoing Source
+    
         if (track.OutgoingSource != null)
         {
             Handles.color = Color.cyan;
