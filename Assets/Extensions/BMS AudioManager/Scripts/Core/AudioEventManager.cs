@@ -31,10 +31,10 @@ public static class AudioEventManager
     public delegate void AudioEvent_PauseBGM_Track(float fadeDuration);
     
     //define a delegate for audio events - Ambient Music
-//define a delegate for audio events - Ambient Music
     public delegate void AudioEvent_PlayAmbientAudio_Track(Transform attachTo, int index, string trackName, float volume, float pitch, float spatialBlend, FadeType fadeType, float fadeDuration, FadeTarget fadeTarget, bool loopAmbient, string eventName);
     public delegate void AudioEvent_StopAmbientAudio_Track(float fadeDuration, FadeTarget fadeTarget);
     public delegate void AudioEvent_PauseAmbientAudio_Track(float fadeDuration, FadeTarget fadeTarget);
+    public delegate void AudioEvent_UpdateAmbientAudio_Track(Transform attachTo, float volume, float pitch, float spatialBlend, float fadeDuration, FadeTarget fadeTarget, bool loopAmbient, string eventName);
     
     
     // Define a delegate for audio events - Dialogue
@@ -63,6 +63,8 @@ public static class AudioEventManager
     public static AudioEvent_StopAmbientAudio_Track stopAmbientTrack;
     // pausing ambient music
     public static AudioEvent_PauseAmbientAudio_Track pauseAmbientTrack;
+    // updating ambient music
+    public static AudioEvent_UpdateAmbientAudio_Track updateAmbientTrack;
     
     // --- Events --- Dialogue - Single Track
     // playing dialogue

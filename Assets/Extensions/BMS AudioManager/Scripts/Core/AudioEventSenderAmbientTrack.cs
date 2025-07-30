@@ -150,6 +150,10 @@ public class AudioEventSenderAmbientTrack : MonoBehaviour, IAudioEventSender
             {
                 Pause();
             }
+
+            if (Input.GetKeyDown(KeyCode.V)){
+                // UpdateParameters();
+            }
         }
     }
 
@@ -260,33 +264,13 @@ public class AudioEventSenderAmbientTrack : MonoBehaviour, IAudioEventSender
 
     private void StopAmbient()
     {
-        // if (AudioManager.Instance.isFadingAmbientAudio)
-        // {
-            // Handle the stop request if the AudioManager is fading
-            AudioEventManager.stopAmbientTrack(fadeDuration, fadeTarget);
-        // }
-        // else
-        // {
-            // Send the StopAmbient Event with parameters from the inspector
-            AudioEventManager.stopAmbientTrack(fadeDuration, fadeTarget);
-        // }
+        AudioEventManager.stopAmbientTrack(fadeDuration, fadeTarget);
     }
 
     private IEnumerator StopAmbient_Delayed(float delay)
     {
         yield return new WaitForSeconds(delay);
         StopAmbient();
-    }
-
-    private IEnumerator WaitForFadeAndStop()
-    {
-        // Wait until the AudioManager is no longer fading
-        // while (AudioManager.Instance.isFadingAmbientAudio)
-        // {
-            yield return null;
-        // }
-        // Send the StopAmbient Event with parameters from the inspector
-        AudioEventManager.stopAmbientTrack(fadeDuration, fadeTarget);
     }
 
     // pause the ambient audio
@@ -314,6 +298,29 @@ public class AudioEventSenderAmbientTrack : MonoBehaviour, IAudioEventSender
         //send the PauseAmbient Event with parameters from the inspector
         AudioEventManager.pauseAmbientTrack(fadeDuration, fadeTarget);
     }
+    
+    // update the audio event sender parameters - instad of playing, stopping or pausing this will just update the parameters
+    public void UpdateParameters(){
+         if(eventDelay<= 0)
+         {  
+            UpdateParametersAmbient();
+         }else
+         {
+            StartCoroutine(UpdateParametersAmbient_Delayed(eventDelay));
+         }
+    }
+
+    private void UpdateParametersAmbient(){
+        //send the UpdateParametersAmbient Event with parameters from the inspector
+        AudioEventManager.updateAmbientTrack(transform, volume, pitch, spatialBlend, fadeDuration, fadeTarget, loopAmbient, eventName);
+    }
+
+    private IEnumerator UpdateParametersAmbient_Delayed(float delay){
+        yield return new WaitForSeconds(delay);
+        //send the UpdateParametersAmbient Event with parameters from the inspector
+        AudioEventManager.updateAmbientTrack(transform, volume, pitch, spatialBlend, fadeDuration, fadeTarget, loopAmbient, eventName);
+    }
+    
 
     #region Gizmo Visualization
 
