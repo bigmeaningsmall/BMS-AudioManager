@@ -46,6 +46,9 @@ public class AmbientAudioTrackEditor : Editor
 
     private void DrawSourceInfo(AmbientAudioTrack track)
     {
+        GUI.color = Color.white;
+        EditorGUILayout.LabelField($"Current State: {track.CurrentState}");
+        
         // Main Source
         GUI.color = track.MainSource != null ? Color.green : Color.red;
         EditorGUILayout.BeginHorizontal();
@@ -89,7 +92,7 @@ public class AmbientAudioTrackEditor : Editor
         EditorGUILayout.EndHorizontal();
 
         GUI.color = Color.white;
-        EditorGUILayout.LabelField($"Current State: {track.CurrentState}");
+
     }
 
     private void DrawLiveAudioInfo(AmbientAudioTrack track)

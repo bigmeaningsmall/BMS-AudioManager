@@ -31,7 +31,7 @@ public class AmbientAudioTrack : MonoBehaviour
     #endregion
     
     [Header("State")]
-    [SerializeField] private AmbientState currentState = AmbientState.Stopped;
+    private AmbientState currentState = AmbientState.Stopped;
     
     // Track settings (preserved for pause/resume)
     private float targetVolume = 1f;
