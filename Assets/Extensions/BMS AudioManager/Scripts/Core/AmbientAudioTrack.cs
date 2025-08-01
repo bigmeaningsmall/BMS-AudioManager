@@ -277,45 +277,44 @@ public class AmbientAudioTrack : MonoBehaviour
     /// <summary>
     /// Stop all audio immediately or with fade. Overrides everything and cleans up all sources.
     /// </summary>
-private bool stopRequested = false;
+    private bool stopRequested = false;
 
-public void Stop(float fadeDuration = 0f, FadeTarget fadeTarget = FadeTarget.FadeVolume)
-{
-    Debug.Log($"[AmbientTrack] Stop called - Current State: {currentState}");
-    
-    // Set the stop flag FIRST - this prevents any fade coroutines from continuing
-    stopRequested = true;
-    
-    // Stop all active coroutines
-    if (mainCoroutine != null)
+    public void Stop(float fadeDuration = 0f, FadeTarget fadeTarget = FadeTarget.FadeVolume)
     {
-        StopCoroutine(mainCoroutine);
-        mainCoroutine = null;
+        Debug.Log($"[AmbientTrack] Stop called - Current State: {currentState}");
+        
+        // Set the stop flag FIRST - this prevents any fade coroutines from continuing
+        stopRequested = true;
+        
+        // Stop all active coroutines
+        if (mainCoroutine != null)
+        {
+            StopCoroutine(mainCoroutine);
+            mainCoroutine = null;
+        }
+        
+        if (cueCoroutine != null)
+        {
+            StopCoroutine(cueCoroutine);
+            cueCoroutine = null;
+        }
+        
+        if (outgoingCoroutine != null)
+        {
+            StopCoroutine(outgoingCoroutine);
+            outgoingCoroutine = null;
+        }
+        
+        if (fadeDuration <= 0f)
+        {
+            InstantStop();
+        }
+        else
+        {
+            currentState = AmbientState.FadingOut;
+            mainCoroutine = StartCoroutine(FadeAllToStop(fadeDuration, fadeTarget));
+        }
     }
-    
-    if (cueCoroutine != null)
-    {
-        StopCoroutine(cueCoroutine);
-        cueCoroutine = null;
-    }
-    
-    if (outgoingCoroutine != null)
-    {
-        StopCoroutine(outgoingCoroutine);
-        outgoingCoroutine = null;
-    }
-    
-    if (fadeDuration <= 0f)
-    {
-        InstantStop();
-    }
-    else
-    {
-        currentState = AmbientState.FadingOut;
-        mainCoroutine = StartCoroutine(FadeAllToStop(fadeDuration, fadeTarget));
-    }
-}
-
     
     /// <summary>
     /// Instantly stop and destroy all sources
@@ -350,6 +349,91 @@ public void Stop(float fadeDuration = 0f, FadeTarget fadeTarget = FadeTarget.Fad
         Debug.Log("[AmbientTrack] Instant stop complete");
     }
     
+
+    /// <summary>
+    /// Update parameters of the currently playing main source with optional fading
+    /// Works during Playing and FadingIn states - can interrupt existing fades with new targets
+    /// </summary>
+    public void UpdateParameters(Transform newAttachTo, float newVolume, float newPitch, 
+        float newSpatialBlend, float fadeDuration, FadeTarget fadeTarget, bool newLoop, string eventName)
+    {
+        Debug.Log($"[AmbientTrack] UpdateParameters called - Current State: {currentState}");
+        
+        // Safety check - allow updates during Playing and FadingIn states
+        if (currentState != AmbientState.Playing && currentState != AmbientState.FadingIn)
+        {
+            Debug.LogWarning($"[AmbientTrack] Cannot update parameters during state: {currentState}. Only allowed during Playing or FadingIn states.");
+            return;
+        }
+        
+        // Must have a main source to update
+        if (mainSource == null)
+        {
+            Debug.LogWarning("[AmbientTrack] No main source to update parameters for.");
+            return;
+        }
+        
+        Debug.Log($"[AmbientTrack] Updating parameters - Volume: {newVolume}, Pitch: {newPitch}, SpatialBlend: {newSpatialBlend}, FadeTarget: {fadeTarget}");
+        
+        // Store new target settings
+        targetVolume = newVolume;
+        targetPitch = newPitch;
+        currentSpatialBlend = newSpatialBlend;
+        isLooping = newLoop;
+        
+        // Instant updates (no fading needed)
+        // Transform change - only if it's actually different and not null
+        if (newAttachTo != null && newAttachTo != mainSource.transform.parent)
+        {
+            mainSource.transform.SetParent(newAttachTo);
+            mainSource.transform.position = newAttachTo.position;
+            Debug.Log($"[AmbientTrack] Moved audio source to new parent: {newAttachTo.name}");
+        }
+        else if (newAttachTo != null)
+        {
+            Debug.Log("[AmbientTrack] Transform not changed - already attached to specified parent");
+        }
+        
+        // Loop setting - instant
+        mainSource.loop = newLoop;
+        
+        // Spatial blend - instant (could be faded in Phase 2)
+        mainSource.spatialBlend = newSpatialBlend;
+        
+        // Volume and Pitch updates based on FadeTarget
+        if (fadeTarget == FadeTarget.Ignore)
+        {
+            // Ignore means don't update volume/pitch at all (like in Play method)
+            Debug.Log("[AmbientTrack] FadeTarget.Ignore - Volume and Pitch not updated");
+        }
+        else if (fadeDuration <= 0f)
+        {
+            // Instant parameter changes when no fade duration
+            if (fadeTarget == FadeTarget.FadeVolume || fadeTarget == FadeTarget.FadeBoth)
+                mainSource.volume = newVolume;
+                
+            if (fadeTarget == FadeTarget.FadePitch || fadeTarget == FadeTarget.FadeBoth)
+                mainSource.pitch = newPitch;
+                
+            Debug.Log("[AmbientTrack] Parameters updated instantly (no fade duration)");
+        }
+        else
+        {
+            // Faded parameter changes - can interrupt existing fades
+            // Stop any existing main coroutine first
+            if (mainCoroutine != null)
+            {
+                StopCoroutine(mainCoroutine);
+                mainCoroutine = null;
+                Debug.Log("[AmbientTrack] Interrupted existing fade for new parameter targets");
+            }
+            
+            // Start parameter fade
+            currentState = AmbientState.FadingIn; // Reusing existing state for parameter fading
+            mainCoroutine = StartCoroutine(FadeParametersToTarget(fadeDuration, fadeTarget, newVolume, newPitch));
+            Debug.Log($"[AmbientTrack] Started parameter fade - duration: {fadeDuration}s, target: {fadeTarget}");
+        }
+    }
     
     #endregion
 
@@ -803,7 +887,6 @@ public void Stop(float fadeDuration = 0f, FadeTarget fadeTarget = FadeTarget.Fad
         outgoingCoroutine = null;
     }
     
-    
     //Pause
     private IEnumerator FadeToPause(float duration, FadeTarget fadeTarget)
     {
@@ -945,6 +1028,60 @@ public void Stop(float fadeDuration = 0f, FadeTarget fadeTarget = FadeTarget.Fad
         mainCoroutine = null;
     }
     
+    /// <summary>
+    /// Fade current main source parameters to new target values
+    /// Similar to FadeInMain but starts from current values instead of 0
+    /// </summary>
+    private IEnumerator FadeParametersToTarget(float duration, FadeTarget fadeTarget, float targetVol, float targetPit)
+    {
+        if (mainSource == null) yield break;
+    
+        float elapsed = 0f;
+        float startVol = mainSource.volume;
+        float startPit = mainSource.pitch;
+    
+        Debug.Log($"[AmbientTrack] Parameter fade starting - From Vol:{startVol:F2}/Pitch:{startPit:F2} To Vol:{targetVol:F2}/Pitch:{targetPit:F2}");
+
+        while (elapsed < duration && mainSource != null)
+        {
+            // Check for stop interruption only (removed mainCoroutine check)
+            if (stopRequested) 
+            {
+                Debug.Log("[AmbientTrack] Parameter fade interrupted by stop - exiting cleanly");
+                yield break;
+            }
+
+            elapsed += Time.deltaTime;
+            float t = elapsed / duration;
+
+            if (fadeTarget == FadeTarget.FadeVolume || fadeTarget == FadeTarget.FadeBoth)
+                mainSource.volume = Mathf.Lerp(startVol, targetVol, t);
+
+            if (fadeTarget == FadeTarget.FadePitch || fadeTarget == FadeTarget.FadeBoth)
+                mainSource.pitch = Mathf.Lerp(startPit, targetPit, t);
+
+            yield return null;
+        }
+
+        // Only finish if not interrupted
+        if (!stopRequested && mainSource != null)
+        {
+            if (fadeTarget == FadeTarget.FadeVolume || fadeTarget == FadeTarget.FadeBoth)
+                mainSource.volume = targetVol;
+            if (fadeTarget == FadeTarget.FadePitch || fadeTarget == FadeTarget.FadeBoth)
+                mainSource.pitch = targetPit;
+
+            currentState = AmbientState.Playing; // Return to stable playing state
+            Debug.Log("[AmbientTrack] Parameter fade completed successfully");
+        }
+        else
+        {
+            Debug.Log("[AmbientTrack] Parameter fade was interrupted - skipping final state change");
+        }
+    
+        mainCoroutine = null;
+    }
+     
     // ==================== HELPER METHODS ====================
     #region HELPER METHODS
 

@@ -75,6 +75,7 @@ public class AudioManager : MonoBehaviour
         AudioEventManager.playAmbientTrack += PlayAmbient;
         AudioEventManager.stopAmbientTrack += StopAmbient;
         AudioEventManager.pauseAmbientTrack += PauseAmbient;
+        AudioEventManager.updateAmbientTrack += UpdateAmbient;
         
         AudioEventManager.PlaySFX += PlaySoundEffect;
         
@@ -92,6 +93,7 @@ public class AudioManager : MonoBehaviour
         AudioEventManager.playAmbientTrack -= PlayAmbient;
         AudioEventManager.stopAmbientTrack -= StopAmbient;
         AudioEventManager.pauseAmbientTrack -= PauseAmbient;
+        AudioEventManager.updateAmbientTrack -= UpdateAmbient;
         
         AudioEventManager.PlaySFX -= PlaySoundEffect;
     }
@@ -182,7 +184,7 @@ public class AudioManager : MonoBehaviour
             Debug.LogError("AmbientTrack reference is null!");
             return;
         }
-        //ambientTrack.UpdateParameters(attachTo, volume, pitch, spatialBlend, fadeDuration, fadeTarget, loop, eventName);
+        ambientTrack.UpdateParameters(attachTo, volume, pitch, spatialBlend, fadeDuration, fadeTarget, loop, eventName);
     }
 
     // SFX Management (UNCHANGED)

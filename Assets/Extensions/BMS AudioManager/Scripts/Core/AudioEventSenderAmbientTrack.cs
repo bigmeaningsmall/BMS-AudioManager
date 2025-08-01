@@ -152,7 +152,7 @@ public class AudioEventSenderAmbientTrack : MonoBehaviour, IAudioEventSender
             }
 
             if (Input.GetKeyDown(KeyCode.V)){
-                // UpdateParameters();
+                UpdateParameters();
             }
         }
     }
