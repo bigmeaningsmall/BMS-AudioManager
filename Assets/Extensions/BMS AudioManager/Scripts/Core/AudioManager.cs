@@ -161,7 +161,7 @@ public class AudioManager : MonoBehaviour
             Debug.LogError("AmbientTrack reference is null!");
             return;
         }
-        ambientTrack.Stop(fadeDuration, fadeTarget); //todo: Uncomment when Stop method is implemented
+        ambientTrack.Stop(fadeDuration, fadeTarget); 
     }
 
     public void PauseAmbient(float fadeDuration, FadeTarget fadeTarget)
@@ -171,8 +171,18 @@ public class AudioManager : MonoBehaviour
             Debug.LogError("AmbientTrack reference is null!");
             return;
         }
-        //ambientTrack.Pause(fadeDuration, fadeTarget); //todo: Uncomment when Pause method is implemented
         ambientTrack.PauseToggle(fadeDuration, fadeTarget);
+    }
+    
+    //method to update parameters of ambient audio
+    public void UpdateAmbient(Transform attachTo, float volume, float pitch, float spatialBlend, float fadeDuration, FadeTarget fadeTarget, bool loop, string eventName)
+    {
+        if (ambientTrack == null)
+        {
+            Debug.LogError("AmbientTrack reference is null!");
+            return;
+        }
+        //ambientTrack.UpdateParameters(attachTo, volume, pitch, spatialBlend, fadeDuration, fadeTarget, loop, eventName);
     }
 
     // SFX Management (UNCHANGED)
