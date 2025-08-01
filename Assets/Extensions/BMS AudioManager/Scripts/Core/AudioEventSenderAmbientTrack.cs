@@ -66,7 +66,7 @@ public class AudioEventSenderAmbientTrack : MonoBehaviour, IAudioEventSender
     private const float TRIGGER_FEEDBACK_DURATION = 0.2f;
     
     [Space(20)]
-    [Header("TestMode : 'M' to play ambient, 'N' to stop, 'B' to pause")]
+    [Header("TestMode : 'M' to play ambient, 'N' to stop, 'B' to pause and 'V' to update parameters")]
     public bool testMode = false;
 
     
@@ -182,20 +182,22 @@ public class AudioEventSenderAmbientTrack : MonoBehaviour, IAudioEventSender
             targetTransform = transformToAttachTo;
         }
 
-        if(!attachToThisTransform && transformToAttachTo == null){
-            Debug.LogWarning("No Transform to attach to - using AudioManager");
-            //send the PlayAmbient Event with parameters from the inspector
-            AudioEventManager.playAmbientTrack(targetTransform, ambientTrackNumber, ambientTrackName, volume, pitch, spatialBlend, fadeType, fadeDuration, fadeTarget, loopAmbient, eventName);
-        }
+        AudioEventManager.playAmbientTrack(targetTransform, ambientTrackNumber, ambientTrackName, volume, pitch, spatialBlend, fadeType, fadeDuration, fadeTarget, loopAmbient, eventName);
         
-        if (attachToThisTransform){
-            //send the PlayAmbient Event with parameters from the inspector
-            AudioEventManager.playAmbientTrack(targetTransform, ambientTrackNumber, ambientTrackName, volume, pitch, spatialBlend, fadeType, fadeDuration, fadeTarget, loopAmbient, eventName);
-        }
-        if(transformToAttachTo != null){
-            //send the PlayAmbient Event with parameters from the inspector
-            AudioEventManager.playAmbientTrack(targetTransform, ambientTrackNumber, ambientTrackName, volume, pitch, spatialBlend, fadeType, fadeDuration, fadeTarget, loopAmbient, eventName);
-        }
+        // if(!attachToThisTransform && transformToAttachTo == null){
+        //     Debug.LogWarning("No Transform to attach to - using AudioManager");
+        //     //send the PlayAmbient Event with parameters from the inspector
+        //     AudioEventManager.playAmbientTrack(targetTransform, ambientTrackNumber, ambientTrackName, volume, pitch, spatialBlend, fadeType, fadeDuration, fadeTarget, loopAmbient, eventName);
+        // }
+        //
+        // if (attachToThisTransform){
+        //     //send the PlayAmbient Event with parameters from the inspector
+        //     AudioEventManager.playAmbientTrack(targetTransform, ambientTrackNumber, ambientTrackName, volume, pitch, spatialBlend, fadeType, fadeDuration, fadeTarget, loopAmbient, eventName);
+        // }
+        // if(transformToAttachTo != null){
+        //     //send the PlayAmbient Event with parameters from the inspector
+        //     AudioEventManager.playAmbientTrack(targetTransform, ambientTrackNumber, ambientTrackName, volume, pitch, spatialBlend, fadeType, fadeDuration, fadeTarget, loopAmbient, eventName);
+        // }
 
     }
 
@@ -214,20 +216,22 @@ public class AudioEventSenderAmbientTrack : MonoBehaviour, IAudioEventSender
             targetTransform = transformToAttachTo;
         }
         
-        if(!attachToThisTransform && transformToAttachTo == null){
-            Debug.LogWarning("No Transform to attach to - using AudioManager");
-            //send the PlayAmbient Event with parameters from the inspector
-            AudioEventManager.playAmbientTrack(targetTransform, ambientTrackNumber, ambientTrackName, volume, pitch, spatialBlend, fadeType, fadeDuration, fadeTarget, loopAmbient, eventName);
-        }
+        AudioEventManager.playAmbientTrack(targetTransform, ambientTrackNumber, ambientTrackName, volume, pitch, spatialBlend, fadeType, fadeDuration, fadeTarget, loopAmbient, eventName);
         
-        if (attachToThisTransform){
-            //send the PlayAmbient Event with parameters from the inspector
-            AudioEventManager.playAmbientTrack(targetTransform, ambientTrackNumber, ambientTrackName, volume, pitch, spatialBlend, fadeType, fadeDuration, fadeTarget, loopAmbient, eventName);
-        }
-        if(transformToAttachTo != null){
-            //send the PlayAmbient Event with parameters from the inspector
-            AudioEventManager.playAmbientTrack(targetTransform, ambientTrackNumber, ambientTrackName, volume, pitch, spatialBlend, fadeType, fadeDuration, fadeTarget, loopAmbient, eventName);
-        }
+        // if(!attachToThisTransform && transformToAttachTo == null){
+        //     Debug.LogWarning("No Transform to attach to - using AudioManager");
+        //     //send the PlayAmbient Event with parameters from the inspector
+        //     AudioEventManager.playAmbientTrack(targetTransform, ambientTrackNumber, ambientTrackName, volume, pitch, spatialBlend, fadeType, fadeDuration, fadeTarget, loopAmbient, eventName);
+        // }
+        //
+        // if (attachToThisTransform){
+        //     //send the PlayAmbient Event with parameters from the inspector
+        //     AudioEventManager.playAmbientTrack(targetTransform, ambientTrackNumber, ambientTrackName, volume, pitch, spatialBlend, fadeType, fadeDuration, fadeTarget, loopAmbient, eventName);
+        // }
+        // if(transformToAttachTo != null){
+        //     //send the PlayAmbient Event with parameters from the inspector
+        //     AudioEventManager.playAmbientTrack(targetTransform, ambientTrackNumber, ambientTrackName, volume, pitch, spatialBlend, fadeType, fadeDuration, fadeTarget, loopAmbient, eventName);
+        // }
     }
 
     private void OnTriggerExit(Collider other)
@@ -311,14 +315,39 @@ public class AudioEventSenderAmbientTrack : MonoBehaviour, IAudioEventSender
     }
 
     private void UpdateParametersAmbient(){
+        
+        Transform targetTransform = null;
+    
+        if (attachToThisTransform)
+        {
+            targetTransform = this.transform;
+        }
+        else if (transformToAttachTo != null)
+        {
+            targetTransform = transformToAttachTo;
+        }
+        
         //send the UpdateParametersAmbient Event with parameters from the inspector
-        AudioEventManager.updateAmbientTrack(transform, volume, pitch, spatialBlend, fadeDuration, fadeTarget, loopAmbient, eventName);
+        AudioEventManager.updateAmbientTrack(targetTransform, volume, pitch, spatialBlend, fadeDuration, fadeTarget, loopAmbient, eventName);
     }
 
     private IEnumerator UpdateParametersAmbient_Delayed(float delay){
+        
         yield return new WaitForSeconds(delay);
+        
+        Transform targetTransform = null;
+    
+        if (attachToThisTransform)
+        {
+            targetTransform = this.transform;
+        }
+        else if (transformToAttachTo != null)
+        {
+            targetTransform = transformToAttachTo;
+        }
+        
         //send the UpdateParametersAmbient Event with parameters from the inspector
-        AudioEventManager.updateAmbientTrack(transform, volume, pitch, spatialBlend, fadeDuration, fadeTarget, loopAmbient, eventName);
+        AudioEventManager.updateAmbientTrack(targetTransform, volume, pitch, spatialBlend, fadeDuration, fadeTarget, loopAmbient, eventName);
     }
     
 
