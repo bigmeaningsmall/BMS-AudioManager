@@ -129,6 +129,7 @@ GameObject:
   m_Component:
   - component: {fileID: 154231098}
   - component: {fileID: 154231097}
+  - component: {fileID: 154231099}
   m_Layer: 0
   m_Name: Test
   m_TagString: Untagged
@@ -163,6 +164,24 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &154231099
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 154231096}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b43c43d06f8a47d4a84f8af9533ad8a5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  fadeDuration: 1.5
+  volume: 1
+  pitch: 1
+  spatialBlend: 0
+  loop: 0
+  attachTo: {fileID: 0}
 --- !u!1 &203844586
 GameObject:
   m_ObjectHideFlags: 0
@@ -302,10 +321,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7382d7b606514ed45ad25b2811994a0c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mainSource: {fileID: 0}
-  cueSource: {fileID: 0}
-  outgoingSource: {fileID: 0}
-  currentState: 0
 --- !u!1001 &469305101
 PrefabInstance:
   m_ObjectHideFlags: 0

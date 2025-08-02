@@ -76,6 +76,11 @@ public class AudioManager : MonoBehaviour
         AudioEventManager.stopAmbientTrack += StopAmbient;
         AudioEventManager.pauseAmbientTrack += PauseAmbient;
         AudioEventManager.updateAmbientTrack += UpdateAmbient;
+        AudioEventManager.setAmbientVolume += SetAmbientVolume;
+        AudioEventManager.setAmbientPitch += SetAmbientPitch;
+        AudioEventManager.setAmbientSpatialBlend += SetAmbientSpatialBlend;
+        AudioEventManager.setAmbientLoop += SetAmbientLoop;
+        AudioEventManager.moveAmbientSource += MoveAmbientSource;
         
         AudioEventManager.PlaySFX += PlaySoundEffect;
         
@@ -94,6 +99,11 @@ public class AudioManager : MonoBehaviour
         AudioEventManager.stopAmbientTrack -= StopAmbient;
         AudioEventManager.pauseAmbientTrack -= PauseAmbient;
         AudioEventManager.updateAmbientTrack -= UpdateAmbient;
+        AudioEventManager.setAmbientVolume -= SetAmbientVolume;
+        AudioEventManager.setAmbientPitch -= SetAmbientPitch;
+        AudioEventManager.setAmbientSpatialBlend -= SetAmbientSpatialBlend;
+        AudioEventManager.setAmbientLoop -= SetAmbientLoop;
+        AudioEventManager.moveAmbientSource -= MoveAmbientSource;
         
         AudioEventManager.PlaySFX -= PlaySoundEffect;
     }
@@ -133,6 +143,8 @@ public class AudioManager : MonoBehaviour
     }
     #endregion
 
+    #region Public Accessors for Audio Resources
+
     // Public accessors for tracks to get resources
     public AudioClip GetAmbientClip(int index) => ambientAudioTracks.TryGetValue(index, out AudioClip clip) ? clip : null;
     public AudioClip GetAmbientClip(string name)
@@ -145,6 +157,10 @@ public class AudioManager : MonoBehaviour
     }
     public GameObject GetAmbientPrefab() => ambientAudioPrefab;
 
+
+    #endregion
+    
+    
     // Ambient Audio Event Methods (just pass to track)
     public void PlayAmbient(Transform attachTo, int trackNumber, string trackName, float volume, float pitch, float spatialBlend, FadeType fadeType, float fadeDuration, FadeTarget fadeTarget, bool loop, string eventName)
     {
@@ -187,6 +203,53 @@ public class AudioManager : MonoBehaviour
         ambientTrack.UpdateParameters(attachTo, volume, pitch, spatialBlend, fadeDuration, fadeTarget, loop, eventName);
     }
 
+    public void SetAmbientVolume(float volume, float fadeDuration)
+    {
+        if (ambientTrack == null)
+        {
+            Debug.LogError("AmbientTrack reference is null!");
+            return;
+        }
+        //ambientTrack.SetVolume(volume, fadeDuration);
+    }
+    public void SetAmbientPitch(float pitch, float fadeDuration)
+    {
+        if (ambientTrack == null)
+        {
+            Debug.LogError("AmbientTrack reference is null!");
+            return;
+        }
+        //ambientTrack.SetPitch(pitch, fadeDuration);
+    }
+    public void SetAmbientSpatialBlend(float spatialBlend)
+    {
+        if (ambientTrack == null)
+        {
+            Debug.LogError("AmbientTrack reference is null!");
+            return;
+        }
+        //ambientTrack.SetSpatialBlend(spatialBlend);
+    }
+    public void SetAmbientLoop(bool loop)
+    {
+        if (ambientTrack == null)
+        {
+            Debug.LogError("AmbientTrack reference is null!");
+            return;
+        }
+        //ambientTrack.SetLoop(loop, fadeDuration);
+    }
+    public void MoveAmbientSource(Transform target)
+    {
+        if (ambientTrack == null)
+        {
+            Debug.LogError("AmbientTrack reference is null!");
+            return;
+        }
+        //ambientTrack.MoveSource(target);
+    }
+    
+    
     // SFX Management (UNCHANGED)
     #region Play Sound Effects
     public void PlaySoundEffect(Transform attachTo, string soundName, float volume, float pitch, bool randomizePitch, float pitchRange, float spatialBlend, string eventName)

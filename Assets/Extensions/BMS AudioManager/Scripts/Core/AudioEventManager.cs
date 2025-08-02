@@ -35,6 +35,12 @@ public static class AudioEventManager
     public delegate void AudioEvent_StopAmbientAudio_Track(float fadeDuration, FadeTarget fadeTarget);
     public delegate void AudioEvent_PauseAmbientAudio_Track(float fadeDuration, FadeTarget fadeTarget);
     public delegate void AudioEvent_UpdateAmbientAudio_Track(Transform attachTo, float volume, float pitch, float spatialBlend, float fadeDuration, FadeTarget fadeTarget, bool loopAmbient, string eventName);
+
+    public delegate void AudioEvent_SetAmbinetVolume(float volume, float fadeDuration);
+    public delegate void AudioEvent_SetAmbientPitch(float pitch, float fadeDuration);
+    public delegate void AudioEvent_SetAmbientSpatialBlend(float spatialBlend);
+    public delegate void AudioEvent_SetAmbientLoop(bool loop);
+    public delegate void AudioEvent_MoveAmbinetSource(Transform target);
     
     
     // Define a delegate for audio events - Dialogue
@@ -65,6 +71,17 @@ public static class AudioEventManager
     public static AudioEvent_PauseAmbientAudio_Track pauseAmbientTrack;
     // updating ambient music
     public static AudioEvent_UpdateAmbientAudio_Track updateAmbientTrack;
+    // setting ambient volume
+    public static AudioEvent_SetAmbinetVolume setAmbientVolume;
+    // setting ambient pitch
+    public static AudioEvent_SetAmbientPitch setAmbientPitch;
+    // setting ambient spatial blend
+    public static AudioEvent_SetAmbientSpatialBlend setAmbientSpatialBlend;
+    // setting ambient loop
+    public static AudioEvent_SetAmbientLoop setAmbientLoop;
+    // moving ambient source
+    public static AudioEvent_MoveAmbinetSource moveAmbientSource;
+    
     
     // --- Events --- Dialogue - Single Track
     // playing dialogue
