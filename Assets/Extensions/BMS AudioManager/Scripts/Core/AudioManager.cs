@@ -51,6 +51,18 @@ public class AudioManager : MonoBehaviour
     [SerializeField] private List<string> soundEffectNames = new List<string>();
     #endregion
 
+    // Parameter and Porperty References for tracks - these are for checking and reference
+    // Parameters for ambient audio - used for getting current state info
+    //[HideInInspector]
+    public AmbientParamters ambientParamters;
+    private int index = 0; // Track index for identification
+    private string trackName = "Ambient Track"; // Track name for identification
+    private string eventName = "AmbientAudioTrackEvent"; // Event name for identification
+    
+    /// <summary>
+    /// METHODS START HERE ------------------------------------------------------
+    /// </summary>
+    
     // Singleton Pattern
     #region Initialise Singleton Pattern
     private void Awake()
@@ -76,11 +88,6 @@ public class AudioManager : MonoBehaviour
         AudioEventManager.stopAmbientTrack += StopAmbient;
         AudioEventManager.pauseAmbientTrack += PauseAmbient;
         AudioEventManager.updateAmbientTrack += UpdateAmbient;
-        AudioEventManager.setAmbientVolume += SetAmbientVolume;
-        AudioEventManager.setAmbientPitch += SetAmbientPitch;
-        AudioEventManager.setAmbientSpatialBlend += SetAmbientSpatialBlend;
-        AudioEventManager.setAmbientLoop += SetAmbientLoop;
-        AudioEventManager.moveAmbientSource += MoveAmbientSource;
         
         AudioEventManager.PlaySFX += PlaySoundEffect;
         
@@ -99,11 +106,6 @@ public class AudioManager : MonoBehaviour
         AudioEventManager.stopAmbientTrack -= StopAmbient;
         AudioEventManager.pauseAmbientTrack -= PauseAmbient;
         AudioEventManager.updateAmbientTrack -= UpdateAmbient;
-        AudioEventManager.setAmbientVolume -= SetAmbientVolume;
-        AudioEventManager.setAmbientPitch -= SetAmbientPitch;
-        AudioEventManager.setAmbientSpatialBlend -= SetAmbientSpatialBlend;
-        AudioEventManager.setAmbientLoop -= SetAmbientLoop;
-        AudioEventManager.moveAmbientSource -= MoveAmbientSource;
         
         AudioEventManager.PlaySFX -= PlaySoundEffect;
     }
@@ -160,7 +162,7 @@ public class AudioManager : MonoBehaviour
 
     #endregion
     
-    
+    //----------------------------------------------------------
     // Ambient Audio Event Methods (just pass to track)
     public void PlayAmbient(Transform attachTo, int trackNumber, string trackName, float volume, float pitch, float spatialBlend, FadeType fadeType, float fadeDuration, FadeTarget fadeTarget, bool loop, string eventName)
     {
@@ -202,51 +204,58 @@ public class AudioManager : MonoBehaviour
         }
         ambientTrack.UpdateParameters(attachTo, volume, pitch, spatialBlend, fadeDuration, fadeTarget, loop, eventName);
     }
+    //override UpdateAmbient methods for different parameters
+    public void UpdateAmbient(Transform attachTo){
+        
+    }
 
-    public void SetAmbientVolume(float volume, float fadeDuration)
-    {
-        if (ambientTrack == null)
-        {
-            Debug.LogError("AmbientTrack reference is null!");
-            return;
-        }
-        //ambientTrack.SetVolume(volume, fadeDuration);
+    
+    
+    //---------------------------------------------------------- ambientTrack.currentState == AmbientState.Playing || 
+    
+    private void LateUpdate(){
+        
+        // Update ambient parameters if the track is fading 
+        UpdateAmbientParameters();
     }
-    public void SetAmbientPitch(float pitch, float fadeDuration)
-    {
-        if (ambientTrack == null)
+    
+    private void UpdateAmbientParameters(){
+        
+        AudioSource currentSource;
+            
+        // handle fadeinout and crossfade separately
+        if (ambientTrack.currentState == AmbientState.Crossfading){
+            currentSource = ambientTrack.mainSource ? ambientTrack.mainSource : ambientTrack.cueSource;
+        }
+        else{
+            currentSource = ambientTrack.mainSource ? ambientTrack.mainSource : ambientTrack.outgoingSource;
+        }
+        
+        if (currentSource == null)
         {
-            Debug.LogError("AmbientTrack reference is null!");
+            Debug.LogWarning("No active audio source found for ambient track.");
             return;
         }
-        //ambientTrack.SetPitch(pitch, fadeDuration);
-    }
-    public void SetAmbientSpatialBlend(float spatialBlend)
-    {
-        if (ambientTrack == null)
-        {
-            Debug.LogError("AmbientTrack reference is null!");
-            return;
-        }
-        //ambientTrack.SetSpatialBlend(spatialBlend);
-    }
-    public void SetAmbientLoop(bool loop)
-    {
-        if (ambientTrack == null)
-        {
-            Debug.LogError("AmbientTrack reference is null!");
-            return;
-        }
-        //ambientTrack.SetLoop(loop, fadeDuration);
-    }
-    public void MoveAmbientSource(Transform target)
-    {
-        if (ambientTrack == null)
-        {
-            Debug.LogError("AmbientTrack reference is null!");
-            return;
-        }
-        //ambientTrack.MoveSource(target);
+        
+        //TODO - CONTINUE HERE.... -- need to update it once in playing state when there is no crossfade or fade in/out
+        
+        if (ambientTrack.currentState == AmbientState.FadingIn || ambientTrack.currentState == AmbientState.FadingOut || ambientTrack.currentState == AmbientState.Crossfading){
+            ambientParamters.attachedTo = currentSource.transform.parent;
+            
+            ambientParamters.volume = currentSource.volume;
+            ambientParamters.pitch = currentSource.pitch;
+            ambientParamters.spatialBlend = currentSource.spatialBlend;
+            ambientParamters.loopAmbient = currentSource.loop;
+            
+            ambientParamters.trackName = currentSource.clip != null ? currentSource.clip.name : "No Clip";
+            
+            //remove "(Clone)" from the track name if it exists
+            if (ambientParamters.trackName.Contains("(Clone)"))
+            {
+                ambientParamters.trackName = ambientParamters.trackName.Replace("(Clone)", "").Trim();
+            }
+        } 
+        
     }
     
     

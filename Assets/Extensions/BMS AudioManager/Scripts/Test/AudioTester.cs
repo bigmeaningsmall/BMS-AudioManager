@@ -19,23 +19,23 @@ public class AudioTester : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.Alpha1))
         {
-            AudioEventManager.setAmbientVolume(volume, fadeDuration);
+            
         }
         if (Input.GetKeyDown(KeyCode.Alpha2))
         {
-            AudioEventManager.setAmbientPitch(pitch, fadeDuration);
+            
         }
         if (Input.GetKeyDown(KeyCode.Alpha3))
         {
-            AudioEventManager.setAmbientSpatialBlend(spatialBlend);
+            
         }
         if (Input.GetKeyDown(KeyCode.Alpha4))
         {
-            AudioEventManager.setAmbientLoop(loop);
+            
         }
         if (Input.GetKeyDown(KeyCode.Alpha5))
         {
-            AudioEventManager.moveAmbientSource(attachTo);
+            
         }
         if (Input.GetKeyDown(KeyCode.Alpha6))
         {

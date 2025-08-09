@@ -25,7 +25,8 @@ public class AudioEventSenderAmbientTrack : MonoBehaviour, IAudioEventSender
     public bool loopAmbient = true;
 
     [Space(10)]
-    [Range(0, 1f)] public float spatialBlend = 0f;
+    [Range(0, 1f)] 
+    public float spatialBlend = 0f;
     
     public FadeType fadeType = FadeType.FadeInOut;
     

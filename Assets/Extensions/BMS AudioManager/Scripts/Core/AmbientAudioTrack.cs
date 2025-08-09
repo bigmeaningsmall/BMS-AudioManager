@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using UnityEngine;
 
@@ -13,10 +14,11 @@ public enum AmbientState
 
 public class AmbientAudioTrack : MonoBehaviour
 {
+    
     [Header("Audio Sources (3-Source System)")]
-    private AudioSource mainSource;      // Currently playing at target volume
-    private AudioSource cueSource;       // Incoming audio (fading in)
-    private AudioSource outgoingSource;  // Audio being faded out
+    [HideInInspector] public AudioSource mainSource;      // Currently playing at target volume
+    [HideInInspector] public AudioSource cueSource;       // Incoming audio (fading in)
+    [HideInInspector] public AudioSource outgoingSource;  // Audio being faded out
     
     private Coroutine mainCoroutine;  // Add this field at the top
     
@@ -31,7 +33,7 @@ public class AmbientAudioTrack : MonoBehaviour
     #endregion
     
     [Header("State")]
-    private AmbientState currentState = AmbientState.Stopped;
+    [HideInInspector] public AmbientState currentState = AmbientState.Stopped;
     
     // Track settings (preserved for pause/resume)
     private float targetVolume = 1f;
@@ -46,6 +48,8 @@ public class AmbientAudioTrack : MonoBehaviour
     // Reference to AudioManager for resources
     private AudioManager audioManager;
     
+
+    
     private void Awake()
     {
         audioManager = GetComponent<AudioManager>();
@@ -54,6 +58,27 @@ public class AmbientAudioTrack : MonoBehaviour
             Debug.LogError("AmbientAudioTrack must be a child of AudioManager!");
         }
     }
+
+    
+    // private void Update(){
+    //     if (mainSource && currentState == AmbientState.Playing){
+    //         ambientParamters.attachedTo = mainSource.transform.parent;
+    //         
+    //         ambientParamters.volume = mainSource.volume;
+    //         ambientParamters.pitch = mainSource.pitch;
+    //         ambientParamters.spatialBlend = mainSource.spatialBlend;
+    //         ambientParamters.loopAmbient = mainSource.loop;
+    //         
+    //         ambientParamters.trackName = mainSource.clip != null ? mainSource.clip.name : "No Clip";
+    //         
+    //         //remove "(Clone)" from the track name if it exists
+    //         if (ambientParamters.trackName.Contains("(Clone)"))
+    //         {
+    //             ambientParamters.trackName = ambientParamters.trackName.Replace("(Clone)", "").Trim();
+    //         }
+    //     }    
+    // }
+
 
     // ==================== PUBLIC CALL METHODS ====================
     #region PUBLIC METHODS
