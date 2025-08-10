@@ -4,7 +4,7 @@ using UnityEngine;
 
 
 [System.Serializable]
-public class AmbientParamters
+public class AudioTrackParamters
 {
     public Transform attachedTo;
     public int index;
@@ -16,7 +16,7 @@ public class AmbientParamters
     public string eventName;
 
     // Constructor to initialize all parameters
-    public AmbientParamters(Transform attachedTo, int index, string trackName, float volume, float pitch, float spatialBlend,  bool loopAmbient, string eventName)
+    public AudioTrackParamters(Transform attachedTo, int index, string trackName, float volume, float pitch, float spatialBlend,  bool loopAmbient, string eventName)
     {
         this.attachedTo = attachedTo;
         this.index = index;

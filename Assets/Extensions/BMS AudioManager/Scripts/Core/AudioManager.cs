@@ -51,10 +51,11 @@ public class AudioManager : MonoBehaviour
     [SerializeField] private List<string> soundEffectNames = new List<string>();
     #endregion
 
+    [Space(10)]
     // Parameter and Porperty References for tracks - these are for checking and reference
     // Parameters for ambient audio - used for getting current state info
     //[HideInInspector]
-    public AmbientParamters ambientParamters;
+    public AudioTrackParamters ambientTrackParamters;
     private int index = 0; // Track index for identification
     private string trackName = "Ambient Track"; // Track name for identification
     private string eventName = "AmbientAudioTrackEvent"; // Event name for identification
@@ -240,19 +241,19 @@ public class AudioManager : MonoBehaviour
         //TODO - CONTINUE HERE.... -- need to update it once in playing state when there is no crossfade or fade in/out
         
         if (ambientTrack.currentState == AmbientState.FadingIn || ambientTrack.currentState == AmbientState.FadingOut || ambientTrack.currentState == AmbientState.Crossfading){
-            ambientParamters.attachedTo = currentSource.transform.parent;
+            ambientTrackParamters.attachedTo = currentSource.transform.parent;
             
-            ambientParamters.volume = currentSource.volume;
-            ambientParamters.pitch = currentSource.pitch;
-            ambientParamters.spatialBlend = currentSource.spatialBlend;
-            ambientParamters.loopAmbient = currentSource.loop;
+            ambientTrackParamters.volume = currentSource.volume;
+            ambientTrackParamters.pitch = currentSource.pitch;
+            ambientTrackParamters.spatialBlend = currentSource.spatialBlend;
+            ambientTrackParamters.loopAmbient = currentSource.loop;
             
-            ambientParamters.trackName = currentSource.clip != null ? currentSource.clip.name : "No Clip";
+            ambientTrackParamters.trackName = currentSource.clip != null ? currentSource.clip.name : "No Clip";
             
             //remove "(Clone)" from the track name if it exists
-            if (ambientParamters.trackName.Contains("(Clone)"))
+            if (ambientTrackParamters.trackName.Contains("(Clone)"))
             {
-                ambientParamters.trackName = ambientParamters.trackName.Replace("(Clone)", "").Trim();
+                ambientTrackParamters.trackName = ambientTrackParamters.trackName.Replace("(Clone)", "").Trim();
             }
         } 
         

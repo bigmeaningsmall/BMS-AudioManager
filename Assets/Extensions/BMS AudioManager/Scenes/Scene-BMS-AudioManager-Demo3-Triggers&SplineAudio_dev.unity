@@ -321,6 +321,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7382d7b606514ed45ad25b2811994a0c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  mainSource: {fileID: 0}
+  cueSource: {fileID: 0}
+  outgoingSource: {fileID: 0}
+  currentState: 0
 --- !u!1001 &469305101
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2038,7 +2042,7 @@ PrefabInstance:
     - target: {fileID: 620935151221146675, guid: ba89dcb19a3cf95418c455c01d332d04,
         type: 3}
       propertyPath: pitch
-      value: 1.5
+      value: 1.18
       objectReference: {fileID: 0}
     - target: {fileID: 620935151221146675, guid: ba89dcb19a3cf95418c455c01d332d04,
         type: 3}
@@ -2048,7 +2052,7 @@ PrefabInstance:
     - target: {fileID: 620935151221146675, guid: ba89dcb19a3cf95418c455c01d332d04,
         type: 3}
       propertyPath: fadeType
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 620935151221146675, guid: ba89dcb19a3cf95418c455c01d332d04,
         type: 3}
@@ -2078,7 +2082,7 @@ PrefabInstance:
     - target: {fileID: 620935151221146675, guid: ba89dcb19a3cf95418c455c01d332d04,
         type: 3}
       propertyPath: fadeDuration
-      value: 0.63
+      value: 2.11
       objectReference: {fileID: 0}
     - target: {fileID: 620935151221146675, guid: ba89dcb19a3cf95418c455c01d332d04,
         type: 3}
