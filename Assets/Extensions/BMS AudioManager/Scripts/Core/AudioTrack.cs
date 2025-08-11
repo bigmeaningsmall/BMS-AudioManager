@@ -1183,29 +1183,21 @@ public class AudioTrack : MonoBehaviour
 
         Transform parent = attachTo ?? audioManager.transform;
         GameObject audioObj = Instantiate(prefab, parent.position, Quaternion.identity, parent);
-        AudioSource audioSource = audioObj.GetComponent<AudioSource>();
-    
-        // Simple - just attach monitor, it'll figure out the rest in Update
-        audioObj.AddComponent<AudioCompletionMonitor>().Initialize(this, audioSource);
-    
-        return audioSource;
+        return audioObj.GetComponent<AudioSource>();
     }
-    
-    public void OnAudioCompleted(AudioSource completedSource)
+
+    private void Update()
     {
-        Debug.Log($"[AudioTrack] OnAudioCompleted called - Source: {completedSource.name}");
-        Debug.Log($"[AudioTrack] Current state: {currentState}");
-        Debug.Log($"[AudioTrack] Main source match: {completedSource == mainSource}");
-    
-        // Only handle completion for main source when it's actively playing
-        if (completedSource == mainSource && currentState == AudioTrackState.Playing)
+        // Only check when we have a main source that's supposed to be playing
+        if (mainSource != null && currentState == AudioTrackState.Playing && 
+            mainSource.clip != null && !mainSource.loop)
         {
-            Debug.Log("[AudioTrack] Natural audio end detected - calling InstantStop()");
-            InstantStop();
-        }
-        else
-        {
-            Debug.Log("[AudioTrack] Ignoring completion - either not main source or not playing state");
+            // Check if non-looped audio has finished
+            if (!mainSource.isPlaying || mainSource.time >= mainSource.clip.length - 0.01f)
+            {
+                Debug.Log($"[AudioTrack] Non-looped audio finished: {mainSource.clip.name}");
+                InstantStop();
+            }
         }
     }
 
