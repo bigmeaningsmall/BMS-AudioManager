@@ -85,10 +85,10 @@ public class AudioManager : MonoBehaviour
     #region Event Subscriptions
     private void OnEnable()
     {
-        AudioEventManager.playAmbientTrack += PlayAmbient;
-        AudioEventManager.stopAmbientTrack += StopAmbient;
-        AudioEventManager.pauseAmbientTrack += PauseAmbient;
-        AudioEventManager.updateAmbientTrack += UpdateAmbient;
+        AudioEventManager.playTrack += PlayTrack;
+        AudioEventManager.stopTrack += StopTrack;
+        AudioEventManager.pauseTrack += PauseTrack;
+        AudioEventManager.updateTrack += UpdateTrack;
         
         AudioEventManager.PlaySFX += PlaySoundEffect;
         
@@ -103,10 +103,10 @@ public class AudioManager : MonoBehaviour
 
     private void OnDisable()
     {
-        AudioEventManager.playAmbientTrack -= PlayAmbient;
-        AudioEventManager.stopAmbientTrack -= StopAmbient;
-        AudioEventManager.pauseAmbientTrack -= PauseAmbient;
-        AudioEventManager.updateAmbientTrack -= UpdateAmbient;
+        AudioEventManager.playTrack -= PlayTrack;
+        AudioEventManager.stopTrack -= StopTrack;
+        AudioEventManager.pauseTrack -= PauseTrack;
+        AudioEventManager.updateTrack -= UpdateTrack;
         
         AudioEventManager.PlaySFX -= PlaySoundEffect;
     }
@@ -130,6 +130,13 @@ public class AudioManager : MonoBehaviour
             ambientAudioTrackNames.Add(ambientClips[i].name);
         }
 
+        AudioClip[] dialogueClips = Resources.LoadAll<AudioClip>("Audio/Dialogue");
+        for (int i = 0; i < dialogueClips.Length; i++)
+        {
+            dialogueAudioTracks[i] = dialogueClips[i];
+            dialogueTrackNames.Add(dialogueClips[i].name);
+        }
+        
         AudioClip[] sfxClips = Resources.LoadAll<AudioClip>("Audio/SFX");
         foreach (var clip in sfxClips)
         {
@@ -137,12 +144,6 @@ public class AudioManager : MonoBehaviour
             soundEffectNames.Add(clip.name);
         }
         
-        AudioClip[] dialogueClips = Resources.LoadAll<AudioClip>("Audio/Dialogue");
-        for (int i = 0; i < dialogueClips.Length; i++)
-        {
-            dialogueAudioTracks[i] = dialogueClips[i];
-            dialogueTrackNames.Add(dialogueClips[i].name);
-        }
     }
     #endregion
 
@@ -189,7 +190,7 @@ public class AudioManager : MonoBehaviour
     
     //----------------------------------------------------------
     // Ambient Audio Event Methods (just pass to track)
-    public void PlayAmbient(Transform attachTo, int trackNumber, string trackName, float volume, float pitch, float spatialBlend, FadeType fadeType, float fadeDuration, FadeTarget fadeTarget, bool loop, string eventName)
+    public void PlayTrack(AudioTrackType trackType, Transform attachTo, int trackNumber, string trackName, float volume, float pitch, float spatialBlend, FadeType fadeType, float fadeDuration, FadeTarget fadeTarget, bool loop, string eventName)
     {
         if (ambientTrack == null)
         {
@@ -206,7 +207,7 @@ public class AudioManager : MonoBehaviour
         
     }
 
-    public void StopAmbient(float fadeDuration, FadeTarget fadeTarget)
+    public void StopTrack(AudioTrackType trackType, float fadeDuration, FadeTarget fadeTarget)
     {
         if (ambientTrack == null)
         {
@@ -216,7 +217,7 @@ public class AudioManager : MonoBehaviour
         ambientTrack.Stop(fadeDuration, fadeTarget); 
     }
 
-    public void PauseAmbient(float fadeDuration, FadeTarget fadeTarget)
+    public void PauseTrack(AudioTrackType trackType, float fadeDuration, FadeTarget fadeTarget)
     {
         if (ambientTrack == null)
         {
@@ -227,7 +228,7 @@ public class AudioManager : MonoBehaviour
     }
     
     //method to update parameters of ambient audio
-    public void UpdateAmbient(Transform attachTo, float volume, float pitch, float spatialBlend, float fadeDuration, FadeTarget fadeTarget, bool loop, string eventName)
+    public void UpdateTrack(AudioTrackType trackType, Transform attachTo, float volume, float pitch, float spatialBlend, float fadeDuration, FadeTarget fadeTarget, bool loop, string eventName)
     {
         if (ambientTrack == null)
         {
@@ -247,7 +248,7 @@ public class AudioManager : MonoBehaviour
         ambientTrackParamters = new AudioTrackParamters(attachTo, tNum, tName, volume, pitch, spatialBlend, loop, eName);
     }
     //override UpdateAmbient methods for different parameters
-    public void UpdateAmbient(Transform attachTo){
+    public void UpdateTrack(AudioTrackType trackType, Transform attachTo){
         
     }
 

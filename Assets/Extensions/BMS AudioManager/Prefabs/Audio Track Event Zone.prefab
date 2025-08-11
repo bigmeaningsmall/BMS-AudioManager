@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1 &8128336122570014985
+--- !u!1 &5274121441138690220
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -8,11 +8,11 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 1579101417476909642}
-  - component: {fileID: 8134523434868682155}
-  - component: {fileID: 7898715726831358809}
-  - component: {fileID: 6490514194078008281}
-  - component: {fileID: 8158587965730192418}
+  - component: {fileID: 6014174656882223073}
+  - component: {fileID: 3053702275367522626}
+  - component: {fileID: 3141949443376146658}
+  - component: {fileID: 1699617394561818098}
+  - component: {fileID: 5355574976095253072}
   m_Layer: 0
   m_Name: Audio Track Event Zone
   m_TagString: Untagged
@@ -20,36 +20,36 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &1579101417476909642
+--- !u!4 &6014174656882223073
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8128336122570014985}
+  m_GameObject: {fileID: 5274121441138690220}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -4, y: 0, z: 7}
+  m_LocalPosition: {x: -9.5, y: 0, z: 1}
   m_LocalScale: {x: 5, y: 5, z: 5}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!33 &8134523434868682155
+--- !u!33 &3053702275367522626
 MeshFilter:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8128336122570014985}
+  m_GameObject: {fileID: 5274121441138690220}
   m_Mesh: {fileID: 10207, guid: 0000000000000000e000000000000000, type: 0}
---- !u!23 &7898715726831358809
+--- !u!23 &3141949443376146658
 MeshRenderer:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8128336122570014985}
+  m_GameObject: {fileID: 5274121441138690220}
   m_Enabled: 1
   m_CastShadows: 1
   m_ReceiveShadows: 1
@@ -88,13 +88,13 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!135 &6490514194078008281
+--- !u!135 &1699617394561818098
 SphereCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8128336122570014985}
+  m_GameObject: {fileID: 5274121441138690220}
   m_Material: {fileID: 0}
   m_IncludeLayers:
     serializedVersion: 2
@@ -109,19 +109,20 @@ SphereCollider:
   serializedVersion: 3
   m_Radius: 0.5
   m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &8158587965730192418
+--- !u!114 &5355574976095253072
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8128336122570014985}
+  m_GameObject: {fileID: 5274121441138690220}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 315f6d115b468f947904b4cb2de27ea9, type: 3}
+  m_Script: {fileID: 11500000, guid: e91a017eacbc87646a9581339fde84f4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  eventName: Custom Ambient Event Name
+  audioTrackType: 1
+  eventName: Custom Event Name
   attachToThisTransform: 0
   transformToAttachTo: {fileID: 0}
   ambientTrackNumber: -1
@@ -130,10 +131,10 @@ MonoBehaviour:
   loop: 1
   spatialBlend: 0
   fadeType: 0
-  fadeDuration: 2.11
+  fadeDuration: 0.5
   fadeTarget: 3
   volume: 1
-  pitch: 1.18
+  pitch: 1
   eventDelay: 0
   collisionType: 2
   targetTag: Player
@@ -141,4 +142,4 @@ MonoBehaviour:
   useTransformScale: 1
   showTriggerInfo: 1
   triggerActiveColor: {r: 0, g: 1, b: 0, a: 0.8}
-  testMode: 1
+  testMode: 0

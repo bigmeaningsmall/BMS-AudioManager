@@ -1255,46 +1255,6 @@ PrefabInstance:
       insertIndex: -1
       addedObject: {fileID: 225177040}
   m_SourcePrefab: {fileID: 100100000, guid: ccc2f9deca1fd8440a1f8646e2051deb, type: 3}
---- !u!1 &1066035052 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 5274121441138690220, guid: ba89dcb19a3cf95418c455c01d332d04,
-    type: 3}
-  m_PrefabInstance: {fileID: 1809776765}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &1066035058
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1066035052}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e91a017eacbc87646a9581339fde84f4, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  audioTrackType: 1
-  eventName: Custom Ambient Event Name
-  attachToThisTransform: 0
-  transformToAttachTo: {fileID: 0}
-  ambientTrackNumber: -1
-  ambientTrackName: NormConnors_VaporStarship
-  playOnEnabled: 0
-  loop: 1
-  spatialBlend: 0
-  fadeType: 0
-  fadeDuration: 0.5
-  fadeTarget: 3
-  volume: 1
-  pitch: 1
-  eventDelay: 0
-  collisionType: 2
-  targetTag: Player
-  stopOnExit: 1
-  useTransformScale: 1
-  showTriggerInfo: 1
-  triggerActiveColor: {r: 0, g: 1, b: 0, a: 0.8}
-  testMode: 1
 --- !u!1 &1308476517 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 8972554719354881190, guid: d3011a8d9e8e2cb47ad213dfabb34e15,
@@ -2103,7 +2063,7 @@ PrefabInstance:
     - target: {fileID: 620935151221146675, guid: ba89dcb19a3cf95418c455c01d332d04,
         type: 3}
       propertyPath: m_Enabled
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 620935151221146675, guid: ba89dcb19a3cf95418c455c01d332d04,
         type: 3}
@@ -2213,11 +2173,7 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 5274121441138690220, guid: ba89dcb19a3cf95418c455c01d332d04,
-        type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 1066035058}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: ba89dcb19a3cf95418c455c01d332d04, type: 3}
 --- !u!1 &1903994565
 GameObject:
@@ -2328,6 +2284,74 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1001 &2140064040
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 5274121441138690220, guid: 89621415efb6a794087214f779dcb9f2,
+        type: 3}
+      propertyPath: m_Name
+      value: Audio Track Event Zone
+      objectReference: {fileID: 0}
+    - target: {fileID: 6014174656882223073, guid: 89621415efb6a794087214f779dcb9f2,
+        type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -9.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 6014174656882223073, guid: 89621415efb6a794087214f779dcb9f2,
+        type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6014174656882223073, guid: 89621415efb6a794087214f779dcb9f2,
+        type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6014174656882223073, guid: 89621415efb6a794087214f779dcb9f2,
+        type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6014174656882223073, guid: 89621415efb6a794087214f779dcb9f2,
+        type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6014174656882223073, guid: 89621415efb6a794087214f779dcb9f2,
+        type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6014174656882223073, guid: 89621415efb6a794087214f779dcb9f2,
+        type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6014174656882223073, guid: 89621415efb6a794087214f779dcb9f2,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6014174656882223073, guid: 89621415efb6a794087214f779dcb9f2,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6014174656882223073, guid: 89621415efb6a794087214f779dcb9f2,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 89621415efb6a794087214f779dcb9f2, type: 3}
 --- !u!4 &2146425261 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 5143825374747379946, guid: e13bc75ae0e07474caa0f3fbc9b0f2fa,
@@ -2472,74 +2496,6 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 3312ccb5aaf9ed342abb38cb6f46a79c, type: 3}
---- !u!1001 &6508253018175444060
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    serializedVersion: 3
-    m_TransformParent: {fileID: 0}
-    m_Modifications:
-    - target: {fileID: 1579101417476909642, guid: 5a285a02de3c4fa4987af398cad6ecca,
-        type: 3}
-      propertyPath: m_LocalPosition.x
-      value: -4
-      objectReference: {fileID: 0}
-    - target: {fileID: 1579101417476909642, guid: 5a285a02de3c4fa4987af398cad6ecca,
-        type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1579101417476909642, guid: 5a285a02de3c4fa4987af398cad6ecca,
-        type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 7
-      objectReference: {fileID: 0}
-    - target: {fileID: 1579101417476909642, guid: 5a285a02de3c4fa4987af398cad6ecca,
-        type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 1579101417476909642, guid: 5a285a02de3c4fa4987af398cad6ecca,
-        type: 3}
-      propertyPath: m_LocalRotation.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1579101417476909642, guid: 5a285a02de3c4fa4987af398cad6ecca,
-        type: 3}
-      propertyPath: m_LocalRotation.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1579101417476909642, guid: 5a285a02de3c4fa4987af398cad6ecca,
-        type: 3}
-      propertyPath: m_LocalRotation.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1579101417476909642, guid: 5a285a02de3c4fa4987af398cad6ecca,
-        type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1579101417476909642, guid: 5a285a02de3c4fa4987af398cad6ecca,
-        type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1579101417476909642, guid: 5a285a02de3c4fa4987af398cad6ecca,
-        type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8128336122570014985, guid: 5a285a02de3c4fa4987af398cad6ecca,
-        type: 3}
-      propertyPath: m_Name
-      value: Audio Track Event Zone
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-    m_RemovedGameObjects: []
-    m_AddedGameObjects: []
-    m_AddedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: 5a285a02de3c4fa4987af398cad6ecca, type: 3}
 --- !u!1001 &8446865978859788715
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2614,9 +2570,9 @@ SceneRoots:
   m_Roots:
   - {fileID: 961739753}
   - {fileID: 1024325076}
+  - {fileID: 2140064040}
   - {fileID: 846978592}
   - {fileID: 1809776765}
-  - {fileID: 6508253018175444060}
   - {fileID: 321655844322372680}
   - {fileID: 1380987046}
   - {fileID: 1008412875}
