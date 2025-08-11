@@ -1126,8 +1126,8 @@ public class AudioTrack : MonoBehaviour
      
     // ==================== HELPER METHODS ====================
     #region HELPER METHODS
-    
-// Replace ResolveAudioClip method in AudioTrack with this (back to your original logic):
+
+    // Resolve audio clip by track number or name
     private AudioClip ResolveAudioClip(int trackNumber, string trackName)
     {
         if (audioManager == null)
@@ -1167,7 +1167,6 @@ public class AudioTrack : MonoBehaviour
     
     private AudioSource CreateAudioSource(Transform attachTo = null)
     {
-        //GameObject prefab = audioManager.GetAmbientPrefab();
         GameObject prefab = trackType switch
         {
             AudioTrackType.BGM => audioManager.GetBGMPrefab(),
@@ -1175,17 +1174,39 @@ public class AudioTrack : MonoBehaviour
             AudioTrackType.Dialogue => audioManager.GetDialoguePrefab(),
             _ => null
         };
-        
+    
         if (prefab == null)
         {
-            Debug.LogError("No ambient audio prefab set in AudioManager!");
+            Debug.LogError("No audio prefab set in AudioManager!");
             return null;
         }
-    
-        // If attachTo is null, use AudioManager's transform as default
+
         Transform parent = attachTo ?? audioManager.transform;
         GameObject audioObj = Instantiate(prefab, parent.position, Quaternion.identity, parent);
-        return audioObj.GetComponent<AudioSource>();
+        AudioSource audioSource = audioObj.GetComponent<AudioSource>();
+    
+        // Simple - just attach monitor, it'll figure out the rest in Update
+        audioObj.AddComponent<AudioCompletionMonitor>().Initialize(this, audioSource);
+    
+        return audioSource;
+    }
+    
+    public void OnAudioCompleted(AudioSource completedSource)
+    {
+        Debug.Log($"[AudioTrack] OnAudioCompleted called - Source: {completedSource.name}");
+        Debug.Log($"[AudioTrack] Current state: {currentState}");
+        Debug.Log($"[AudioTrack] Main source match: {completedSource == mainSource}");
+    
+        // Only handle completion for main source when it's actively playing
+        if (completedSource == mainSource && currentState == AudioTrackState.Playing)
+        {
+            Debug.Log("[AudioTrack] Natural audio end detected - calling InstantStop()");
+            InstantStop();
+        }
+        else
+        {
+            Debug.Log("[AudioTrack] Ignoring completion - either not main source or not playing state");
+        }
     }
 
     #endregion
