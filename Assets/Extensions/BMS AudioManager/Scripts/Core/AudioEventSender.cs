@@ -19,8 +19,8 @@ public class AudioEventSender : MonoBehaviour
     [Header("Audio Tack - Event Parameters")]
     [Space(20)]
     [Tooltip("The track number of the audio clip to play - used if no name is given -1 to ignore")]
-    public int ambientTrackNumber = 0; // WILL USE THE TRACK NUMBER IF NO NAME IS GIVEN
-    public string ambientTrackName = "TRACK NAME HERE"; //IF NO NAME IS GIVEN, THE TRACK NUMBER WILL BE USED
+    public int trackNumber = 0; // WILL USE THE TRACK NUMBER IF NO NAME IS GIVEN
+    public string trackName = "TRACK NAME HERE"; //IF NO NAME IS GIVEN, THE TRACK NUMBER WILL BE USED
 
     [Space(20)]
     public bool playOnEnabled = true;
@@ -61,7 +61,7 @@ public class AudioEventSender : MonoBehaviour
     [Tooltip("Show trigger info labels in editor")]
     public bool showTriggerInfo = true;
     [Tooltip("Color when trigger is activated")]
-    public Color triggerActiveColor = new Color(0f, 1f, 0f, 0.8f); // Green when active (ambient theme)
+    public Color triggerActiveColor = new Color(0f, 1f, 0f, 0.8f); // Green when active 
 
     // For showing activation feedback
     private bool isTriggered = false;
@@ -69,7 +69,7 @@ public class AudioEventSender : MonoBehaviour
     private const float TRIGGER_FEEDBACK_DURATION = 0.2f;
     
     [Space(20)]
-    [Header("TestMode : 'M' to play ambient, 'N' to stop, 'B' to pause and 'V' to update parameters")]
+    [Header("TestMode : 'M' to play, 'N' to stop, 'B' to pause and 'V' to update parameters")]
     public bool testMode = false;
 
     
@@ -185,7 +185,7 @@ public class AudioEventSender : MonoBehaviour
             targetTransform = transformToAttachTo;
         }
 
-        AudioEventManager.playTrack(audioTrackType, targetTransform, ambientTrackNumber, ambientTrackName, volume, pitch, spatialBlend, fadeType, fadeDuration, fadeTarget, loop, eventName);
+        AudioEventManager.playTrack(audioTrackType, targetTransform, trackNumber, trackName, volume, pitch, spatialBlend, fadeType, fadeDuration, fadeTarget, loop, eventName);
 
     }
 
@@ -204,7 +204,7 @@ public class AudioEventSender : MonoBehaviour
             targetTransform = transformToAttachTo;
         }
         
-        AudioEventManager.playTrack(audioTrackType, targetTransform, ambientTrackNumber, ambientTrackName, volume, pitch, spatialBlend, fadeType, fadeDuration, fadeTarget, loop, eventName);
+        AudioEventManager.playTrack(audioTrackType, targetTransform, trackNumber, trackName, volume, pitch, spatialBlend, fadeType, fadeDuration, fadeTarget, loop, eventName);
         
     }
 
@@ -251,7 +251,7 @@ public class AudioEventSender : MonoBehaviour
         StopTrack();
     }
 
-    // pause the ambient audio
+    // pause the audio
     public void Pause()
     {
         if (eventDelay <= 0)
@@ -266,14 +266,14 @@ public class AudioEventSender : MonoBehaviour
 
     private void PauseTrack()
     {
-        //send the PauseAmbient Event with parameters from the inspector
+        //send the Pause Event with parameters from the inspector
         AudioEventManager.pauseTrack(audioTrackType, fadeDuration, fadeTarget);
     }
 
     private IEnumerator PauseTrack_Delayed(float delay)
     {
         yield return new WaitForSeconds(delay);
-        //send the PauseAmbient Event with parameters from the inspector
+        //send the Pause Event with parameters from the inspector
         AudioEventManager.pauseTrack(audioTrackType, fadeDuration, fadeTarget);
     }
     
@@ -301,7 +301,7 @@ public class AudioEventSender : MonoBehaviour
             targetTransform = transformToAttachTo;
         }
         
-        //send the UpdateParametersAmbient Event with parameters from the inspector
+        //send the UpdateParameters Event with parameters from the inspector
         AudioEventManager.updateTrack(audioTrackType, targetTransform, volume, pitch, spatialBlend, fadeDuration, fadeTarget, loop, eventName);
     }
 
@@ -320,7 +320,7 @@ public class AudioEventSender : MonoBehaviour
             targetTransform = transformToAttachTo;
         }
         
-        //send the UpdateParametersAmbient Event with parameters from the inspector
+        //send the UpdateParameters Event with parameters from the inspector
         AudioEventManager.updateTrack(audioTrackType, targetTransform, volume, pitch, spatialBlend, fadeDuration, fadeTarget, loop, eventName);
     }
     
@@ -353,7 +353,7 @@ public class AudioEventSender : MonoBehaviour
         
         UnityEditor.Handles.Label(labelPos, 
             $"{trackTypeLabel}: {eventName}\n" + 
-            $"Track Name: {ambientTrackName}\n" +
+            $"Track Name: {trackName}\n" +
             $"Shape: {shapeInfo}\n" +
             $"Type: {collisionType}\n" +
             $"Tag: {targetTag}\n" +

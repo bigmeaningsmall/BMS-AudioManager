@@ -303,29 +303,12 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 50, y: -30, z: 0}
---- !u!1 &225177037 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 5737640405453547409, guid: ccc2f9deca1fd8440a1f8646e2051deb,
+--- !u!4 &225177042 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 1627499547365978731, guid: ccc2f9deca1fd8440a1f8646e2051deb,
     type: 3}
   m_PrefabInstance: {fileID: 1024325076}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &225177040
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 225177037}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7382d7b606514ed45ad25b2811994a0c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  trackType: 1
-  mainSource: {fileID: 0}
-  cueSource: {fileID: 0}
-  outgoingSource: {fileID: 0}
-  currentState: 0
 --- !u!1001 &469305101
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -660,12 +643,159 @@ PrefabInstance:
       addedObject: {fileID: 1646152825}
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: d3011a8d9e8e2cb47ad213dfabb34e15, type: 3}
+--- !u!1 &499862674
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 499862676}
+  - component: {fileID: 499862675}
+  m_Layer: 0
+  m_Name: BGM
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &499862675
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 499862674}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7382d7b606514ed45ad25b2811994a0c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  trackType: 0
+  mainSource: {fileID: 0}
+  cueSource: {fileID: 0}
+  outgoingSource: {fileID: 0}
+  currentState: 0
+--- !u!4 &499862676
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 499862674}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 225177042}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &610669005
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 610669007}
+  - component: {fileID: 610669006}
+  m_Layer: 0
+  m_Name: Dialogue
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &610669006
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 610669005}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7382d7b606514ed45ad25b2811994a0c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  trackType: 2
+  mainSource: {fileID: 0}
+  cueSource: {fileID: 0}
+  outgoingSource: {fileID: 0}
+  currentState: 0
+--- !u!4 &610669007
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 610669005}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 225177042}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!4 &635648899 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 1881576656664404952, guid: d3011a8d9e8e2cb47ad213dfabb34e15,
     type: 3}
   m_PrefabInstance: {fileID: 469305101}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &639331736
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 639331738}
+  - component: {fileID: 639331737}
+  m_Layer: 0
+  m_Name: Ambient
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &639331737
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 639331736}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7382d7b606514ed45ad25b2811994a0c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  trackType: 1
+  mainSource: {fileID: 0}
+  cueSource: {fileID: 0}
+  outgoingSource: {fileID: 0}
+  currentState: 0
+--- !u!4 &639331738
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 639331736}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 225177042}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &711655765
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1129,9 +1259,19 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7366141512683043284, guid: ccc2f9deca1fd8440a1f8646e2051deb,
         type: 3}
+      propertyPath: bgmTrack
+      value: 
+      objectReference: {fileID: 499862675}
+    - target: {fileID: 7366141512683043284, guid: ccc2f9deca1fd8440a1f8646e2051deb,
+        type: 3}
       propertyPath: ambientTrack
       value: 
-      objectReference: {fileID: 225177040}
+      objectReference: {fileID: 639331737}
+    - target: {fileID: 7366141512683043284, guid: ccc2f9deca1fd8440a1f8646e2051deb,
+        type: 3}
+      propertyPath: dialogueTrack
+      value: 
+      objectReference: {fileID: 610669006}
     - target: {fileID: 7366141512683043284, guid: ccc2f9deca1fd8440a1f8646e2051deb,
         type: 3}
       propertyPath: dialogueAudioPrefab
@@ -1145,12 +1285,20 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
-    m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 5737640405453547409, guid: ccc2f9deca1fd8440a1f8646e2051deb,
+    m_AddedGameObjects:
+    - targetCorrespondingSourceObject: {fileID: 1627499547365978731, guid: ccc2f9deca1fd8440a1f8646e2051deb,
         type: 3}
       insertIndex: -1
-      addedObject: {fileID: 225177040}
+      addedObject: {fileID: 499862676}
+    - targetCorrespondingSourceObject: {fileID: 1627499547365978731, guid: ccc2f9deca1fd8440a1f8646e2051deb,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 639331738}
+    - targetCorrespondingSourceObject: {fileID: 1627499547365978731, guid: ccc2f9deca1fd8440a1f8646e2051deb,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 610669007}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: ccc2f9deca1fd8440a1f8646e2051deb, type: 3}
 --- !u!1 &1308476517 stripped
 GameObject:
@@ -1922,6 +2070,21 @@ PrefabInstance:
         type: 3}
       propertyPath: testMode
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5355574976095253072, guid: 89621415efb6a794087214f779dcb9f2,
+        type: 3}
+      propertyPath: trackName
+      value: NormConnors_VaporStarship
+      objectReference: {fileID: 0}
+    - target: {fileID: 5355574976095253072, guid: 89621415efb6a794087214f779dcb9f2,
+        type: 3}
+      propertyPath: trackNumber
+      value: -1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5355574976095253072, guid: 89621415efb6a794087214f779dcb9f2,
+        type: 3}
+      propertyPath: ambientTrackNumber
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6014174656882223073, guid: 89621415efb6a794087214f779dcb9f2,
         type: 3}

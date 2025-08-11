@@ -2,12 +2,13 @@ using System;
 using System.Collections;
 using UnityEngine;
 
-public enum AudioTrackType
-{
-    BGM,
-    Ambient, 
-    Dialogue
-}
+// public enum AudioTrackType
+// {
+//     BGM,
+//     Ambient, 
+//     Dialogue
+// }
+
 public enum AudioTrackState
 {
     Stopped,        // No audio playing
@@ -20,8 +21,13 @@ public enum AudioTrackState
 
 public class AudioTrack : MonoBehaviour
 {
+    // Add this property to AudioTrack class for debugging:
+    public AudioTrackType TrackType => trackType;
+
+
+    
     [Header("Track Configuration")]
-    [SerializeField] private AudioTrackType trackType;
+    [SerializeField] public AudioTrackType trackType;
     
     [Header("Audio Sources (3-Source System)")]
     [HideInInspector] public AudioSource mainSource;      // Currently playing at target volume
@@ -59,11 +65,35 @@ public class AudioTrack : MonoBehaviour
     
     private void Awake()
     {
+        // Try to get AudioManager from the same GameObject first
         audioManager = GetComponent<AudioManager>();
+    
+        // If not found, try to get from parent
         if (audioManager == null)
         {
-            Debug.LogError("AudioTrack must be a child of AudioManager!");
+            audioManager = GetComponentInParent<AudioManager>();
         }
+    
+        // If still not found, try to find it in the scene
+        if (audioManager == null)
+        {
+            audioManager = FindObjectOfType<AudioManager>();
+        }
+    
+        if (audioManager == null)
+        {
+            Debug.LogError($"[AudioTrack] Cannot find AudioManager! Make sure AudioTrack is on the same GameObject as AudioManager or is a child of it.");
+        }
+        else
+        {
+            Debug.Log($"[AudioTrack] Found AudioManager: {audioManager.name}");
+        }
+    }
+    // set by AudioManager during its Awake
+    public void SetTrackType(AudioTrackType type)
+    {
+        trackType = type;
+        Debug.Log($"[AudioTrack] Track type set to: {trackType}");
     }
 
 
@@ -1096,10 +1126,17 @@ public class AudioTrack : MonoBehaviour
      
     // ==================== HELPER METHODS ====================
     #region HELPER METHODS
-
+    
+// Replace ResolveAudioClip method in AudioTrack with this (back to your original logic):
     private AudioClip ResolveAudioClip(int trackNumber, string trackName)
     {
-        // Try by name first if provided
+        if (audioManager == null)
+        {
+            Debug.LogError($"[AudioTrack] AudioManager is null!");
+            return null;
+        }
+    
+        // Try by name first if provided AND NOT EMPTY
         if (!string.IsNullOrEmpty(trackName))
         {
             AudioClip clip = trackType switch
@@ -1113,7 +1150,7 @@ public class AudioTrack : MonoBehaviour
             if (clip != null) return clip;
         }
     
-        // Fall back to track number if name didn't work
+        // ONLY use track number if trackNumber >= 0 (your original logic)
         if (trackNumber >= 0)
         {
             return trackType switch
@@ -1166,7 +1203,7 @@ public class AudioTrack : MonoBehaviour
 
     
     // Debug helpers---------------------------------------------------------
-    public string DebugInfo => $"State: {currentState}, Main: {(mainSource != null)}, Cue: {(cueSource != null)}, Outgoing: {(outgoingSource != null)}";
+    public string DebugInfo => $"Type: {trackType}, State: {currentState}, Main: {(mainSource != null)}, Cue: {(cueSource != null)}, Outgoing: {(outgoingSource != null)}";
     
     
 }

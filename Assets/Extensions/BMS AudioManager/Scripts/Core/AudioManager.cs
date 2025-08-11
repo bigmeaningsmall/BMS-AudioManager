@@ -3,6 +3,13 @@ using System.Collections.Generic;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
+public enum AudioTrackType
+{
+    BGM,
+    Ambient, 
+    Dialogue
+}
+
 /// <summary>
 /// The AudioManager class is responsible for managing background music and sound effects in the game.
 /// It handles loading audio resources and routing events to appropriate track components.
@@ -18,9 +25,9 @@ public class AudioManager : MonoBehaviour
 
     // Track Components (these handle everything)
     [Header("Audio Tracks")]
-    [SerializeField] private AudioTrack ambientTrack;
     [SerializeField] private AudioTrack bgmTrack;
-    /[SerializeField] private AudioTrack dialogueTrack;
+    [SerializeField] private AudioTrack ambientTrack;
+    [SerializeField] private AudioTrack dialogueTrack;
     
     // Audio Resource Dictionaries (KEEP - centralized loading)
     [Header("Audio Resources")]
@@ -67,13 +74,16 @@ public class AudioManager : MonoBehaviour
     /// </summary>
     
     // Singleton Pattern
-    #region Initialise Singleton Pattern
+    #region Initialise Singleton & Audio Tracks
     private void Awake()
     {
         if (Instance == null)
         {
             Instance = this;
             DontDestroyOnLoad(gameObject);
+        
+            // Initialize track types BEFORE loading resources
+            InitializeTrackTypes();
             LoadAudioResources();
         }
         else
@@ -81,6 +91,70 @@ public class AudioManager : MonoBehaviour
             Destroy(gameObject);
         }
     }
+
+[ContextMenu("Validate Audio Track Setup")]
+public void ValidateAudioTrackSetup()
+{
+    Debug.Log("=== AudioManager Track Validation ===");
+    
+    if (bgmTrack == null)
+        Debug.LogError("[AudioManager] BGM Track reference is NULL!");
+    else
+        Debug.Log($"[AudioManager] BGM Track: {bgmTrack.name} (Type: {bgmTrack.trackType})");
+        
+    if (ambientTrack == null)
+        Debug.LogError("[AudioManager] Ambient Track reference is NULL!");
+    else
+        Debug.Log($"[AudioManager] Ambient Track: {ambientTrack.name} (Type: {ambientTrack.trackType})");
+        
+    if (dialogueTrack == null)
+        Debug.LogError("[AudioManager] Dialogue Track reference is NULL!");
+    else
+        Debug.Log($"[AudioManager] Dialogue Track: {dialogueTrack.name} (Type: {dialogueTrack.trackType})");
+        
+    Debug.Log("=== Audio Resources ===");
+    Debug.Log($"BGM tracks loaded: {musicTracks.Count}");
+    Debug.Log($"Ambient tracks loaded: {ambientAudioTracks.Count}");
+    Debug.Log($"Dialogue tracks loaded: {dialogueAudioTracks.Count}");
+    Debug.Log($"SFX loaded: {soundEffects.Count}");
+}
+
+
+private void InitializeTrackTypes()
+{
+    Debug.Log("[AudioManager] Initializing track types...");
+    
+    // Set the track types for each AudioTrack component
+    if (bgmTrack != null)
+    {
+        bgmTrack.SetTrackType(AudioTrackType.BGM);
+        Debug.Log("[AudioManager] BGM track type initialized");
+    }
+    else
+    {
+        Debug.LogError("[AudioManager] BGM track reference is null! Please assign an AudioTrack component to the bgmTrack field.");
+    }
+    
+    if (ambientTrack != null)
+    {
+        ambientTrack.SetTrackType(AudioTrackType.Ambient);
+        Debug.Log("[AudioManager] Ambient track type initialized");
+    }
+    else
+    {
+        Debug.LogError("[AudioManager] Ambient track reference is null! Please assign an AudioTrack component to the ambientTrack field.");
+    }
+    
+    if (dialogueTrack != null)
+    {
+        dialogueTrack.SetTrackType(AudioTrackType.Dialogue);
+        Debug.Log("[AudioManager] Dialogue track type initialized");
+    }
+    else
+    {
+        Debug.LogError("[AudioManager] Dialogue track reference is null! Please assign an AudioTrack component to the dialogueTrack field.");
+    }
+}
     #endregion
 
     // Event Subscriptions
@@ -189,113 +263,178 @@ public class AudioManager : MonoBehaviour
     // Audio Event Methods (just passing properties and commands to audio tracks)
     public void PlayTrack(AudioTrackType trackType, Transform attachTo, int trackNumber, string trackName, float volume, float pitch, float spatialBlend, FadeType fadeType, float fadeDuration, FadeTarget fadeTarget, bool loop, string eventName)
     {
-        if (ambientTrack == null)
+        AudioTrack targetTrack = GetTrackByType(trackType);
+        if (targetTrack == null)
         {
-            Debug.LogError("AmbientTrack reference is null!");
+            Debug.LogError($"{trackType}Track reference is null!");
             return;
         }
         
         // CALL THE TRACK METHOD
-        // This will handle the actual playing of the ambient track
-        ambientTrack.Play(trackNumber, trackName, volume, pitch, spatialBlend, fadeType, fadeDuration, fadeTarget, loop, attachTo);
+        // This will handle the actual playing of the track
+        targetTrack.Play(trackNumber, trackName, volume, pitch, spatialBlend, fadeType, fadeDuration, fadeTarget, loop, attachTo);
         
-        // set parameters for the ambient track -- parameters are updated in LateUpdate when fading 
-        ambientTrackParamters = new AudioTrackParamters(attachTo, trackNumber, trackName, volume, pitch, spatialBlend, loop, eventName);
-        
+        // Set parameters for the track -- parameters are updated in LateUpdate when fading 
+        AudioTrackParamters newParams = new AudioTrackParamters(attachTo, trackNumber, trackName, volume, pitch, spatialBlend, loop, eventName);
+        SetTrackParameters(trackType, newParams);
     }
 
     public void StopTrack(AudioTrackType trackType, float fadeDuration, FadeTarget fadeTarget)
     {
-        if (ambientTrack == null)
+        AudioTrack targetTrack = GetTrackByType(trackType);
+        if (targetTrack == null)
         {
-            Debug.LogError("AmbientTrack reference is null!");
+            Debug.LogError($"{trackType}Track reference is null!");
             return;
         }
-        ambientTrack.Stop(fadeDuration, fadeTarget); 
+        targetTrack.Stop(fadeDuration, fadeTarget); 
     }
 
     public void PauseTrack(AudioTrackType trackType, float fadeDuration, FadeTarget fadeTarget)
     {
-        if (ambientTrack == null)
+        AudioTrack targetTrack = GetTrackByType(trackType);
+        if (targetTrack == null)
         {
-            Debug.LogError("AmbientTrack reference is null!");
+            Debug.LogError($"{trackType}Track reference is null!");
             return;
         }
-        ambientTrack.PauseToggle(fadeDuration, fadeTarget);
+        targetTrack.PauseToggle(fadeDuration, fadeTarget);
     }
-    
+
     //method to update parameters of audio tracks
     public void UpdateTrack(AudioTrackType trackType, Transform attachTo, float volume, float pitch, float spatialBlend, float fadeDuration, FadeTarget fadeTarget, bool loop, string eventName)
     {
-        if (ambientTrack == null)
+        AudioTrack targetTrack = GetTrackByType(trackType);
+        if (targetTrack == null)
         {
-            Debug.LogError("AmbientTrack reference is null!");
+            Debug.LogError($"{trackType}Track reference is null!");
             return;
         }
         
         // CALL THE TRACK METHOD
-        // This will handle the actual updating of the ambient track parameters
-        ambientTrack.UpdateParameters(attachTo, volume, pitch, spatialBlend, fadeDuration, fadeTarget, loop, eventName);
+        // This will handle the actual updating of the track parameters
+        targetTrack.UpdateParameters(attachTo, volume, pitch, spatialBlend, fadeDuration, fadeTarget, loop, eventName);
         
-        // set parameters for the ambient track -- parameters are updated in LateUpdate when fading 
-        
-        int tNum = ambientTrackParamters.index; // Get the current index from the track
-        string tName = ambientTrackParamters.trackName;
-        string eName = ambientTrackParamters.eventName;
-        ambientTrackParamters = new AudioTrackParamters(attachTo, tNum, tName, volume, pitch, spatialBlend, loop, eName);
+        // Get current parameters to preserve existing values
+        AudioTrackParamters currentParams = GetTrackParameters(trackType);
+        if (currentParams != null)
+        {
+            int tNum = currentParams.index; // Get the current index from the track
+            string tName = currentParams.trackName;
+            string eName = currentParams.eventName;
+            AudioTrackParamters updatedParams = new AudioTrackParamters(attachTo, tNum, tName, volume, pitch, spatialBlend, loop, eName);
+            SetTrackParameters(trackType, updatedParams);
+        }
     }
-    //override UpdateAmbient methods for different parameters // todo implement this in the future
-    public void UpdateTrack(AudioTrackType trackType, Transform attachTo){
-        
+
+    //override UpdateTrack methods for different parameters // todo implement this in the future
+    public void UpdateTrack(AudioTrackType trackType, Transform attachTo)
+    {
+        // Future implementation for simplified parameter updates
+    }
+
+    #endregion
+    
+    #region Helper Methods for Track Management
+
+    private AudioTrack GetTrackByType(AudioTrackType trackType)
+    {
+        return trackType switch
+        {
+            AudioTrackType.BGM => bgmTrack,
+            AudioTrackType.Ambient => ambientTrack,
+            AudioTrackType.Dialogue => dialogueTrack,
+            _ => null
+        };
+    }
+
+    private AudioTrackParamters GetTrackParameters(AudioTrackType trackType)
+    {
+        return trackType switch
+        {
+            AudioTrackType.BGM => bgmTrackParamters,
+            AudioTrackType.Ambient => ambientTrackParamters,
+            AudioTrackType.Dialogue => dialogueTrackParamters,
+            _ => null
+        };
+    }
+
+    private void SetTrackParameters(AudioTrackType trackType, AudioTrackParamters parameters)
+    {
+        switch (trackType)
+        {
+            case AudioTrackType.BGM:
+                bgmTrackParamters = parameters;
+                break;
+            case AudioTrackType.Ambient:
+                ambientTrackParamters = parameters;
+                break;
+            case AudioTrackType.Dialogue:
+                dialogueTrackParamters = parameters;
+                break;
+        }
     }
 
     #endregion
     
     //---------------------------------------------------------- 
     
-    private void LateUpdate(){
-        
-        // Update ambient parameters if the track is fading 
-        UpdateAmbientParameters();
+    private void LateUpdate()
+    {
+        // Update parameters for all track types during fading states
+        UpdateTrackParameters(AudioTrackType.BGM);
+        UpdateTrackParameters(AudioTrackType.Ambient);
+        UpdateTrackParameters(AudioTrackType.Dialogue);
     }
     
     
-    private void UpdateAmbientParameters(){
-        
+    private void UpdateTrackParameters(AudioTrackType trackType)
+    {
+        AudioTrack track = GetTrackByType(trackType);
+        AudioTrackParamters trackParams = GetTrackParameters(trackType);
+    
+        if (track == null || trackParams == null) return;
+    
         AudioSource currentSource;
-            
-        // handle fadeinout and crossfade separately - to decide between cue for crossfade or outgoing for fadein/out
-        if (ambientTrack.currentState == AudioTrackState.Crossfading){
-            currentSource = ambientTrack.mainSource ? ambientTrack.mainSource : ambientTrack.cueSource;
-        }
-        else{
-            currentSource = ambientTrack.mainSource ? ambientTrack.mainSource : ambientTrack.outgoingSource;
-        }
         
+        // Handle fadeinout and crossfade separately - to decide between cue for crossfade or outgoing for fadein/out
+        if (track.currentState == AudioTrackState.Crossfading)
+        {
+            currentSource = track.mainSource ? track.mainSource : track.cueSource;
+        }
+        else
+        {
+            currentSource = track.mainSource ? track.mainSource : track.outgoingSource;
+        }
+    
         if (currentSource == null)
         {
-            Debug.LogWarning("No active audio source found for ambient track.");
+            // Only warn if the track is supposed to be playing
+            if (track.currentState != AudioTrackState.Stopped)
+            {
+                Debug.LogWarning($"No active audio source found for {trackType} track.");
+            }
             return;
         }
+    
+        // Update the track parameters based on the current audio source when fading or crossfading
+        if (track.currentState == AudioTrackState.FadingIn || 
+            track.currentState == AudioTrackState.FadingOut || 
+            track.currentState == AudioTrackState.Crossfading)
+        {
+            trackParams.attachedTo = currentSource.transform.parent;
+            trackParams.volume = currentSource.volume;
+            trackParams.pitch = currentSource.pitch;
+            trackParams.spatialBlend = currentSource.spatialBlend;
+            trackParams.loop = currentSource.loop;
+            trackParams.trackName = currentSource.clip != null ? currentSource.clip.name : "No Clip";
         
-        // Update the ambient track parameters based on the current audio source when fading or crossfading
-        if (ambientTrack.currentState == AudioTrackState.FadingIn || ambientTrack.currentState == AudioTrackState.FadingOut || ambientTrack.currentState == AudioTrackState.Crossfading){
-            ambientTrackParamters.attachedTo = currentSource.transform.parent;
-            
-            ambientTrackParamters.volume = currentSource.volume;
-            ambientTrackParamters.pitch = currentSource.pitch;
-            ambientTrackParamters.spatialBlend = currentSource.spatialBlend;
-            ambientTrackParamters.loop = currentSource.loop;
-            
-            ambientTrackParamters.trackName = currentSource.clip != null ? currentSource.clip.name : "No Clip";
-            
-            //remove "(Clone)" from the track name if it exists
-            if (ambientTrackParamters.trackName.Contains("(Clone)"))
+            // Remove "(Clone)" from the track name if it exists
+            if (trackParams.trackName.Contains("(Clone)"))
             {
-                ambientTrackParamters.trackName = ambientTrackParamters.trackName.Replace("(Clone)", "").Trim();
+                trackParams.trackName = trackParams.trackName.Replace("(Clone)", "").Trim();
             }
         } 
-        
     }
     
     
