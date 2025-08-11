@@ -12,11 +12,11 @@ public class AudioTrackParamters
     public float volume;
     public float pitch;
     public float spatialBlend;
-    public bool loopAmbient;
+    public bool loop;
     public string eventName;
 
     // Constructor to initialize all parameters
-    public AudioTrackParamters(Transform attachedTo, int index, string trackName, float volume, float pitch, float spatialBlend,  bool loopAmbient, string eventName)
+    public AudioTrackParamters(Transform attachedTo, int index, string trackName, float volume, float pitch, float spatialBlend,  bool loop, string eventName)
     {
         this.attachedTo = attachedTo;
         this.index = index;
@@ -24,7 +24,7 @@ public class AudioTrackParamters
         this.volume = volume;
         this.pitch = pitch;
         this.spatialBlend = spatialBlend;
-        this.loopAmbient = loopAmbient;
+        this.loop = loop;
         this.eventName = eventName;
     }
 }

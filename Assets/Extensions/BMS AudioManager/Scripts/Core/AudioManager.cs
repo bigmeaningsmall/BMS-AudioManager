@@ -173,6 +173,9 @@ public class AudioManager : MonoBehaviour
             return;
         }
         ambientTrack.Play(trackNumber, trackName, volume, pitch, spatialBlend, fadeType, fadeDuration, fadeTarget, loop, attachTo);
+        
+        // set parameters for the ambient track -- parameters are updated in LateUpdate when fading
+        ambientTrackParamters = new AudioTrackParamters(attachTo, index, trackName, volume, pitch, spatialBlend, loop, eventName);
     }
 
     public void StopAmbient(float fadeDuration, FadeTarget fadeTarget)
@@ -238,15 +241,14 @@ public class AudioManager : MonoBehaviour
             return;
         }
         
-        //TODO - CONTINUE HERE.... -- need to update it once in playing state when there is no crossfade or fade in/out
-        
+        // Update the ambient track parameters based on the current audio source when fading or crossfading
         if (ambientTrack.currentState == AmbientState.FadingIn || ambientTrack.currentState == AmbientState.FadingOut || ambientTrack.currentState == AmbientState.Crossfading){
             ambientTrackParamters.attachedTo = currentSource.transform.parent;
             
             ambientTrackParamters.volume = currentSource.volume;
             ambientTrackParamters.pitch = currentSource.pitch;
             ambientTrackParamters.spatialBlend = currentSource.spatialBlend;
-            ambientTrackParamters.loopAmbient = currentSource.loop;
+            ambientTrackParamters.loop = currentSource.loop;
             
             ambientTrackParamters.trackName = currentSource.clip != null ? currentSource.clip.name : "No Clip";
             
@@ -258,17 +260,6 @@ public class AudioManager : MonoBehaviour
         } 
         
     }
-
-    // private AudioTrackParamters SetParameters(AudioSource source, ){
-    //
-    //     AudioTrackParamters parameters = new AudioTrackParamters();
-    //     
-    //     parameters.attachedTo = source.transform.parent;
-    //     parameters.index = -1; // Assuming index is set somewhere in the track
-    //     
-    //
-    //     return parameters;
-    // }
     
     
     // SFX Management (UNCHANGED)
