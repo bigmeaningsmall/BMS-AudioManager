@@ -224,7 +224,7 @@ public class AudioManager : MonoBehaviour
         
         AudioSource currentSource;
             
-        // handle fadeinout and crossfade separately
+        // handle fadeinout and crossfade separately - to decide between cue for crossfade or outgoing for fadein/out
         if (ambientTrack.currentState == AmbientState.Crossfading){
             currentSource = ambientTrack.mainSource ? ambientTrack.mainSource : ambientTrack.cueSource;
         }
@@ -258,6 +258,17 @@ public class AudioManager : MonoBehaviour
         } 
         
     }
+
+    // private AudioTrackParamters SetParameters(AudioSource source, ){
+    //
+    //     AudioTrackParamters parameters = new AudioTrackParamters();
+    //     
+    //     parameters.attachedTo = source.transform.parent;
+    //     parameters.index = -1; // Assuming index is set somewhere in the track
+    //     
+    //
+    //     return parameters;
+    // }
     
     
     // SFX Management (UNCHANGED)
