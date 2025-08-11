@@ -347,9 +347,13 @@ public class AudioEventSender : MonoBehaviour
         #if UNITY_EDITOR
         UnityEditor.Handles.color = Color.white;
         string shapeInfo = GetShapeInfo();
+        
+        // Get track type specific info
+        string trackTypeLabel = GetTrackTypeLabel();
+        
         UnityEditor.Handles.Label(labelPos, 
-            $"Ambient: {eventName}\n" + 
-            $"Track Name: {ambientTrackName}\n +" +
+            $"{trackTypeLabel}: {eventName}\n" + 
+            $"Track Name: {ambientTrackName}\n" +
             $"Shape: {shapeInfo}\n" +
             $"Type: {collisionType}\n" +
             $"Tag: {targetTag}\n" +
@@ -361,18 +365,73 @@ public class AudioEventSender : MonoBehaviour
     {
         if (!isTriggered) return;
         
-        // Draw activation pulse
-        Gizmos.color = triggerActiveColor;
+        // Use track type specific color
+        Gizmos.color = GetTrackTypeColor();
         Bounds bounds = GetObjectBounds();
         float pulseSize = bounds.size.magnitude * 1.2f;
         Gizmos.DrawWireSphere(transform.position, pulseSize);
         
-        // Draw activation icon
+        // Draw activation icon with track type specific symbol
         #if UNITY_EDITOR
         Vector3 iconPos = transform.position + Vector3.up * (bounds.size.y * 0.5f + 2f);
-        UnityEditor.Handles.color = triggerActiveColor;
-        UnityEditor.Handles.Label(iconPos, "~ TRIGGERED ~");
+        UnityEditor.Handles.color = GetTrackTypeColor();
+        string triggerIcon = GetTrackTypeTriggerIcon();
+        UnityEditor.Handles.Label(iconPos, triggerIcon);
         #endif
+    }
+
+    private string GetTrackTypeLabel()
+    {
+        return audioTrackType switch
+        {
+            AudioTrackType.BGM => "BGM",
+            AudioTrackType.Ambient => "Ambient",
+            AudioTrackType.Dialogue => "Dialogue",
+            _ => "Unknown"
+        };
+    }
+
+    private Color GetTrackTypeColor()
+    {
+        return audioTrackType switch
+        {
+            AudioTrackType.BGM => new Color(0f, 0f, 1f, 0.8f),      // Blue for BGM
+            AudioTrackType.Ambient => new Color(0f, 1f, 0f, 0.8f),  // Green for Ambient
+            AudioTrackType.Dialogue => new Color(1f, 0.5f, 0f, 0.8f), // Orange for Dialogue
+            _ => Color.white
+        };
+    }
+
+    private string GetTrackTypeTriggerIcon()
+    {
+        return audioTrackType switch
+        {
+            AudioTrackType.BGM => "♫ TRIGGERED ♫",
+            AudioTrackType.Ambient => "~ TRIGGERED ~",
+            AudioTrackType.Dialogue => "💬 TRIGGERED 💬",
+            _ => "⚡ TRIGGERED ⚡"
+        };
+    }
+
+    // You might also want to update the default triggerActiveColor in the inspector
+    // to match the track type when the component is added
+    private void Reset()
+    {
+        // Called when component is first added or reset
+        triggerActiveColor = GetTrackTypeColor();
+    }
+
+    private void OnValidate()
+    {
+        // Called when values change in inspector
+        // Update color when track type changes
+        if (triggerActiveColor == Color.white || 
+            triggerActiveColor == new Color(0f, 1f, 0f, 0.8f) || 
+            triggerActiveColor == new Color(0f, 0f, 1f, 0.8f) || 
+            triggerActiveColor == new Color(1f, 0.5f, 0f, 0.8f))
+        {
+            triggerActiveColor = GetTrackTypeColor();
+        }
     }
 
     private Bounds GetObjectBounds()

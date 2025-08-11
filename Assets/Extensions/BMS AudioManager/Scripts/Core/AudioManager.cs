@@ -19,8 +19,8 @@ public class AudioManager : MonoBehaviour
     // Track Components (these handle everything)
     [Header("Audio Tracks")]
     [SerializeField] private AudioTrack ambientTrack;
-    //[SerializeField] private BGMAudioTrack bgmTrack;
-    //[SerializeField] private DialogueAudioTrack dialogueTrack;
+    [SerializeField] private AudioTrack bgmTrack;
+    /[SerializeField] private AudioTrack dialogueTrack;
     
     // Audio Resource Dictionaries (KEEP - centralized loading)
     [Header("Audio Resources")]
@@ -53,12 +53,14 @@ public class AudioManager : MonoBehaviour
 
     [Space(10)]
     // Parameter and Porperty References for tracks - these are for checking and reference
-    // Parameters for ambient audio - used for getting current state info
+    // Parameters for audio - used for getting current state info
+    //[HideInInspector]
+    public AudioTrackParamters bgmTrackParamters;
     //[HideInInspector]
     public AudioTrackParamters ambientTrackParamters;
-    // private int index = -1; // Track index for identification
-    // private string trackName = "Ambient Track"; // Track name for identification
-    // private string eventName = "AmbientAudioTrackEvent"; // Event name for identification
+    //[HideInInspector]q
+    public AudioTrackParamters dialogueTrackParamters;
+    
     
     /// <summary>
     /// METHODS START HERE ------------------------------------------------------
@@ -91,14 +93,6 @@ public class AudioManager : MonoBehaviour
         AudioEventManager.updateTrack += UpdateTrack;
         
         AudioEventManager.PlaySFX += PlaySoundEffect;
-        
-        // TODO: Uncomment when BGM/Dialogue tracks are implemented
-        // AudioEventManager.playBGMTrack += PlayMusic;
-        // AudioEventManager.stopBGMTrack += StopMusic;
-        // AudioEventManager.pauseBGMTrack += PauseMusic;
-        // AudioEventManager.playDialogueTrack += PlayDialogue;
-        // AudioEventManager.stopDialogueTrack += StopDialogueAudio;
-        // AudioEventManager.pauseDialogueTrack += PauseDialogue;
     }
 
     private void OnDisable()
@@ -187,9 +181,12 @@ public class AudioManager : MonoBehaviour
     public GameObject GetDialoguePrefab() => dialogueAudioPrefab;
     //-----------------------------------------------------------
     #endregion
+
     
     //----------------------------------------------------------
-    // Ambient Audio Event Methods (just pass to track)
+    
+    #region Audio Track Event Methods
+    // Audio Event Methods (just passing properties and commands to audio tracks)
     public void PlayTrack(AudioTrackType trackType, Transform attachTo, int trackNumber, string trackName, float volume, float pitch, float spatialBlend, FadeType fadeType, float fadeDuration, FadeTarget fadeTarget, bool loop, string eventName)
     {
         if (ambientTrack == null)
@@ -227,7 +224,7 @@ public class AudioManager : MonoBehaviour
         ambientTrack.PauseToggle(fadeDuration, fadeTarget);
     }
     
-    //method to update parameters of ambient audio
+    //method to update parameters of audio tracks
     public void UpdateTrack(AudioTrackType trackType, Transform attachTo, float volume, float pitch, float spatialBlend, float fadeDuration, FadeTarget fadeTarget, bool loop, string eventName)
     {
         if (ambientTrack == null)
@@ -247,14 +244,14 @@ public class AudioManager : MonoBehaviour
         string eName = ambientTrackParamters.eventName;
         ambientTrackParamters = new AudioTrackParamters(attachTo, tNum, tName, volume, pitch, spatialBlend, loop, eName);
     }
-    //override UpdateAmbient methods for different parameters
+    //override UpdateAmbient methods for different parameters // todo implement this in the future
     public void UpdateTrack(AudioTrackType trackType, Transform attachTo){
         
     }
 
+    #endregion
     
-    
-    //---------------------------------------------------------- ambientTrack.currentState == AmbientState.Playing || 
+    //---------------------------------------------------------- 
     
     private void LateUpdate(){
         
