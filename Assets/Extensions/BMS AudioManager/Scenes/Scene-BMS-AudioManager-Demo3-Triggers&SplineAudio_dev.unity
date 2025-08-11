@@ -321,6 +321,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7382d7b606514ed45ad25b2811994a0c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  trackType: 1
   mainSource: {fileID: 0}
   cueSource: {fileID: 0}
   outgoingSource: {fileID: 0}

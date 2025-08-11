@@ -18,7 +18,7 @@ public class AudioManager : MonoBehaviour
 
     // Track Components (these handle everything)
     [Header("Audio Tracks")]
-    [SerializeField] private AmbientAudioTrack ambientTrack;
+    [SerializeField] private AudioTrack ambientTrack;
     //[SerializeField] private BGMAudioTrack bgmTrack;
     //[SerializeField] private DialogueAudioTrack dialogueTrack;
     
@@ -56,9 +56,9 @@ public class AudioManager : MonoBehaviour
     // Parameters for ambient audio - used for getting current state info
     //[HideInInspector]
     public AudioTrackParamters ambientTrackParamters;
-    private int index = 0; // Track index for identification
-    private string trackName = "Ambient Track"; // Track name for identification
-    private string eventName = "AmbientAudioTrackEvent"; // Event name for identification
+    // private int index = -1; // Track index for identification
+    // private string trackName = "Ambient Track"; // Track name for identification
+    // private string eventName = "AmbientAudioTrackEvent"; // Event name for identification
     
     /// <summary>
     /// METHODS START HERE ------------------------------------------------------
@@ -172,10 +172,14 @@ public class AudioManager : MonoBehaviour
             Debug.LogError("AmbientTrack reference is null!");
             return;
         }
+        
+        // CALL THE TRACK METHOD
+        // This will handle the actual playing of the ambient track
         ambientTrack.Play(trackNumber, trackName, volume, pitch, spatialBlend, fadeType, fadeDuration, fadeTarget, loop, attachTo);
         
-        // set parameters for the ambient track -- parameters are updated in LateUpdate when fading
-        ambientTrackParamters = new AudioTrackParamters(attachTo, index, trackName, volume, pitch, spatialBlend, loop, eventName);
+        // set parameters for the ambient track -- parameters are updated in LateUpdate when fading 
+        ambientTrackParamters = new AudioTrackParamters(attachTo, trackNumber, trackName, volume, pitch, spatialBlend, loop, eventName);
+        
     }
 
     public void StopAmbient(float fadeDuration, FadeTarget fadeTarget)
@@ -206,7 +210,17 @@ public class AudioManager : MonoBehaviour
             Debug.LogError("AmbientTrack reference is null!");
             return;
         }
+        
+        // CALL THE TRACK METHOD
+        // This will handle the actual updating of the ambient track parameters
         ambientTrack.UpdateParameters(attachTo, volume, pitch, spatialBlend, fadeDuration, fadeTarget, loop, eventName);
+        
+        // set parameters for the ambient track -- parameters are updated in LateUpdate when fading 
+        
+        int tNum = ambientTrackParamters.index; // Get the current index from the track
+        string tName = ambientTrackParamters.trackName;
+        string eName = ambientTrackParamters.eventName;
+        ambientTrackParamters = new AudioTrackParamters(attachTo, tNum, tName, volume, pitch, spatialBlend, loop, eName);
     }
     //override UpdateAmbient methods for different parameters
     public void UpdateAmbient(Transform attachTo){
@@ -223,12 +237,13 @@ public class AudioManager : MonoBehaviour
         UpdateAmbientParameters();
     }
     
+    
     private void UpdateAmbientParameters(){
         
         AudioSource currentSource;
             
         // handle fadeinout and crossfade separately - to decide between cue for crossfade or outgoing for fadein/out
-        if (ambientTrack.currentState == AmbientState.Crossfading){
+        if (ambientTrack.currentState == AudioTrackState.Crossfading){
             currentSource = ambientTrack.mainSource ? ambientTrack.mainSource : ambientTrack.cueSource;
         }
         else{
@@ -242,7 +257,7 @@ public class AudioManager : MonoBehaviour
         }
         
         // Update the ambient track parameters based on the current audio source when fading or crossfading
-        if (ambientTrack.currentState == AmbientState.FadingIn || ambientTrack.currentState == AmbientState.FadingOut || ambientTrack.currentState == AmbientState.Crossfading){
+        if (ambientTrack.currentState == AudioTrackState.FadingIn || ambientTrack.currentState == AudioTrackState.FadingOut || ambientTrack.currentState == AudioTrackState.Crossfading){
             ambientTrackParamters.attachedTo = currentSource.transform.parent;
             
             ambientTrackParamters.volume = currentSource.volume;

@@ -2,7 +2,13 @@ using System;
 using System.Collections;
 using UnityEngine;
 
-public enum AmbientState
+public enum AudioTrackType
+{
+    BGM,
+    Ambient, 
+    Dialogue
+}
+public enum AudioTrackState
 {
     Stopped,        // No audio playing
     Playing,        // Main source playing normally
@@ -12,8 +18,10 @@ public enum AmbientState
     Crossfading,    // Cue fading in, outgoing fading out
 }
 
-public class AmbientAudioTrack : MonoBehaviour
+public class AudioTrack : MonoBehaviour
 {
+    [Header("Track Configuration")]
+    [SerializeField] private AudioTrackType trackType;
     
     [Header("Audio Sources (3-Source System)")]
     [HideInInspector] public AudioSource mainSource;      // Currently playing at target volume
@@ -33,7 +41,7 @@ public class AmbientAudioTrack : MonoBehaviour
     #endregion
     
     [Header("State")]
-    [HideInInspector] public AmbientState currentState = AmbientState.Stopped;
+    [HideInInspector] public AudioTrackState currentState = AudioTrackState.Stopped;
     
     // Track settings (preserved for pause/resume)
     private float targetVolume = 1f;
@@ -48,36 +56,15 @@ public class AmbientAudioTrack : MonoBehaviour
     // Reference to AudioManager for resources
     private AudioManager audioManager;
     
-
     
     private void Awake()
     {
         audioManager = GetComponent<AudioManager>();
         if (audioManager == null)
         {
-            Debug.LogError("AmbientAudioTrack must be a child of AudioManager!");
+            Debug.LogError("AudioTrack must be a child of AudioManager!");
         }
     }
-
-    
-    // private void Update(){
-    //     if (mainSource && currentState == AmbientState.Playing){
-    //         ambientParamters.attachedTo = mainSource.transform.parent;
-    //         
-    //         ambientParamters.volume = mainSource.volume;
-    //         ambientParamters.pitch = mainSource.pitch;
-    //         ambientParamters.spatialBlend = mainSource.spatialBlend;
-    //         ambientParamters.loopAmbient = mainSource.loop;
-    //         
-    //         ambientParamters.trackName = mainSource.clip != null ? mainSource.clip.name : "No Clip";
-    //         
-    //         //remove "(Clone)" from the track name if it exists
-    //         if (ambientParamters.trackName.Contains("(Clone)"))
-    //         {
-    //             ambientParamters.trackName = ambientParamters.trackName.Replace("(Clone)", "").Trim();
-    //         }
-    //     }    
-    // }
 
 
     // ==================== PUBLIC CALL METHODS ====================
@@ -89,7 +76,7 @@ public class AmbientAudioTrack : MonoBehaviour
     public void Play(int trackNumber, string trackName, float volume, float pitch, float spatialBlend, 
                      FadeType fadeType, float fadeDuration, FadeTarget fadeTarget, bool loop, Transform attachTo)
     {
-        Debug.Log($"[AmbientTrack] Play called - Current State: {currentState}, FadeType: {fadeType}");
+        Debug.Log($"[Track] Play called - Current State: {currentState}, FadeType: {fadeType}");
         
         // Store target settings
         targetVolume = volume;
@@ -101,19 +88,19 @@ public class AmbientAudioTrack : MonoBehaviour
         AudioClip clip = ResolveAudioClip(trackNumber, trackName);
         if (clip == null)
         {
-            Debug.LogError($"AmbientAudioTrack: Could not find clip for track {trackNumber}/{trackName}");
+            Debug.LogError($"AudioTrack: Could not find clip for track {trackNumber}/{trackName}");
             return;
         }
         
         // Handle based on current state
         switch (currentState)
         {
-            case AmbientState.Stopped:
+            case AudioTrackState.Stopped:
                 // Simple case - just start playing
                 StartFromStopped(clip, volume, pitch, spatialBlend, fadeDuration, fadeTarget, loop, attachTo);
                 break;
                 
-            case AmbientState.Playing:
+            case AudioTrackState.Playing:
                 // Need to transition - check fade type
                 if (fadeType == FadeType.Crossfade)
                 {
@@ -125,12 +112,12 @@ public class AmbientAudioTrack : MonoBehaviour
                 }
                 break;
                 
-            case AmbientState.Crossfading:
+            case AudioTrackState.Crossfading:
                 // Already crossfading - use 3-source safety
                 HandlePlayDuringCrossfade(clip, volume, pitch, spatialBlend, fadeType, fadeDuration, fadeTarget, loop, attachTo);
                 break;
                 
-            case AmbientState.FadingIn:
+            case AudioTrackState.FadingIn:
                 // ALWAYS use 3-source safety when transitioning during any fade
                 if (fadeType == FadeType.Crossfade)
                 {
@@ -142,11 +129,11 @@ public class AmbientAudioTrack : MonoBehaviour
                 }
                 break;
                 
-            case AmbientState.Paused:
+            case AudioTrackState.Paused:
                 Debug.LogWarning("Cannot play while paused. Resume or stop first.");
                 break;
                 
-            case AmbientState.FadingOut:
+            case AudioTrackState.FadingOut:
                 // Let fade out complete, then start new
                 Debug.Log("Currently fading out. New play request will start after fade completes.");
                 break;
@@ -158,11 +145,11 @@ public class AmbientAudioTrack : MonoBehaviour
     /// </summary>
     public void PauseToggle(float fadeDuration = 0f, FadeTarget fadeTarget = FadeTarget.FadeVolume)
     {
-        if (currentState == AmbientState.Paused)
+        if (currentState == AudioTrackState.Paused)
         {
             Resume(fadeDuration, fadeTarget);
         }
-        else if (currentState == AmbientState.FadingOut && mainCoroutine != null)
+        else if (currentState == AudioTrackState.FadingOut && mainCoroutine != null)
         {
             // Interrupt fade-to-pause and reverse to fade-from-pause
             StopCoroutine(mainCoroutine);
@@ -171,17 +158,17 @@ public class AmbientAudioTrack : MonoBehaviour
             if (mainSource != null)
             {
                 mainSource.UnPause(); // Make sure it's unpaused
-                currentState = AmbientState.FadingIn;
+                currentState = AudioTrackState.FadingIn;
                 mainCoroutine = StartCoroutine(FadeFromPause(fadeDuration, fadeTarget));
             }
         }
-        else if (currentState == AmbientState.FadingIn && mainCoroutine != null)
+        else if (currentState == AudioTrackState.FadingIn && mainCoroutine != null)
         {
             // Interrupt fade-from-pause and reverse to fade-to-pause
             StopCoroutine(mainCoroutine);
             mainCoroutine = null;
         
-            currentState = AmbientState.FadingOut;
+            currentState = AudioTrackState.FadingOut;
             mainCoroutine = StartCoroutine(FadeToPause(fadeDuration, fadeTarget));
         }
         else
@@ -195,12 +182,12 @@ public class AmbientAudioTrack : MonoBehaviour
     /// </summary>
     private void Pause(float fadeDuration = 0f, FadeTarget fadeTarget = FadeTarget.FadeVolume)
     {
-        Debug.Log($"[AmbientTrack] Pause called - Current State: {currentState}");
+        Debug.Log($"[Track] Pause called - Current State: {currentState}");
 
         // Can only pause if we're in a playing state
-        if (currentState == AmbientState.Stopped || currentState == AmbientState.Paused)
+        if (currentState == AudioTrackState.Stopped || currentState == AudioTrackState.Paused)
         {
-            Debug.LogWarning($"[AmbientTrack] Cannot pause from state: {currentState}");
+            Debug.LogWarning($"[Track] Cannot pause from state: {currentState}");
             return;
         }
 
@@ -251,12 +238,12 @@ public class AmbientAudioTrack : MonoBehaviour
             {
                 // Instant pause
                 mainSource.Pause();
-                currentState = AmbientState.Paused;
+                currentState = AudioTrackState.Paused;
             }
             else
             {
                 // Fade to pause - starts from CURRENT values
-                currentState = AmbientState.FadingOut;
+                currentState = AudioTrackState.FadingOut;
                 mainCoroutine = StartCoroutine(FadeToPause(fadeDuration, fadeTarget));
             }
         }
@@ -267,18 +254,18 @@ public class AmbientAudioTrack : MonoBehaviour
     /// </summary>
     private void Resume(float fadeDuration = 0f, FadeTarget fadeTarget = FadeTarget.FadeVolume)
     {
-        Debug.Log($"[AmbientTrack] Resume called - Current State: {currentState}");
+        Debug.Log($"[Track] Resume called - Current State: {currentState}");
 
-        if (currentState != AmbientState.Paused)
+        if (currentState != AudioTrackState.Paused)
         {
-            Debug.LogWarning($"[AmbientTrack] Cannot resume from state: {currentState}");
+            Debug.LogWarning($"[Track] Cannot resume from state: {currentState}");
             return;
         }
 
         if (mainSource == null)
         {
-            Debug.LogWarning("[AmbientTrack] No paused source to resume");
-            currentState = AmbientState.Stopped;
+            Debug.LogWarning("[Track] No paused source to resume");
+            currentState = AudioTrackState.Stopped;
             return;
         }
 
@@ -288,13 +275,13 @@ public class AmbientAudioTrack : MonoBehaviour
             mainSource.UnPause();
             mainSource.volume = targetVolume;
             mainSource.pitch = targetPitch;
-            currentState = AmbientState.Playing;
+            currentState = AudioTrackState.Playing;
         }
         else
         {
             // Fade from pause - starts from CURRENT values
             mainSource.UnPause();
-            currentState = AmbientState.FadingIn;
+            currentState = AudioTrackState.FadingIn;
             mainCoroutine = StartCoroutine(FadeFromPause(fadeDuration, fadeTarget));
         }
     }
@@ -306,7 +293,7 @@ public class AmbientAudioTrack : MonoBehaviour
 
     public void Stop(float fadeDuration = 0f, FadeTarget fadeTarget = FadeTarget.FadeVolume)
     {
-        Debug.Log($"[AmbientTrack] Stop called - Current State: {currentState}");
+        Debug.Log($"[Track] Stop called - Current State: {currentState}");
         
         // Set the stop flag FIRST - this prevents any fade coroutines from continuing
         stopRequested = true;
@@ -336,7 +323,7 @@ public class AmbientAudioTrack : MonoBehaviour
         }
         else
         {
-            currentState = AmbientState.FadingOut;
+            currentState = AudioTrackState.FadingOut;
             mainCoroutine = StartCoroutine(FadeAllToStop(fadeDuration, fadeTarget));
         }
     }
@@ -370,8 +357,8 @@ public class AmbientAudioTrack : MonoBehaviour
             outgoingSource = null;
         }
 
-        currentState = AmbientState.Stopped;
-        Debug.Log("[AmbientTrack] Instant stop complete");
+        currentState = AudioTrackState.Stopped;
+        Debug.Log("[Track] Instant stop complete");
     }
     
 
@@ -382,23 +369,23 @@ public class AmbientAudioTrack : MonoBehaviour
     public void UpdateParameters(Transform newAttachTo, float newVolume, float newPitch, 
         float newSpatialBlend, float fadeDuration, FadeTarget fadeTarget, bool newLoop, string eventName)
     {
-        Debug.Log($"[AmbientTrack] UpdateParameters called - Current State: {currentState}");
+        Debug.Log($"[Track] UpdateParameters called - Current State: {currentState}");
         
         // Safety check - allow updates during Playing and FadingIn states
-        if (currentState != AmbientState.Playing && currentState != AmbientState.FadingIn)
+        if (currentState != AudioTrackState.Playing && currentState != AudioTrackState.FadingIn)
         {
-            Debug.LogWarning($"[AmbientTrack] Cannot update parameters during state: {currentState}. Only allowed during Playing or FadingIn states.");
+            Debug.LogWarning($"[Track] Cannot update parameters during state: {currentState}. Only allowed during Playing or FadingIn states.");
             return;
         }
         
         // Must have a main source to update
         if (mainSource == null)
         {
-            Debug.LogWarning("[AmbientTrack] No main source to update parameters for.");
+            Debug.LogWarning("[Track] No main source to update parameters for.");
             return;
         }
         
-        Debug.Log($"[AmbientTrack] Updating parameters - Volume: {newVolume}, Pitch: {newPitch}, SpatialBlend: {newSpatialBlend}, FadeTarget: {fadeTarget}");
+        Debug.Log($"[Track] Updating parameters - Volume: {newVolume}, Pitch: {newPitch}, SpatialBlend: {newSpatialBlend}, FadeTarget: {fadeTarget}");
         
         // Store new target settings
         targetVolume = newVolume;
@@ -412,11 +399,11 @@ public class AmbientAudioTrack : MonoBehaviour
         {
             mainSource.transform.SetParent(newAttachTo);
             mainSource.transform.position = newAttachTo.position;
-            Debug.Log($"[AmbientTrack] Moved audio source to new parent: {newAttachTo.name}");
+            Debug.Log($"[Track] Moved audio source to new parent: {newAttachTo.name}");
         }
         else if (newAttachTo != null)
         {
-            Debug.Log("[AmbientTrack] Transform not changed - already attached to specified parent");
+            Debug.Log("[Track] Transform not changed - already attached to specified parent");
         }
         
         // Loop setting - instant
@@ -429,7 +416,7 @@ public class AmbientAudioTrack : MonoBehaviour
         if (fadeTarget == FadeTarget.Ignore)
         {
             // Ignore means don't update volume/pitch at all (like in Play method)
-            Debug.Log("[AmbientTrack] FadeTarget.Ignore - Volume and Pitch not updated");
+            Debug.Log("[Track] FadeTarget.Ignore - Volume and Pitch not updated");
         }
         else if (fadeDuration <= 0f)
         {
@@ -440,7 +427,7 @@ public class AmbientAudioTrack : MonoBehaviour
             if (fadeTarget == FadeTarget.FadePitch || fadeTarget == FadeTarget.FadeBoth)
                 mainSource.pitch = newPitch;
                 
-            Debug.Log("[AmbientTrack] Parameters updated instantly (no fade duration)");
+            Debug.Log("[Track] Parameters updated instantly (no fade duration)");
         }
         else
         {
@@ -450,13 +437,13 @@ public class AmbientAudioTrack : MonoBehaviour
             {
                 StopCoroutine(mainCoroutine);
                 mainCoroutine = null;
-                Debug.Log("[AmbientTrack] Interrupted existing fade for new parameter targets");
+                Debug.Log("[Track] Interrupted existing fade for new parameter targets");
             }
             
             // Start parameter fade
-            currentState = AmbientState.FadingIn; // Reusing existing state for parameter fading
+            currentState = AudioTrackState.FadingIn; // Reusing existing state for parameter fading
             mainCoroutine = StartCoroutine(FadeParametersToTarget(fadeDuration, fadeTarget, newVolume, newPitch));
-            Debug.Log($"[AmbientTrack] Started parameter fade - duration: {fadeDuration}s, target: {fadeTarget}");
+            Debug.Log($"[Track] Started parameter fade - duration: {fadeDuration}s, target: {fadeTarget}");
         }
     }
     
@@ -468,7 +455,7 @@ public class AmbientAudioTrack : MonoBehaviour
     private void HandlePlayDuringCrossfade(AudioClip clip, float volume, float pitch, float spatialBlend,
         FadeType fadeType, float fadeDuration, FadeTarget fadeTarget, bool loop, Transform attachTo)
     {
-        Debug.Log("[AmbientTrack] Handling Play during crossfade - 3-source safety engaged");
+        Debug.Log("[Track] Handling Play during crossfade - 3-source safety engaged");
 
         // Store current outgoing source fade values for inheritance
         float inheritVolume = 0f;
@@ -493,7 +480,7 @@ public class AmbientAudioTrack : MonoBehaviour
                 {
                     // Estimate remaining time based on progress
                     inheritFadeDuration = fadeDuration * (1f - fadeProgress);
-                    Debug.Log($"[AmbientTrack] Inheriting fade duration: {inheritFadeDuration:F2}s (progress: {fadeProgress:F2})");
+                    Debug.Log($"[Track] Inheriting fade duration: {inheritFadeDuration:F2}s (progress: {fadeProgress:F2})");
                 }
             }
 
@@ -551,7 +538,7 @@ public class AmbientAudioTrack : MonoBehaviour
         cueSource.Play();
 
         // Start fade in on new cue
-        currentState = AmbientState.Crossfading;
+        currentState = AudioTrackState.Crossfading;
         cueCoroutine = StartCoroutine(FadeInCue(fadeDuration, fadeTarget, volume, pitch));
     }
     
@@ -576,7 +563,7 @@ public class AmbientAudioTrack : MonoBehaviour
             mainSource.volume = volume;
             mainSource.pitch = pitch;
             mainSource.Play();
-            currentState = AmbientState.Playing;
+            currentState = AudioTrackState.Playing;
         }
         else
         {
@@ -589,7 +576,7 @@ public class AmbientAudioTrack : MonoBehaviour
         
             Debug.Log($"[DEBUG] Audio source playing: {mainSource.isPlaying}, volume: {mainSource.volume}");
         
-            currentState = AmbientState.FadingIn;
+            currentState = AudioTrackState.FadingIn;
             mainCoroutine = StartCoroutine(FadeInMain(fadeDuration, fadeTarget, volume, pitch));
         
             Debug.Log("[DEBUG] Started FadeInMain coroutine");
@@ -599,7 +586,7 @@ public class AmbientAudioTrack : MonoBehaviour
     private void StartCrossfade(AudioClip clip, float volume, float pitch, float spatialBlend,
         float fadeDuration, FadeTarget fadeTarget, bool loop, Transform attachTo)
     {
-        Debug.Log("[AmbientTrack] Starting crossfade - enforcing 3-source limit");
+        Debug.Log("[Track] Starting crossfade - enforcing 3-source limit");
 
         // CRITICAL: Clean up any existing outgoing source first
         if (outgoingSource != null)
@@ -649,7 +636,7 @@ public class AmbientAudioTrack : MonoBehaviour
         cueSource.pitch = (fadeTarget == FadeTarget.FadePitch || fadeTarget == FadeTarget.FadeBoth) ? 0f : pitch;
         cueSource.Play();
 
-        currentState = AmbientState.Crossfading;
+        currentState = AudioTrackState.Crossfading;
 
         // Start fade in on new cue
         cueCoroutine = StartCoroutine(FadeInCue(fadeDuration, fadeTarget, volume, pitch));
@@ -658,7 +645,7 @@ public class AmbientAudioTrack : MonoBehaviour
     private void StartFadeOutIn(AudioClip clip, float volume, float pitch, float spatialBlend,
         float fadeDuration, FadeTarget fadeTarget, bool loop, Transform attachTo)
     {
-        Debug.Log("[AmbientTrack] Starting Fade Out/In transition");
+        Debug.Log("[Track] Starting Fade Out/In transition");
 
         // IMMEDIATE cleanup of any existing sources (safety)
         if (outgoingCoroutine != null)
@@ -694,7 +681,7 @@ public class AmbientAudioTrack : MonoBehaviour
             mainSource = null;
 
             // Start fade out, then fade in when complete
-            currentState = AmbientState.FadingOut;
+            currentState = AudioTrackState.FadingOut;
             outgoingCoroutine = StartCoroutine(FadeOutThenFadeIn(outgoingSource, clip, volume, pitch,
                 spatialBlend, fadeDuration, fadeTarget, loop, attachTo));
         }
@@ -717,7 +704,7 @@ public class AmbientAudioTrack : MonoBehaviour
             // Check for stop interruption only - mainCoroutine assignment happens after StartCoroutine
             if (stopRequested) 
             {
-                Debug.Log("[AmbientTrack] FadeInMain interrupted by stop - exiting cleanly");
+                Debug.Log("[Track] FadeInMain interrupted by stop - exiting cleanly");
                 yield break;
             }
 
@@ -741,12 +728,12 @@ public class AmbientAudioTrack : MonoBehaviour
             if (fadeTarget == FadeTarget.FadePitch || fadeTarget == FadeTarget.FadeBoth)
                 mainSource.pitch = targetPit;
 
-            currentState = AmbientState.Playing;
-            Debug.Log("[AmbientTrack] FadeInMain completed successfully");
+            currentState = AudioTrackState.Playing;
+            Debug.Log("[Track] FadeInMain completed successfully");
         }
         else
         {
-            Debug.Log("[AmbientTrack] FadeInMain was interrupted - skipping final state change");
+            Debug.Log("[Track] FadeInMain was interrupted - skipping final state change");
         }
     }
     
@@ -781,7 +768,7 @@ public class AmbientAudioTrack : MonoBehaviour
             // Promote cue to main
             mainSource = cueSource;
             cueSource = null;
-            currentState = AmbientState.Playing;
+            currentState = AudioTrackState.Playing;
         }
         
         cueCoroutine = null;
@@ -877,7 +864,7 @@ public class AmbientAudioTrack : MonoBehaviour
             mainSource = cueSource;
             cueSource = null;
             
-            currentState = AmbientState.FadingIn;
+            currentState = AudioTrackState.FadingIn;
 
             // Fade in the now-main source
             float elapsed2 = 0f;
@@ -908,7 +895,7 @@ public class AmbientAudioTrack : MonoBehaviour
             }
         }
 
-        currentState = AmbientState.Playing;
+        currentState = AudioTrackState.Playing;
         outgoingCoroutine = null;
     }
     
@@ -939,7 +926,7 @@ public class AmbientAudioTrack : MonoBehaviour
         if (mainSource != null)
         {
             mainSource.Pause();
-            currentState = AmbientState.Paused;
+            currentState = AudioTrackState.Paused;
         }
 
         mainCoroutine = null;
@@ -975,7 +962,7 @@ public class AmbientAudioTrack : MonoBehaviour
             if (fadeTarget == FadeTarget.FadePitch || fadeTarget == FadeTarget.FadeBoth)
                 mainSource.pitch = targetPitch;
 
-            currentState = AmbientState.Playing;
+            currentState = AudioTrackState.Playing;
         }
 
         mainCoroutine = null;
@@ -1000,12 +987,12 @@ public class AmbientAudioTrack : MonoBehaviour
 
         if (activeSources.Count == 0)
         {
-            currentState = AmbientState.Stopped;
+            currentState = AudioTrackState.Stopped;
             mainCoroutine = null;
             yield break;
         }
 
-        Debug.Log($"[AmbientTrack] Fading {activeSources.Count} sources to stop over {duration}s");
+        Debug.Log($"[Track] Fading {activeSources.Count} sources to stop over {duration}s");
 
         // Fade from the captured values - FORCE OVERRIDE every frame
         float elapsed = 0f;
@@ -1049,7 +1036,7 @@ public class AmbientAudioTrack : MonoBehaviour
         }
 
         InstantStop();
-        Debug.Log("[AmbientTrack] Fade stop complete");
+        Debug.Log("[Track] Fade stop complete");
         mainCoroutine = null;
     }
     
@@ -1065,14 +1052,14 @@ public class AmbientAudioTrack : MonoBehaviour
         float startVol = mainSource.volume;
         float startPit = mainSource.pitch;
     
-        Debug.Log($"[AmbientTrack] Parameter fade starting - From Vol:{startVol:F2}/Pitch:{startPit:F2} To Vol:{targetVol:F2}/Pitch:{targetPit:F2}");
+        Debug.Log($"[Track] Parameter fade starting - From Vol:{startVol:F2}/Pitch:{startPit:F2} To Vol:{targetVol:F2}/Pitch:{targetPit:F2}");
 
         while (elapsed < duration && mainSource != null)
         {
             // Check for stop interruption only (removed mainCoroutine check)
             if (stopRequested) 
             {
-                Debug.Log("[AmbientTrack] Parameter fade interrupted by stop - exiting cleanly");
+                Debug.Log("[Track] Parameter fade interrupted by stop - exiting cleanly");
                 yield break;
             }
 
@@ -1096,12 +1083,12 @@ public class AmbientAudioTrack : MonoBehaviour
             if (fadeTarget == FadeTarget.FadePitch || fadeTarget == FadeTarget.FadeBoth)
                 mainSource.pitch = targetPit;
 
-            currentState = AmbientState.Playing; // Return to stable playing state
-            Debug.Log("[AmbientTrack] Parameter fade completed successfully");
+            currentState = AudioTrackState.Playing; // Return to stable playing state
+            Debug.Log("[Track] Parameter fade completed successfully");
         }
         else
         {
-            Debug.Log("[AmbientTrack] Parameter fade was interrupted - skipping final state change");
+            Debug.Log("[Track] Parameter fade was interrupted - skipping final state change");
         }
     
         mainCoroutine = null;
@@ -1147,9 +1134,9 @@ public class AmbientAudioTrack : MonoBehaviour
     // ==================== PUBLIC PROPERTIES ====================
     #region PUBLIC PROPERTIES
 
-    public AmbientState CurrentState => currentState;
+    public AudioTrackState CurrentState => currentState;
     public bool IsPlaying => mainSource != null && mainSource.isPlaying;
-    public bool IsCrossfading => currentState == AmbientState.Crossfading;
+    public bool IsCrossfading => currentState == AudioTrackState.Crossfading;
 
     #endregion
     

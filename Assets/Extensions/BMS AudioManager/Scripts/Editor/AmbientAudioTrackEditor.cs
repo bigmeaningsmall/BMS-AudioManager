@@ -2,7 +2,7 @@
 using UnityEditor;
 using UnityEngine;
 
-[CustomEditor(typeof(AmbientAudioTrack))]
+[CustomEditor(typeof(AudioTrack))]
 public class AmbientAudioTrackEditor : Editor
 {
     private Texture2D waveformTexture;
@@ -14,7 +14,7 @@ public class AmbientAudioTrackEditor : Editor
     {
         DrawDefaultInspector();
 
-        AmbientAudioTrack track = (AmbientAudioTrack)target;
+        AudioTrack track = (AudioTrack)target;
 
         EditorGUILayout.Space();
         EditorGUILayout.LabelField("DEBUG INFO", EditorStyles.boldLabel);
@@ -44,7 +44,7 @@ public class AmbientAudioTrackEditor : Editor
         }
     }
 
-    private void DrawSourceInfo(AmbientAudioTrack track)
+    private void DrawSourceInfo(AudioTrack track)
     {
         GUI.color = Color.white;
         EditorGUILayout.LabelField($"Current State: {track.CurrentState}");
@@ -95,7 +95,7 @@ public class AmbientAudioTrackEditor : Editor
 
     }
 
-    private void DrawLiveAudioInfo(AmbientAudioTrack track)
+    private void DrawLiveAudioInfo(AudioTrack track)
     {
         bool hasAnySources = false;
 
@@ -169,7 +169,7 @@ public class AmbientAudioTrackEditor : Editor
         DrawProgressBar(track);
     }
 
-    private void DrawProgressBar(AmbientAudioTrack track)
+    private void DrawProgressBar(AudioTrack track)
     {
         // Find the first active source with proper null checks
         AudioSource activeSource = null;
@@ -198,7 +198,7 @@ public class AmbientAudioTrackEditor : Editor
         EditorGUILayout.LabelField($"Playing: {activeSource.clip.name}", EditorStyles.miniLabel);
     }
 
-    private void DrawWaveformSection(AmbientAudioTrack track)
+    private void DrawWaveformSection(AudioTrack track)
     {
         EditorGUILayout.Space();
         
@@ -365,7 +365,7 @@ public class AmbientAudioTrackEditor : Editor
 
     private void OnSceneGUI()
     {
-        AmbientAudioTrack track = (AmbientAudioTrack)target;
+        AudioTrack track = (AudioTrack)target;
         
         // Use HandleUtility.GetHandleSize for proper camera-relative scaling
         float handleSize = HandleUtility.GetHandleSize(track.transform.position);
