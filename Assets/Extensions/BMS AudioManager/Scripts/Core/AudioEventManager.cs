@@ -25,6 +25,14 @@ public enum FadeTarget
 public static class AudioEventManager
 {
     
+    //define a delegate for audio events - type of track is defined ion the parameters
+    public delegate void AudioEvent_PlayAudio_Track(AudioTrackType trackType, Transform attachTo, int trackIndex, string trackName, float volume, float pitch, float spatialBlend, FadeType fadeType, float fadeDuration, FadeTarget fadeTarget, bool loop, string eventName);
+    public delegate void AudioEvent_StopAudio_Track(AudioTrackType trackType, float fadeDuration, FadeTarget fadeTarget);
+    public delegate void AudioEvent_PauseAudio_Track(AudioTrackType trackType, float fadeDuration, FadeTarget fadeTarget);
+    public delegate void AudioEvent_UpdateAudio_Track(AudioTrackType trackType, Transform attachTo, float volume, float pitch, float spatialBlend, float fadeDuration, FadeTarget fadeTarget, bool loop, string eventName);
+
+    
+    
     //define a delegate for audio events - BGM
     public delegate void AudioEvent_PlayBGM_Track(int index, string trackName, float volume, FadeType fadeType, float fadeDuration, bool loopBGM, string eventName);
     public delegate void AudioEvent_StopBGM_Track(float fadeDuration);
@@ -48,6 +56,21 @@ public static class AudioEventManager
     public delegate void AudioEvent_PlaySFX(Transform attachTo, string soundName, float volume, float pitch, bool randomizePitch, float pitchRange,  float spatialBlend, string eventName);
     
     
+    // ---------------------------------------------------------------------------------
+    
+    
+    // --- Events --- Generic Audio Tracks 
+    // playing ambient music
+    public static AudioEvent_PlayAudio_Track playTrack;
+    // stopping ambient music
+    public static AudioEvent_StopAudio_Track stopTrack;
+    // pausing ambient music
+    public static AudioEvent_PauseAudio_Track pauseTrack;
+    // updating ambient music
+    public static AudioEvent_UpdateAudio_Track updateTrack;
+
+    
+    
     // --- Events --- BGM - Single Track
     // playing background music
     public static AudioEvent_PlayBGM_Track playBGMTrack;
@@ -66,7 +89,6 @@ public static class AudioEventManager
     public static AudioEvent_PauseAmbientAudio_Track pauseAmbientTrack;
     // updating ambient music
     public static AudioEvent_UpdateAmbientAudio_Track updateAmbientTrack;
-    // setting ambient volume
     
     
     // --- Events --- Dialogue - Single Track

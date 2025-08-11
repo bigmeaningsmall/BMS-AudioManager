@@ -1099,23 +1099,46 @@ public class AudioTrack : MonoBehaviour
 
     private AudioClip ResolveAudioClip(int trackNumber, string trackName)
     {
+        // Try by name first if provided
         if (!string.IsNullOrEmpty(trackName))
         {
-            AudioClip clip = audioManager.GetAmbientClip(trackName);
+            AudioClip clip = trackType switch
+            {
+                AudioTrackType.BGM => audioManager.GetBGMClip(trackName),
+                AudioTrackType.Ambient => audioManager.GetAmbientClip(trackName),
+                AudioTrackType.Dialogue => audioManager.GetDialogueClip(trackName),
+                _ => null
+            };
+        
             if (clip != null) return clip;
         }
-        
+    
+        // Fall back to track number if name didn't work
         if (trackNumber >= 0)
         {
-            return audioManager.GetAmbientClip(trackNumber);
+            return trackType switch
+            {
+                AudioTrackType.BGM => audioManager.GetBGMClip(trackNumber),
+                AudioTrackType.Ambient => audioManager.GetAmbientClip(trackNumber),
+                AudioTrackType.Dialogue => audioManager.GetDialogueClip(trackNumber),
+                _ => null
+            };
         }
-        
+    
         return null;
     }
     
     private AudioSource CreateAudioSource(Transform attachTo = null)
     {
-        GameObject prefab = audioManager.GetAmbientPrefab();
+        //GameObject prefab = audioManager.GetAmbientPrefab();
+        GameObject prefab = trackType switch
+        {
+            AudioTrackType.BGM => audioManager.GetBGMPrefab(),
+            AudioTrackType.Ambient => audioManager.GetAmbientPrefab(),
+            AudioTrackType.Dialogue => audioManager.GetDialoguePrefab(),
+            _ => null
+        };
+        
         if (prefab == null)
         {
             Debug.LogError("No ambient audio prefab set in AudioManager!");

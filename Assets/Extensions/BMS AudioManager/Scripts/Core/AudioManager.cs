@@ -147,8 +147,20 @@ public class AudioManager : MonoBehaviour
     #endregion
 
     #region Public Accessors for Audio Resources
-
     // Public accessors for tracks to get resources
+    //-----------------------------------------------------------
+    public AudioClip GetBGMClip(int index) => musicTracks.TryGetValue(index, out AudioClip clip) ? clip : null;
+
+    public AudioClip GetBGMClip(string name)
+    {
+        foreach (var track in musicTracks)
+        {
+            if (track.Value.name == name) return track.Value;
+        }
+        return null;
+    }
+    public GameObject GetBGMPrefab() => musicPrefab;
+    //-----------------------------------------------------------
     public AudioClip GetAmbientClip(int index) => ambientAudioTracks.TryGetValue(index, out AudioClip clip) ? clip : null;
     public AudioClip GetAmbientClip(string name)
     {
@@ -159,8 +171,20 @@ public class AudioManager : MonoBehaviour
         return null;
     }
     public GameObject GetAmbientPrefab() => ambientAudioPrefab;
+    //-----------------------------------------------------------
 
+    public AudioClip GetDialogueClip(int index) => dialogueAudioTracks.TryGetValue(index, out AudioClip clip) ? clip : null;
 
+    public AudioClip GetDialogueClip(string name)
+    {
+        foreach (var track in dialogueAudioTracks)
+        {
+            if (track.Value.name == name) return track.Value;
+        }
+        return null;
+    }
+    public GameObject GetDialoguePrefab() => dialogueAudioPrefab;
+    //-----------------------------------------------------------
     #endregion
     
     //----------------------------------------------------------
