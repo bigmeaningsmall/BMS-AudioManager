@@ -1255,7 +1255,7 @@ PrefabInstance:
     - target: {fileID: 7366141512683043284, guid: ccc2f9deca1fd8440a1f8646e2051deb,
         type: 3}
       propertyPath: version
-      value: v1.3
+      value: v1.4
       objectReference: {fileID: 0}
     - target: {fileID: 7366141512683043284, guid: ccc2f9deca1fd8440a1f8646e2051deb,
         type: 3}
@@ -1298,7 +1298,11 @@ PrefabInstance:
         type: 3}
       insertIndex: -1
       addedObject: {fileID: 610669007}
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 5737640405453547409, guid: ccc2f9deca1fd8440a1f8646e2051deb,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1905089424}
   m_SourcePrefab: {fileID: 100100000, guid: ccc2f9deca1fd8440a1f8646e2051deb, type: 3}
 --- !u!1 &1308476517 stripped
 GameObject:
@@ -2053,6 +2057,65 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1905089422 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5737640405453547409, guid: ccc2f9deca1fd8440a1f8646e2051deb,
+    type: 3}
+  m_PrefabInstance: {fileID: 1024325076}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1905089424
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1905089422}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 83e6786c62456db4f8f3bbebccb0f978, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  bgmParameters:
+    trackState: 0
+    attachedTo: {fileID: 0}
+    index: 0
+    trackName: 
+    volume: 0
+    pitch: 0
+    spatialBlend: 0
+    loop: 0
+    clipProgress: 0
+    clipLength: 0
+    clipPercent: 0
+    eventName: 
+  ambientParameters:
+    trackState: 0
+    attachedTo: {fileID: 0}
+    index: 0
+    trackName: 
+    volume: 0
+    pitch: 0
+    spatialBlend: 0
+    loop: 0
+    clipProgress: 0
+    clipLength: 0
+    clipPercent: 0
+    eventName: 
+  dialogueParameters:
+    trackState: 0
+    attachedTo: {fileID: 0}
+    index: 0
+    trackName: 
+    volume: 0
+    pitch: 0
+    spatialBlend: 0
+    loop: 0
+    clipProgress: 0
+    clipLength: 0
+    clipPercent: 0
+    eventName: 
+  updateInEditMode: 1
+  updateInterval: 0.1
 --- !u!1001 &2140064040
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2069,7 +2132,12 @@ PrefabInstance:
     - target: {fileID: 5355574976095253072, guid: 89621415efb6a794087214f779dcb9f2,
         type: 3}
       propertyPath: loop
-      value: 0
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5355574976095253072, guid: 89621415efb6a794087214f779dcb9f2,
+        type: 3}
+      propertyPath: volume
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5355574976095253072, guid: 89621415efb6a794087214f779dcb9f2,
         type: 3}

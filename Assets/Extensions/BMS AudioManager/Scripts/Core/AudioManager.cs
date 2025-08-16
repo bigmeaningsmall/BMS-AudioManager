@@ -59,15 +59,17 @@ public class AudioManager : MonoBehaviour
     [SerializeField] private List<string> soundEffectNames = new List<string>();
     #endregion
 
-    [Space(10)]
+
     // Parameter and Porperty References for tracks - these are for checking and reference
     // Parameters for audio - used for getting current state info
-    //[HideInInspector]
-    public AudioTrackParamters bgmTrackParameters;
-    //[HideInInspector]
-    public AudioTrackParamters ambientTrackParameters;
-    //[HideInInspector]q
-    public AudioTrackParamters dialogueTrackParameters;
+    private AudioTrackParamters bgmTrackParameters;
+    private AudioTrackParamters ambientTrackParameters;
+    private AudioTrackParamters dialogueTrackParameters;
+
+    // public readonly getters -- optional, but useful for other scripts to access track parameters
+    public AudioTrackParamters BGMParameters => bgmTrackParameters;
+    public AudioTrackParamters AmbientParameters => ambientTrackParameters;
+    public AudioTrackParamters DialogueParameters => dialogueTrackParameters;
     
     
     /// <summary>
@@ -494,7 +496,8 @@ public class AudioManager : MonoBehaviour
         };
     }
 
-    private AudioTrackParamters GetTrackParameters(AudioTrackType trackType)
+    // Get the parameters for a specific track type - used internally but also called by AudioTrackParameterDisplay for accessing current track parameters
+    public AudioTrackParamters GetTrackParameters(AudioTrackType trackType)
     {
         return trackType switch
         {
