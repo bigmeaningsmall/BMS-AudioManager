@@ -155,7 +155,7 @@ public class AudioEventSender : MonoBehaviour
             }
 
             if (Input.GetKeyDown(KeyCode.V)){
-                UpdateParameters();
+                AdjustParameters();
             }
         }
     }
@@ -235,13 +235,13 @@ public class AudioEventSender : MonoBehaviour
     
     
     // update the audio event sender parameters - instad of playing, stopping or pausing this will just update the parameters
-    public void UpdateParameters(){
+    public void AdjustParameters(){
         
-        UpdateTrackParameters();
+        AdjustTrackParameters();
         
     }
 
-    private void UpdateTrackParameters(){
+    private void AdjustTrackParameters(){
         
         Transform targetTransform = null;
     
@@ -255,7 +255,7 @@ public class AudioEventSender : MonoBehaviour
         }
         
         //send the UpdateParameters Event with parameters from the inspector
-        AudioEventManager.updateTrack(audioTrackType, targetTransform, volume, pitch, spatialBlend, fadeDuration, fadeTarget, loop, eventDelay, eventName);
+        AudioEventManager.adjustTrack(audioTrackType, targetTransform, volume, pitch, spatialBlend, fadeDuration, fadeTarget, loop, eventDelay, eventName);
     }
     
     

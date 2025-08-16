@@ -166,7 +166,7 @@ public class AudioManager : MonoBehaviour
         AudioEventManager.playTrack += PlayTrack;
         AudioEventManager.stopTrack += StopTrack;
         AudioEventManager.pauseTrack += PauseTrack;
-        AudioEventManager.updateTrack += UpdateTrack;
+        AudioEventManager.adjustTrack += AdjustTrack;
         
         AudioEventManager.PlaySFX += PlaySoundEffect;
     }
@@ -176,7 +176,7 @@ public class AudioManager : MonoBehaviour
         AudioEventManager.playTrack -= PlayTrack;
         AudioEventManager.stopTrack -= StopTrack;
         AudioEventManager.pauseTrack -= PauseTrack;
-        AudioEventManager.updateTrack -= UpdateTrack;
+        AudioEventManager.adjustTrack -= AdjustTrack;
         
         AudioEventManager.PlaySFX -= PlaySoundEffect;
     }
@@ -416,23 +416,23 @@ public class AudioManager : MonoBehaviour
     // UPDATE TRACK METHODS---------------------------------------------------------------------------------------
     
     //method to update parameters of audio tracks
-    public void UpdateTrack(AudioTrackType trackType, Transform attachTo, float volume, float pitch, float spatialBlend, float fadeDuration, FadeTarget fadeTarget, bool loop, float delay = 0f, string eventName = "")
+    public void AdjustTrack(AudioTrackType trackType, Transform attachTo, float volume, float pitch, float spatialBlend, float fadeDuration, FadeTarget fadeTarget, bool loop, float delay = 0f, string eventName = "")
     {
         // Cancel ANY existing delayed event for this track type
         CancelDelayedTrack(trackType);
         
         if (delay <= 0f)
         {
-            UpdateTrackImmediate(trackType, attachTo, volume, pitch, spatialBlend, fadeDuration, fadeTarget, loop, eventName);
+            AdjustTrackImmediate(trackType, attachTo, volume, pitch, spatialBlend, fadeDuration, fadeTarget, loop, eventName);
         }
         else
         {
-            Coroutine delayedCoroutine = StartCoroutine(UpdateTrackDelayed(delay, trackType, attachTo, volume, pitch, spatialBlend, fadeDuration, fadeTarget, loop, eventName));
+            Coroutine delayedCoroutine = StartCoroutine(AdjustTrackDelayed(delay, trackType, attachTo, volume, pitch, spatialBlend, fadeDuration, fadeTarget, loop, eventName));
             delayedCoroutines[trackType] = delayedCoroutine;
         }
     }
 
-    private void UpdateTrackImmediate(AudioTrackType trackType, Transform attachTo, float volume, float pitch, float spatialBlend, float fadeDuration, FadeTarget fadeTarget, bool loop, string eventName)
+    private void AdjustTrackImmediate(AudioTrackType trackType, Transform attachTo, float volume, float pitch, float spatialBlend, float fadeDuration, FadeTarget fadeTarget, bool loop, string eventName)
     {
         AudioTrack targetTrack = GetTrackByType(trackType);
         if (targetTrack == null)
@@ -461,7 +461,7 @@ public class AudioManager : MonoBehaviour
         }
     }
 
-    private IEnumerator UpdateTrackDelayed(float delay, AudioTrackType trackType, Transform attachTo, float volume, float pitch, float spatialBlend, float fadeDuration, FadeTarget fadeTarget, bool loop, string eventName)
+    private IEnumerator AdjustTrackDelayed(float delay, AudioTrackType trackType, Transform attachTo, float volume, float pitch, float spatialBlend, float fadeDuration, FadeTarget fadeTarget, bool loop, string eventName)
     {
         Debug.Log($"[AudioManager] Delaying {trackType} update for {delay}s");
         yield return new WaitForSeconds(delay);
@@ -470,11 +470,11 @@ public class AudioManager : MonoBehaviour
         delayedCoroutines.Remove(trackType);
         
         Debug.Log($"[AudioManager] Executing delayed {trackType} update");
-        UpdateTrackImmediate(trackType, attachTo, volume, pitch, spatialBlend, fadeDuration, fadeTarget, loop, eventName);
+        AdjustTrackImmediate(trackType, attachTo, volume, pitch, spatialBlend, fadeDuration, fadeTarget, loop, eventName);
     }
 
     //override UpdateTrack methods for different parameters // todo implement this in the future
-    public void UpdateTrack(AudioTrackType trackType, Transform attachTo)
+    public void AdjustTrack(AudioTrackType trackType, Transform attachTo)
     {
         // Future implementation for simplified parameter updates
     }
@@ -577,7 +577,7 @@ public class AudioManager : MonoBehaviour
         if (track.currentState == AudioTrackState.FadingIn || 
             track.currentState == AudioTrackState.FadingOut || 
             track.currentState == AudioTrackState.Crossfading ||
-            track.currentState == AudioTrackState.Updating ||
+            track.currentState == AudioTrackState.AdjustingParameters ||
             track.currentState == AudioTrackState.FadeToPause ||
             track.currentState == AudioTrackState.FadeFromPause)
         {

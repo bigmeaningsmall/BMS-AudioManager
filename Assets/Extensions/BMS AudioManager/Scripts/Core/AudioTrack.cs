@@ -17,7 +17,7 @@ public enum AudioTrackState
     FadingIn,       // Main or cue source fading in
     FadingOut,      // Outgoing source fading out  
     Crossfading,    // Cue fading in, outgoing fading out
-    Updating,       // Updating parameters (volume/pitch) during Playing or FadingIn
+    AdjustingParameters,       // Updating parameters (volume/pitch) during Playing or FadingIn
     FadeToPause,    // Fading out to pause
     FadeFromPause   // Fading in from pause
 }
@@ -407,7 +407,7 @@ public class AudioTrack : MonoBehaviour
         // Safety check - allow updates during Playing and FadingIn states
         if (currentState != AudioTrackState.Playing && 
             currentState != AudioTrackState.FadingIn && 
-            currentState != AudioTrackState.Updating)
+            currentState != AudioTrackState.AdjustingParameters)
         {
             Debug.LogWarning($"[Track] Cannot update parameters during state: {currentState}. Only allowed during Playing, FadingIn, or Updating states.");
             return;
@@ -476,7 +476,7 @@ public class AudioTrack : MonoBehaviour
             }
             
             // Start parameter fade
-            currentState = AudioTrackState.Updating; // Reusing existing state for parameter fading
+            currentState = AudioTrackState.AdjustingParameters; // Reusing existing state for parameter fading
             mainCoroutine = StartCoroutine(FadeParametersToTarget(fadeDuration, fadeTarget, newVolume, newPitch));
             Debug.Log($"[Track] Started parameter fade - duration: {fadeDuration}s, target: {fadeTarget}");
         }

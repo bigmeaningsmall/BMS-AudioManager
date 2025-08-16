@@ -29,7 +29,7 @@ public static class AudioEventManager
     public delegate void AudioEvent_PlayAudio_Track(AudioTrackType trackType, Transform attachTo, int trackIndex, string trackName, float volume, float pitch, float spatialBlend, FadeType fadeType, float fadeDuration, FadeTarget fadeTarget, bool loop, float delay, string eventName);
     public delegate void AudioEvent_StopAudio_Track(AudioTrackType trackType, float fadeDuration, FadeTarget fadeTarget, float delay, string eventName);
     public delegate void AudioEvent_PauseAudio_Track(AudioTrackType trackType, float fadeDuration, FadeTarget fadeTarget, float delay, string eventName);
-    public delegate void AudioEvent_UpdateAudio_Track(AudioTrackType trackType, Transform attachTo, float volume, float pitch, float spatialBlend, float fadeDuration, FadeTarget fadeTarget, bool loop, float delay, string eventName);
+    public delegate void AudioEvent_AdjustAudio_Track(AudioTrackType trackType, Transform attachTo, float volume, float pitch, float spatialBlend, float fadeDuration, FadeTarget fadeTarget, bool loop, float delay, string eventName);
 
     
     // Define a delegate for audio events - SFX // todo add delay
@@ -47,7 +47,7 @@ public static class AudioEventManager
     // pausing ambient music
     public static AudioEvent_PauseAudio_Track pauseTrack;
     // updating ambient music
-    public static AudioEvent_UpdateAudio_Track updateTrack;
+    public static AudioEvent_AdjustAudio_Track adjustTrack;
     
     
     // --- Events --- SFX - OneShots
