@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Random = UnityEngine.Random;
@@ -261,8 +262,21 @@ public class AudioManager : MonoBehaviour
     //----------------------------------------------------------
     
     #region Public Event Methods - Audio Tracks
+    //TODO - TEST ADDING A DELAY PARAMETER AS A COROUTINE FOR AUDIO TRACKS - Would it be a problem to call multiple times when there is a delay?
+    
     // Audio Event Methods (just passing properties and commands to audio tracks)
-    public void PlayTrack(AudioTrackType trackType, Transform attachTo, int trackNumber, string trackName, float volume, float pitch, float spatialBlend, FadeType fadeType, float fadeDuration, FadeTarget fadeTarget, bool loop, string eventName)
+    public void PlayTrack(AudioTrackType trackType, Transform attachTo, int trackNumber, string trackName, float volume, float pitch, float spatialBlend, FadeType fadeType, float fadeDuration, FadeTarget fadeTarget, bool loop, string eventName, float delay = 0f)
+    {
+        if (delay <= 0f)
+        {
+            PlayTrackImmediate(trackType, attachTo, trackNumber, trackName, volume, pitch, spatialBlend, fadeType, fadeDuration, fadeTarget, loop, eventName);
+        }
+        else
+        {
+            StartCoroutine(PlayTrackDelayed(delay, trackType, attachTo, trackNumber, trackName, volume, pitch, spatialBlend, fadeType, fadeDuration, fadeTarget, loop, eventName));
+        }
+    }
+    private void PlayTrackImmediate(AudioTrackType trackType, Transform attachTo, int trackNumber, string trackName, float volume, float pitch, float spatialBlend, FadeType fadeType, float fadeDuration, FadeTarget fadeTarget, bool loop, string eventName)
     {
         AudioTrack targetTrack = GetTrackByType(trackType);
         if (targetTrack == null)
@@ -279,8 +293,14 @@ public class AudioManager : MonoBehaviour
         AudioTrackParamters newParams = new AudioTrackParamters(attachTo, trackNumber, trackName, volume, pitch, spatialBlend, loop, eventName);
         SetTrackParameters(trackType, newParams);
     }
+    
+    private IEnumerator PlayTrackDelayed(float delay, AudioTrackType trackType, Transform attachTo, int trackNumber, string trackName, float volume, float pitch, float spatialBlend, FadeType fadeType, float fadeDuration, FadeTarget fadeTarget, bool loop, string eventName)
+    {
+        yield return new WaitForSeconds(delay);
+        PlayTrackImmediate(trackType, attachTo, trackNumber, trackName, volume, pitch, spatialBlend, fadeType, fadeDuration, fadeTarget, loop, eventName);
+    }
 
-    public void StopTrack(AudioTrackType trackType, float fadeDuration, FadeTarget fadeTarget)
+    private void StopTrack(AudioTrackType trackType, float fadeDuration, FadeTarget fadeTarget)
     {
         AudioTrack targetTrack = GetTrackByType(trackType);
         if (targetTrack == null)
@@ -291,7 +311,7 @@ public class AudioManager : MonoBehaviour
         targetTrack.Stop(fadeDuration, fadeTarget); 
     }
 
-    public void PauseTrack(AudioTrackType trackType, float fadeDuration, FadeTarget fadeTarget)
+    private void PauseTrack(AudioTrackType trackType, float fadeDuration, FadeTarget fadeTarget)
     {
         AudioTrack targetTrack = GetTrackByType(trackType);
         if (targetTrack == null)
@@ -303,7 +323,7 @@ public class AudioManager : MonoBehaviour
     }
 
     //method to update parameters of audio tracks
-    public void UpdateTrack(AudioTrackType trackType, Transform attachTo, float volume, float pitch, float spatialBlend, float fadeDuration, FadeTarget fadeTarget, bool loop, string eventName)
+    private void UpdateTrack(AudioTrackType trackType, Transform attachTo, float volume, float pitch, float spatialBlend, float fadeDuration, FadeTarget fadeTarget, bool loop, float delay, string eventName)
     {
         AudioTrack targetTrack = GetTrackByType(trackType);
         if (targetTrack == null)

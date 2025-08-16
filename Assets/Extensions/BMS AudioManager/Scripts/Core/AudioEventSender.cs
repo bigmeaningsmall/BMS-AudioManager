@@ -185,7 +185,7 @@ public class AudioEventSender : MonoBehaviour
             targetTransform = transformToAttachTo;
         }
 
-        AudioEventManager.playTrack(audioTrackType, targetTransform, trackNumber, trackName, volume, pitch, spatialBlend, fadeType, fadeDuration, fadeTarget, loop, eventName);
+        AudioEventManager.playTrack(audioTrackType, targetTransform, trackNumber, trackName, volume, pitch, spatialBlend, fadeType, fadeDuration, fadeTarget, loop, eventDelay, eventName);
 
     }
 
@@ -204,7 +204,7 @@ public class AudioEventSender : MonoBehaviour
             targetTransform = transformToAttachTo;
         }
         
-        AudioEventManager.playTrack(audioTrackType, targetTransform, trackNumber, trackName, volume, pitch, spatialBlend, fadeType, fadeDuration, fadeTarget, loop, eventName);
+        AudioEventManager.playTrack(audioTrackType, targetTransform, trackNumber, trackName, volume, pitch, spatialBlend, fadeType, fadeDuration, fadeTarget, loop, eventDelay, eventName);
         
     }
 
@@ -302,7 +302,7 @@ public class AudioEventSender : MonoBehaviour
         }
         
         //send the UpdateParameters Event with parameters from the inspector
-        AudioEventManager.updateTrack(audioTrackType, targetTransform, volume, pitch, spatialBlend, fadeDuration, fadeTarget, loop, eventName);
+        AudioEventManager.updateTrack(audioTrackType, targetTransform, volume, pitch, spatialBlend, fadeDuration, fadeTarget, loop, eventDelay, eventName);
     }
 
     private IEnumerator UpdateTrackParameters_Delayed(float delay){
@@ -321,7 +321,7 @@ public class AudioEventSender : MonoBehaviour
         }
         
         //send the UpdateParameters Event with parameters from the inspector
-        AudioEventManager.updateTrack(audioTrackType, targetTransform, volume, pitch, spatialBlend, fadeDuration, fadeTarget, loop, eventName);
+        AudioEventManager.updateTrack(audioTrackType, targetTransform, volume, pitch, spatialBlend, fadeDuration, fadeTarget, loop, eventDelay, eventName);
     }
     
 
