@@ -27,8 +27,8 @@ public static class AudioEventManager
     
     //define a delegate for audio events - type of track is defined ion the parameters
     public delegate void AudioEvent_PlayAudio_Track(AudioTrackType trackType, Transform attachTo, int trackIndex, string trackName, float volume, float pitch, float spatialBlend, FadeType fadeType, float fadeDuration, FadeTarget fadeTarget, bool loop, float delay, string eventName);
-    public delegate void AudioEvent_StopAudio_Track(AudioTrackType trackType, float fadeDuration, FadeTarget fadeTarget);
-    public delegate void AudioEvent_PauseAudio_Track(AudioTrackType trackType, float fadeDuration, FadeTarget fadeTarget);
+    public delegate void AudioEvent_StopAudio_Track(AudioTrackType trackType, float fadeDuration, FadeTarget fadeTarget, float delay, string eventName);
+    public delegate void AudioEvent_PauseAudio_Track(AudioTrackType trackType, float fadeDuration, FadeTarget fadeTarget, float delay, string eventName);
     public delegate void AudioEvent_UpdateAudio_Track(AudioTrackType trackType, Transform attachTo, float volume, float pitch, float spatialBlend, float fadeDuration, FadeTarget fadeTarget, bool loop, float delay, string eventName);
 
     

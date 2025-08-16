@@ -264,16 +264,44 @@ public class AudioManager : MonoBehaviour
     #region Public Event Methods - Audio Tracks
     //TODO - TEST ADDING A DELAY PARAMETER AS A COROUTINE FOR AUDIO TRACKS - Would it be a problem to call multiple times when there is a delay?
     
+    
+    // field to track delayed coroutines
+    private Dictionary<AudioTrackType, Coroutine> delayedCoroutines = new Dictionary<AudioTrackType, Coroutine>();
+    
+    // PLAY TRACK METHODS---------------------------------------------------------------------------------------
+    
     // Audio Event Methods (just passing properties and commands to audio tracks)
-    public void PlayTrack(AudioTrackType trackType, Transform attachTo, int trackNumber, string trackName, float volume, float pitch, float spatialBlend, FadeType fadeType, float fadeDuration, FadeTarget fadeTarget, bool loop, string eventName, float delay = 0f)
+    public void PlayTrack(AudioTrackType trackType, Transform attachTo, int trackNumber, string trackName, float volume, float pitch, float spatialBlend, FadeType fadeType, float fadeDuration, FadeTarget fadeTarget, bool loop, float delay, string eventName)
     {
+        // Cancel any existing delayed coroutine for this track type
+        CancelDelayedTrack(trackType);
+    
         if (delay <= 0f)
         {
             PlayTrackImmediate(trackType, attachTo, trackNumber, trackName, volume, pitch, spatialBlend, fadeType, fadeDuration, fadeTarget, loop, eventName);
         }
         else
         {
-            StartCoroutine(PlayTrackDelayed(delay, trackType, attachTo, trackNumber, trackName, volume, pitch, spatialBlend, fadeType, fadeDuration, fadeTarget, loop, eventName));
+            // Store the coroutine reference so we can cancel it later
+            Coroutine delayedCoroutine = StartCoroutine(PlayTrackDelayed(delay, trackType, attachTo, trackNumber, trackName, volume, pitch, spatialBlend, fadeType, fadeDuration, fadeTarget, loop, eventName));
+            delayedCoroutines[trackType] = delayedCoroutine;
+        }
+    }
+    // helper method to cancel delayed coroutines
+    private void CancelDelayedTrack(AudioTrackType trackType)
+    {
+        if (delayedCoroutines.TryGetValue(trackType, out Coroutine existingCoroutine))
+        {
+            if (existingCoroutine != null)
+            {
+                Debug.Log($"[AudioManager] CANCELLING delayed {trackType} event"); // Add this line
+                StopCoroutine(existingCoroutine);
+            }
+            delayedCoroutines.Remove(trackType);
+        }
+        else
+        {
+            Debug.Log($"[AudioManager] No delayed {trackType} event to cancel"); // Add this line too
         }
     }
     private void PlayTrackImmediate(AudioTrackType trackType, Transform attachTo, int trackNumber, string trackName, float volume, float pitch, float spatialBlend, FadeType fadeType, float fadeDuration, FadeTarget fadeTarget, bool loop, string eventName)
@@ -296,11 +324,35 @@ public class AudioManager : MonoBehaviour
     
     private IEnumerator PlayTrackDelayed(float delay, AudioTrackType trackType, Transform attachTo, int trackNumber, string trackName, float volume, float pitch, float spatialBlend, FadeType fadeType, float fadeDuration, FadeTarget fadeTarget, bool loop, string eventName)
     {
+        Debug.Log($"[AudioManager] Delaying {trackType} track for {delay}s");
         yield return new WaitForSeconds(delay);
+    
+        // Clean up the coroutine reference since it's completing
+        delayedCoroutines.Remove(trackType);
+    
+        Debug.Log($"[AudioManager] Executing delayed {trackType} track");
         PlayTrackImmediate(trackType, attachTo, trackNumber, trackName, volume, pitch, spatialBlend, fadeType, fadeDuration, fadeTarget, loop, eventName);
     }
 
-    private void StopTrack(AudioTrackType trackType, float fadeDuration, FadeTarget fadeTarget)
+
+    // STOP TRACK METHODS---------------------------------------------------------------------------------------
+    
+    public void StopTrack(AudioTrackType trackType, float fadeDuration, FadeTarget fadeTarget, float delay = 0f, string eventName = "")
+    {
+        CancelDelayedTrack(trackType); // Cancel any pending events for this track
+    
+        if (delay <= 0f)
+        {
+            StopTrackImmediate(trackType, fadeDuration, fadeTarget);
+        }
+        else
+        {
+            Coroutine delayedCoroutine = StartCoroutine(StopTrackDelayed(delay, trackType, fadeDuration, fadeTarget));
+            delayedCoroutines[trackType] = delayedCoroutine;
+        }
+    }
+
+    private void StopTrackImmediate(AudioTrackType trackType, float fadeDuration, FadeTarget fadeTarget)
     {
         AudioTrack targetTrack = GetTrackByType(trackType);
         if (targetTrack == null)
@@ -308,10 +360,39 @@ public class AudioManager : MonoBehaviour
             Debug.LogError($"{trackType}Track reference is null!");
             return;
         }
-        targetTrack.Stop(fadeDuration, fadeTarget); 
+        targetTrack.Stop(fadeDuration, fadeTarget);
     }
 
-    private void PauseTrack(AudioTrackType trackType, float fadeDuration, FadeTarget fadeTarget)
+    private IEnumerator StopTrackDelayed(float delay, AudioTrackType trackType, float fadeDuration, FadeTarget fadeTarget)
+    {
+        Debug.Log($"[AudioManager] Delaying {trackType} stop for {delay}s");
+        yield return new WaitForSeconds(delay);
+    
+        // Clean up the coroutine reference since it's completing
+        delayedCoroutines.Remove(trackType);
+    
+        Debug.Log($"[AudioManager] Executing delayed {trackType} stop");
+        StopTrackImmediate(trackType, fadeDuration, fadeTarget);
+    }
+
+    // PAUSE TRACK METHODS---------------------------------------------------------------------------------------
+    
+    public void PauseTrack(AudioTrackType trackType, float fadeDuration, FadeTarget fadeTarget, float delay = 0f, string eventName = "")
+    {
+        CancelDelayedTrack(trackType); // Cancel any pending events for this track
+    
+        if (delay <= 0f)
+        {
+            PauseTrackImmediate(trackType, fadeDuration, fadeTarget);
+        }
+        else
+        {
+            Coroutine delayedCoroutine = StartCoroutine(PauseTrackDelayed(delay, trackType, fadeDuration, fadeTarget));
+            delayedCoroutines[trackType] = delayedCoroutine;
+        }
+    }
+
+    private void PauseTrackImmediate(AudioTrackType trackType, float fadeDuration, FadeTarget fadeTarget)
     {
         AudioTrack targetTrack = GetTrackByType(trackType);
         if (targetTrack == null)
@@ -322,8 +403,38 @@ public class AudioManager : MonoBehaviour
         targetTrack.PauseToggle(fadeDuration, fadeTarget);
     }
 
+    private IEnumerator PauseTrackDelayed(float delay, AudioTrackType trackType, float fadeDuration, FadeTarget fadeTarget)
+    {
+        Debug.Log($"[AudioManager] Delaying {trackType} pause for {delay}s");
+        yield return new WaitForSeconds(delay);
+    
+        // Clean up the coroutine reference since it's completing
+        delayedCoroutines.Remove(trackType);
+    
+        Debug.Log($"[AudioManager] Executing delayed {trackType} pause");
+        PauseTrackImmediate(trackType, fadeDuration, fadeTarget);
+    }
+    
+    // UPDATE TRACK METHODS---------------------------------------------------------------------------------------
+    
     //method to update parameters of audio tracks
-    private void UpdateTrack(AudioTrackType trackType, Transform attachTo, float volume, float pitch, float spatialBlend, float fadeDuration, FadeTarget fadeTarget, bool loop, float delay, string eventName)
+    public void UpdateTrack(AudioTrackType trackType, Transform attachTo, float volume, float pitch, float spatialBlend, float fadeDuration, FadeTarget fadeTarget, bool loop, float delay = 0f, string eventName = "")
+    {
+        // Cancel ANY existing delayed event for this track type
+        CancelDelayedTrack(trackType);
+        
+        if (delay <= 0f)
+        {
+            UpdateTrackImmediate(trackType, attachTo, volume, pitch, spatialBlend, fadeDuration, fadeTarget, loop, eventName);
+        }
+        else
+        {
+            Coroutine delayedCoroutine = StartCoroutine(UpdateTrackDelayed(delay, trackType, attachTo, volume, pitch, spatialBlend, fadeDuration, fadeTarget, loop, eventName));
+            delayedCoroutines[trackType] = delayedCoroutine;
+        }
+    }
+
+    private void UpdateTrackImmediate(AudioTrackType trackType, Transform attachTo, float volume, float pitch, float spatialBlend, float fadeDuration, FadeTarget fadeTarget, bool loop, string eventName)
     {
         AudioTrack targetTrack = GetTrackByType(trackType);
         if (targetTrack == null)
@@ -346,6 +457,18 @@ public class AudioManager : MonoBehaviour
             AudioTrackParamters updatedParams = new AudioTrackParamters(attachTo, tNum, tName, volume, pitch, spatialBlend, loop, eName);
             SetTrackParameters(trackType, updatedParams);
         }
+    }
+
+    private IEnumerator UpdateTrackDelayed(float delay, AudioTrackType trackType, Transform attachTo, float volume, float pitch, float spatialBlend, float fadeDuration, FadeTarget fadeTarget, bool loop, string eventName)
+    {
+        Debug.Log($"[AudioManager] Delaying {trackType} update for {delay}s");
+        yield return new WaitForSeconds(delay);
+        
+        // Clean up the coroutine reference since it's completing
+        delayedCoroutines.Remove(trackType);
+        
+        Debug.Log($"[AudioManager] Executing delayed {trackType} update");
+        UpdateTrackImmediate(trackType, attachTo, volume, pitch, spatialBlend, fadeDuration, fadeTarget, loop, eventName);
     }
 
     //override UpdateTrack methods for different parameters // todo implement this in the future

@@ -162,14 +162,7 @@ public class AudioEventSender : MonoBehaviour
 
     public void Play()
     {
-        if (eventDelay <= 0)
-        {
-            PlayTrack();
-        }
-        else
-        {
-            StartCoroutine(PlayTrack_Delayed(eventDelay));
-        }
+        PlayTrack();
     }
 
     private void PlayTrack()
@@ -187,25 +180,6 @@ public class AudioEventSender : MonoBehaviour
 
         AudioEventManager.playTrack(audioTrackType, targetTransform, trackNumber, trackName, volume, pitch, spatialBlend, fadeType, fadeDuration, fadeTarget, loop, eventDelay, eventName);
 
-    }
-
-    private IEnumerator PlayTrack_Delayed(float delay)
-    {
-        yield return new WaitForSeconds(delay);
-        
-        Transform targetTransform = null;
-    
-        if (attachToThisTransform)
-        {
-            targetTransform = this.transform;
-        }
-        else if (transformToAttachTo != null)
-        {
-            targetTransform = transformToAttachTo;
-        }
-        
-        AudioEventManager.playTrack(audioTrackType, targetTransform, trackNumber, trackName, volume, pitch, spatialBlend, fadeType, fadeDuration, fadeTarget, loop, eventDelay, eventName);
-        
     }
 
     private void OnTriggerExit(Collider other)
@@ -230,19 +204,14 @@ public class AudioEventSender : MonoBehaviour
     
     public void Stop()
     {
-        if (eventDelay <= 0)
-        {
-            StopTrack();
-        }
-        else
-        {
-            StartCoroutine(StopTrack_Delayed(eventDelay));
-        }
+        
+        StopTrack();
+        
     }
 
     private void StopTrack()
     {
-        AudioEventManager.stopTrack(audioTrackType, fadeDuration, fadeTarget);
+        AudioEventManager.stopTrack(audioTrackType, fadeDuration, fadeTarget, eventDelay, eventName);
     }
 
     private IEnumerator StopTrack_Delayed(float delay)
@@ -254,38 +223,22 @@ public class AudioEventSender : MonoBehaviour
     // pause the audio
     public void Pause()
     {
-        if (eventDelay <= 0)
-        {
-            PauseTrack();
-        }
-        else
-        {
-            StartCoroutine(PauseTrack_Delayed(eventDelay));
-        }
+        PauseTrack();
+        
     }
 
     private void PauseTrack()
     {
         //send the Pause Event with parameters from the inspector
-        AudioEventManager.pauseTrack(audioTrackType, fadeDuration, fadeTarget);
+        AudioEventManager.pauseTrack(audioTrackType, fadeDuration, fadeTarget, eventDelay, eventName);
     }
-
-    private IEnumerator PauseTrack_Delayed(float delay)
-    {
-        yield return new WaitForSeconds(delay);
-        //send the Pause Event with parameters from the inspector
-        AudioEventManager.pauseTrack(audioTrackType, fadeDuration, fadeTarget);
-    }
+    
     
     // update the audio event sender parameters - instad of playing, stopping or pausing this will just update the parameters
     public void UpdateParameters(){
-         if(eventDelay<= 0)
-         {  
-            UpdateTrackParameters();
-         }else
-         {
-            StartCoroutine(UpdateTrackParameters_Delayed(eventDelay));
-         }
+        
+        UpdateTrackParameters();
+        
     }
 
     private void UpdateTrackParameters(){
@@ -304,25 +257,7 @@ public class AudioEventSender : MonoBehaviour
         //send the UpdateParameters Event with parameters from the inspector
         AudioEventManager.updateTrack(audioTrackType, targetTransform, volume, pitch, spatialBlend, fadeDuration, fadeTarget, loop, eventDelay, eventName);
     }
-
-    private IEnumerator UpdateTrackParameters_Delayed(float delay){
-        
-        yield return new WaitForSeconds(delay);
-        
-        Transform targetTransform = null;
     
-        if (attachToThisTransform)
-        {
-            targetTransform = this.transform;
-        }
-        else if (transformToAttachTo != null)
-        {
-            targetTransform = transformToAttachTo;
-        }
-        
-        //send the UpdateParameters Event with parameters from the inspector
-        AudioEventManager.updateTrack(audioTrackType, targetTransform, volume, pitch, spatialBlend, fadeDuration, fadeTarget, loop, eventDelay, eventName);
-    }
     
 
     #region Gizmo Visualization
