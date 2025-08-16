@@ -576,7 +576,10 @@ public class AudioManager : MonoBehaviour
         // Update the track parameters based on the current audio source when fading or crossfading
         if (track.currentState == AudioTrackState.FadingIn || 
             track.currentState == AudioTrackState.FadingOut || 
-            track.currentState == AudioTrackState.Crossfading)
+            track.currentState == AudioTrackState.Crossfading ||
+            track.currentState == AudioTrackState.Updating ||
+            track.currentState == AudioTrackState.FadeToPause ||
+            track.currentState == AudioTrackState.FadeFromPause)
         {
             trackParams.trackState = track.currentState;
             trackParams.attachedTo = currentSource.transform.parent;

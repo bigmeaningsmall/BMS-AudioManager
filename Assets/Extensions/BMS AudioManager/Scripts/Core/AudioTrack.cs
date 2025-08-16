@@ -191,7 +191,7 @@ public class AudioTrack : MonoBehaviour
             if (mainSource != null)
             {
                 mainSource.UnPause(); // Make sure it's unpaused
-                currentState = AudioTrackState.FadingIn;
+                currentState = AudioTrackState.FadeFromPause;
                 mainCoroutine = StartCoroutine(FadeFromPause(fadeDuration, fadeTarget));
             }
         }
@@ -201,7 +201,7 @@ public class AudioTrack : MonoBehaviour
             StopCoroutine(mainCoroutine);
             mainCoroutine = null;
         
-            currentState = AudioTrackState.FadingOut;
+            currentState = AudioTrackState.FadeToPause;
             mainCoroutine = StartCoroutine(FadeToPause(fadeDuration, fadeTarget));
         }
         else
@@ -276,7 +276,7 @@ public class AudioTrack : MonoBehaviour
             else
             {
                 // Fade to pause - starts from CURRENT values
-                currentState = AudioTrackState.FadingOut;
+                currentState = AudioTrackState.FadeToPause;
                 mainCoroutine = StartCoroutine(FadeToPause(fadeDuration, fadeTarget));
             }
         }
@@ -314,7 +314,7 @@ public class AudioTrack : MonoBehaviour
         {
             // Fade from pause - starts from CURRENT values
             mainSource.UnPause();
-            currentState = AudioTrackState.FadingIn;
+            currentState = AudioTrackState.FadeFromPause;
             mainCoroutine = StartCoroutine(FadeFromPause(fadeDuration, fadeTarget));
         }
     }
@@ -405,9 +405,11 @@ public class AudioTrack : MonoBehaviour
         Debug.Log($"[Track] UpdateParameters called - Current State: {currentState}");
         
         // Safety check - allow updates during Playing and FadingIn states
-        if (currentState != AudioTrackState.Playing && currentState != AudioTrackState.FadingIn)
+        if (currentState != AudioTrackState.Playing && 
+            currentState != AudioTrackState.FadingIn && 
+            currentState != AudioTrackState.Updating)
         {
-            Debug.LogWarning($"[Track] Cannot update parameters during state: {currentState}. Only allowed during Playing or FadingIn states.");
+            Debug.LogWarning($"[Track] Cannot update parameters during state: {currentState}. Only allowed during Playing, FadingIn, or Updating states.");
             return;
         }
         
@@ -474,7 +476,7 @@ public class AudioTrack : MonoBehaviour
             }
             
             // Start parameter fade
-            currentState = AudioTrackState.FadingIn; // Reusing existing state for parameter fading
+            currentState = AudioTrackState.Updating; // Reusing existing state for parameter fading
             mainCoroutine = StartCoroutine(FadeParametersToTarget(fadeDuration, fadeTarget, newVolume, newPitch));
             Debug.Log($"[Track] Started parameter fade - duration: {fadeDuration}s, target: {fadeTarget}");
         }
