@@ -17,6 +17,9 @@ public enum AudioTrackState
     FadingIn,       // Main or cue source fading in
     FadingOut,      // Outgoing source fading out  
     Crossfading,    // Cue fading in, outgoing fading out
+    Updating,       // Updating parameters (volume/pitch) during Playing or FadingIn
+    FadeToPause,    // Fading out to pause
+    FadeFromPause   // Fading in from pause
 }
 
 public class AudioTrack : MonoBehaviour

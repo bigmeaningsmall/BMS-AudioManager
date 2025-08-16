@@ -262,8 +262,6 @@ public class AudioManager : MonoBehaviour
     //----------------------------------------------------------
     
     #region Public Event Methods - Audio Tracks
-    //TODO - TEST ADDING A DELAY PARAMETER AS A COROUTINE FOR AUDIO TRACKS - Would it be a problem to call multiple times when there is a delay?
-    
     
     // field to track delayed coroutines
     private Dictionary<AudioTrackType, Coroutine> delayedCoroutines = new Dictionary<AudioTrackType, Coroutine>();
@@ -318,7 +316,7 @@ public class AudioManager : MonoBehaviour
         targetTrack.Play(trackNumber, trackName, volume, pitch, spatialBlend, fadeType, fadeDuration, fadeTarget, loop, attachTo);
         
         // Set parameters for the track -- parameters are updated in LateUpdate when fading 
-        AudioTrackParamters newParams = new AudioTrackParamters(attachTo, trackNumber, trackName, volume, pitch, spatialBlend, loop, eventName);
+        AudioTrackParamters newParams = new AudioTrackParamters(targetTrack.currentState, attachTo, trackNumber, trackName, volume, pitch, spatialBlend, loop, 0f, 0f, 0f, eventName);
         SetTrackParameters(trackType, newParams);
     }
     
@@ -453,8 +451,12 @@ public class AudioManager : MonoBehaviour
         {
             int tNum = currentParams.index; // Get the current index from the track
             string tName = currentParams.trackName;
-            string eName = currentParams.eventName;
-            AudioTrackParamters updatedParams = new AudioTrackParamters(attachTo, tNum, tName, volume, pitch, spatialBlend, loop, eName);
+            // if the eventname is not set, use the current event name
+            if (string.IsNullOrEmpty(eventName)){
+                eventName = currentParams.eventName;
+            }
+            
+            AudioTrackParamters updatedParams = new AudioTrackParamters(targetTrack.currentState, attachTo, tNum, tName, volume, pitch, spatialBlend, loop, 0f, 0f, 0f, eventName);
             SetTrackParameters(trackType, updatedParams);
         }
     }
@@ -538,6 +540,11 @@ public class AudioManager : MonoBehaviour
         AudioTrackParamters trackParams = GetTrackParameters(trackType);
     
         if (track == null || trackParams == null) return;
+        
+        trackParams.trackState = track.currentState;
+        // trackParams.clipProgress = track.GetComponent<AudioSource>().time;
+        // trackParams.clipLength = currentSource.clip != null ? currentSource.clip.length : 0f;
+        // trackParams.clipPercent = trackParams.clipLength > 0f ? (trackParams.clipProgress / trackParams.clipLength) * 100f : 0f;
     
         AudioSource currentSource;
         
@@ -560,12 +567,18 @@ public class AudioManager : MonoBehaviour
             }
             return;
         }
+        
+        trackParams.clipProgress = float.Parse(currentSource.time.ToString("F3"));
+        trackParams.clipLength = currentSource.clip != null ? float.Parse(currentSource.clip.length.ToString("F3")) : 0f;
+        trackParams.clipPercent = trackParams.clipLength > 0f ? float.Parse(((trackParams.clipProgress / trackParams.clipLength) * 100f).ToString("F1")) : 0f;
+
     
         // Update the track parameters based on the current audio source when fading or crossfading
         if (track.currentState == AudioTrackState.FadingIn || 
             track.currentState == AudioTrackState.FadingOut || 
             track.currentState == AudioTrackState.Crossfading)
         {
+            trackParams.trackState = track.currentState;
             trackParams.attachedTo = currentSource.transform.parent;
             trackParams.volume = currentSource.volume;
             trackParams.pitch = currentSource.pitch;
