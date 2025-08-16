@@ -63,11 +63,11 @@ public class AudioManager : MonoBehaviour
     // Parameter and Porperty References for tracks - these are for checking and reference
     // Parameters for audio - used for getting current state info
     //[HideInInspector]
-    public AudioTrackParamters bgmTrackParamters;
+    public AudioTrackParamters bgmTrackParameters;
     //[HideInInspector]
-    public AudioTrackParamters ambientTrackParamters;
+    public AudioTrackParamters ambientTrackParameters;
     //[HideInInspector]q
-    public AudioTrackParamters dialogueTrackParamters;
+    public AudioTrackParamters dialogueTrackParameters;
     
     
     /// <summary>
@@ -498,9 +498,9 @@ public class AudioManager : MonoBehaviour
     {
         return trackType switch
         {
-            AudioTrackType.BGM => bgmTrackParamters,
-            AudioTrackType.Ambient => ambientTrackParamters,
-            AudioTrackType.Dialogue => dialogueTrackParamters,
+            AudioTrackType.BGM => bgmTrackParameters,
+            AudioTrackType.Ambient => ambientTrackParameters,
+            AudioTrackType.Dialogue => dialogueTrackParameters,
             _ => null
         };
     }
@@ -510,13 +510,13 @@ public class AudioManager : MonoBehaviour
         switch (trackType)
         {
             case AudioTrackType.BGM:
-                bgmTrackParamters = parameters;
+                bgmTrackParameters = parameters;
                 break;
             case AudioTrackType.Ambient:
-                ambientTrackParamters = parameters;
+                ambientTrackParameters = parameters;
                 break;
             case AudioTrackType.Dialogue:
-                dialogueTrackParamters = parameters;
+                dialogueTrackParameters = parameters;
                 break;
         }
     }
