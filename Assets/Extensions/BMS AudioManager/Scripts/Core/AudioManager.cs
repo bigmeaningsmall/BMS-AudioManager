@@ -26,9 +26,9 @@ public class AudioManager : MonoBehaviour
 
     // Track Components (these handle everything)
     [Header("Audio Tracks")]
-    [SerializeField] private AudioTrack bgmTrack;
-    [SerializeField] private AudioTrack ambientTrack;
-    [SerializeField] private AudioTrack dialogueTrack;
+    [HideInInspector] private AudioTrack bgmTrack;
+    [HideInInspector] private AudioTrack ambientTrack;
+    [HideInInspector] private AudioTrack dialogueTrack;
     
     // Audio Resource Dictionaries (KEEP - centralized loading)
     [Header("Audio Resources")]
@@ -108,6 +108,74 @@ public class AudioManager : MonoBehaviour
         }
     }
 
+    private void InitializeTrackTypes()
+    {
+        Debug.Log("[AudioManager] Dynamically initializing track types from child transforms...");
+        
+        // Find AudioTrack components in child transforms by name
+        bgmTrack = FindChildAudioTrack("BGM");
+        ambientTrack = FindChildAudioTrack("Ambient");
+        dialogueTrack = FindChildAudioTrack("Dialogue");
+        
+        // Set track types and validate
+        if (bgmTrack != null)
+        {
+            bgmTrack.SetTrackType(AudioTrackType.BGM);
+            Debug.Log($"[AudioManager] BGM track found and initialized: {bgmTrack.name}");
+        }
+        else
+        {
+            Debug.LogError("[AudioManager] BGM track not found! Please ensure there's a child GameObject named 'BGM' with an AudioTrack component.");
+        }
+        
+        if (ambientTrack != null)
+        {
+            ambientTrack.SetTrackType(AudioTrackType.Ambient);
+            Debug.Log($"[AudioManager] Ambient track found and initialized: {ambientTrack.name}");
+        }
+        else
+        {
+            Debug.LogError("[AudioManager] Ambient track not found! Please ensure there's a child GameObject named 'Ambient' with an AudioTrack component.");
+        }
+        
+        if (dialogueTrack != null)
+        {
+            dialogueTrack.SetTrackType(AudioTrackType.Dialogue);
+            Debug.Log($"[AudioManager] Dialogue track found and initialized: {dialogueTrack.name}");
+        }
+        else
+        {
+            Debug.LogError("[AudioManager] Dialogue track not found! Please ensure there's a child GameObject named 'Dialogue' with an AudioTrack component.");
+        }
+        
+        // Summary
+        int foundTracks = (bgmTrack != null ? 1 : 0) + (ambientTrack != null ? 1 : 0) + (dialogueTrack != null ? 1 : 0);
+        Debug.Log($"[AudioManager] Track initialization complete: {foundTracks}/3 tracks found");
+    }
+
+    // helper method:
+    private AudioTrack FindChildAudioTrack(string childName)
+    {
+        // Find child transform by name
+        Transform childTransform = transform.Find(childName);
+        if (childTransform == null)
+        {
+            Debug.LogWarning($"[AudioManager] Child GameObject '{childName}' not found");
+            return null;
+        }
+        
+        // Get AudioTrack component from the child
+        AudioTrack audioTrack = childTransform.GetComponent<AudioTrack>();
+        if (audioTrack == null)
+        {
+            Debug.LogWarning($"[AudioManager] AudioTrack component not found on child '{childName}'");
+            return null;
+        }
+        
+        return audioTrack;
+    }
+
+    // ValidateAudioTrackSetup method to show the found tracks:
     [ContextMenu("Validate Audio Track Setup")]
     public void ValidateAudioTrackSetup()
     {
@@ -116,60 +184,23 @@ public class AudioManager : MonoBehaviour
         if (bgmTrack == null)
             Debug.LogError("[AudioManager] BGM Track reference is NULL!");
         else
-            Debug.Log($"[AudioManager] BGM Track: {bgmTrack.name} (Type: {bgmTrack.trackType})");
+            Debug.Log($"[AudioManager] BGM Track: {bgmTrack.name} (Type: {bgmTrack.TrackType}) on GameObject: {bgmTrack.gameObject.name}");
             
         if (ambientTrack == null)
             Debug.LogError("[AudioManager] Ambient Track reference is NULL!");
         else
-            Debug.Log($"[AudioManager] Ambient Track: {ambientTrack.name} (Type: {ambientTrack.trackType})");
+            Debug.Log($"[AudioManager] Ambient Track: {ambientTrack.name} (Type: {ambientTrack.TrackType}) on GameObject: {ambientTrack.gameObject.name}");
             
         if (dialogueTrack == null)
             Debug.LogError("[AudioManager] Dialogue Track reference is NULL!");
         else
-            Debug.Log($"[AudioManager] Dialogue Track: {dialogueTrack.name} (Type: {dialogueTrack.trackType})");
+            Debug.Log($"[AudioManager] Dialogue Track: {dialogueTrack.name} (Type: {dialogueTrack.TrackType}) on GameObject: {dialogueTrack.gameObject.name}");
             
         Debug.Log("=== Audio Resources ===");
         Debug.Log($"BGM tracks loaded: {musicTracks.Count}");
         Debug.Log($"Ambient tracks loaded: {ambientAudioTracks.Count}");
         Debug.Log($"Dialogue tracks loaded: {dialogueAudioTracks.Count}");
         Debug.Log($"SFX loaded: {soundEffects.Count}");
-    }
-
-
-    private void InitializeTrackTypes()
-    {
-        Debug.Log("[AudioManager] Initializing track types...");
-        
-        // Set the track types for each AudioTrack component
-        if (bgmTrack != null)
-        {
-            bgmTrack.SetTrackType(AudioTrackType.BGM);
-            Debug.Log("[AudioManager] BGM track type initialized");
-        }
-        else
-        {
-            Debug.LogError("[AudioManager] BGM track reference is null! Please assign an AudioTrack component to the bgmTrack field.");
-        }
-        
-        if (ambientTrack != null)
-        {
-            ambientTrack.SetTrackType(AudioTrackType.Ambient);
-            Debug.Log("[AudioManager] Ambient track type initialized");
-        }
-        else
-        {
-            Debug.LogError("[AudioManager] Ambient track reference is null! Please assign an AudioTrack component to the ambientTrack field.");
-        }
-        
-        if (dialogueTrack != null)
-        {
-            dialogueTrack.SetTrackType(AudioTrackType.Dialogue);
-            Debug.Log("[AudioManager] Dialogue track type initialized");
-        }
-        else
-        {
-            Debug.LogError("[AudioManager] Dialogue track reference is null! Please assign an AudioTrack component to the dialogueTrack field.");
-        }
     }
     
     #endregion
