@@ -611,32 +611,197 @@ public class AudioManager : MonoBehaviour
     
     // SFX Management (UNCHANGED)
     #region Play Sound Effects
-    public void PlaySoundEffect(Transform attachTo, string soundName, float volume, float pitch, bool randomizePitch, float pitchRange, float spatialBlend, string eventName)
+    
+    // delayed coroutines tracking for SFX (similar to tracks but specific to SFX)
+    private List<Coroutine> delayedSFXCoroutines = new List<Coroutine>();
+    
+    // PlaySoundEffect method with all parameters
+    // Note: soundNames is an array to allow random selection from multiple options
+    public void PlaySoundEffect(string[] soundNames, float volume, float pitch, bool randomizePitch, float pitchRange, float spatialBlend, bool loop, float delay, float percentChanceToPlay, Transform attachTo, Vector3 position, float minDist, float maxDist, string eventName)
     {
-        Debug.Log($"Playing sound effect '{soundName}' with volume {volume}, pitch {pitch}, spatial blend {spatialBlend}");
-        
-        if (!soundEffects.TryGetValue(soundName, out AudioClip clip))
+        // Check if the sound should play based on the percentage chance
+        if (percentChanceToPlay < 100f)
         {
-            Debug.Log($"Sound '{soundName}' not found in Resources/Audio/SFX!");
+            int random = Random.Range(0, 100);
+            if (random > percentChanceToPlay)
+            {
+                Debug.Log($"[AudioManager] SFX '{string.Join(", ", soundNames)}' skipped due to chance ({random} > {percentChanceToPlay})");
+                return;
+            }
+        }
+        
+        // Select a random sound effect name from the array
+        if (soundNames == null || soundNames.Length == 0)
+        {
+            Debug.LogError("[AudioManager] No sound names provided for SFX!");
             return;
         }
         
-        if(attachTo == null)
+        string selectedSoundName = soundNames[Random.Range(0, soundNames.Length)];
+        Debug.Log($"[AudioManager] Selected SFX: '{selectedSoundName}' from {soundNames.Length} options");
+        
+        if (delay <= 0f)
         {
-            attachTo = transform;
-            spatialBlend = 0;
+            PlaySoundEffectImmediate(selectedSoundName, volume, pitch, randomizePitch, pitchRange, spatialBlend, loop, attachTo, position, minDist, maxDist, eventName);
+        }
+        else
+        {
+            Coroutine delayedCoroutine = StartCoroutine(PlaySoundEffectDelayed(delay, selectedSoundName, volume, pitch, randomizePitch, pitchRange, spatialBlend, loop, attachTo, position, minDist, maxDist, eventName));
+            delayedSFXCoroutines.Add(delayedCoroutine);
+        }
+    }
+
+    private void PlaySoundEffectImmediate(string soundName, float volume, float pitch, bool randomizePitch, float pitchRange, float spatialBlend, bool loop, Transform attachTo, Vector3 position, float minDist, float maxDist, string eventName)
+    {
+        Debug.Log($"Playing sound effect '{soundName}' with volume {volume}, pitch {pitch}, spatial blend {spatialBlend}, loop {loop}");
+        
+        if (!soundEffects.TryGetValue(soundName, out AudioClip clip))
+        {
+            Debug.LogWarning($"Sound '{soundName}' not found in Resources/Audio/SFX!");
+            return;
         }
         
-        GameObject sfxObject = Instantiate(soundEffectPrefab, attachTo.position, Quaternion.identity, attachTo);
-        AudioSource sfxSource = sfxObject.GetComponent<AudioSource>();
+        // Determine position and parent transform
+        Vector3 spawnPosition;
+        Transform parentTransform;
 
+        if (attachTo != null)
+        {
+            // Use specified transform position and parent
+            spawnPosition = attachTo.position;
+            parentTransform = attachTo;
+            Debug.Log($"[AudioManager] Attaching SFX to: {attachTo.name}");
+        }
+        else if (position != default(Vector3))
+        {
+            // Use provided Vector3 position, parent to AudioManager
+            spawnPosition = position;
+            parentTransform = transform;
+            spatialBlend = Mathf.Max(spatialBlend, 0.1f); // Ensure some 3D when using world position
+            Debug.Log($"[AudioManager] Using custom position: {position}");
+        }
+        else
+        {
+            // Default: Use AudioManager position and parent
+            spawnPosition = transform.position;
+            parentTransform = transform;
+            Debug.Log($"[AudioManager] Using AudioManager default position with spatialBlend={spatialBlend}");
+        }
+        
+        GameObject sfxObject = Instantiate(soundEffectPrefab, spawnPosition, Quaternion.identity, parentTransform);
+        AudioSource sfxSource = sfxObject.GetComponent<AudioSource>();
+        
+        // Rename the GameObject to include the sound name and SFX tag
+        sfxObject.name = $"{soundName} (SFX)";
+        
+        // More detailed naming
+        sfxObject.name = $"{soundName} (SFX) - {(loop ? "Loop" : "OneShot")}";
+
+        // Apply basic parameters
         sfxSource.clip = clip;
-        sfxSource.volume = volume;
+        sfxSource.volume = volume * globalSFXAttenuation;
         sfxSource.pitch = randomizePitch ? Random.Range(pitch - pitchRange, pitch + pitchRange) * pitch : pitch;
+        sfxSource.loop = loop;
+        
+        // IMPORTANT: Apply spatial blend and 3D settings BEFORE other 3D properties
         sfxSource.spatialBlend = spatialBlend;
+        
+        // Apply 3D audio settings if spatial
+        if (spatialBlend > 0f)
+        {
+            // Set 3D audio properties
+            sfxSource.rolloffMode = AudioRolloffMode.Logarithmic;
+            sfxSource.minDistance = minDist;
+            sfxSource.maxDistance = maxDist;
+            
+            // Ensure other 3D settings are properly configured
+            sfxSource.spread = 0f; // Directional sound
+            sfxSource.dopplerLevel = 1f; // Enable doppler effect
+            
+            Debug.Log($"[AudioManager] Applied 3D settings: minDist={minDist}, maxDist={maxDist}, rolloff={sfxSource.rolloffMode}");
+        }
+        else
+        {
+            // For 2D audio, explicitly set these to ensure no 3D processing
+            sfxSource.rolloffMode = AudioRolloffMode.Logarithmic; // This still works for 2D
+            sfxSource.minDistance = 1f;
+            sfxSource.maxDistance = 500f;
+            Debug.Log("[AudioManager] 2D audio - spatial blend = 0");
+        }
+        
+        // Start playing
         sfxSource.Play();
 
-        Destroy(sfxObject, clip.length / sfxSource.pitch);
+        // Only auto-destroy if not looping
+        if (!loop)
+        {
+            Destroy(sfxObject, clip.length / Mathf.Abs(sfxSource.pitch));
+        }
+        
+        Debug.Log($"[AudioManager] SFX '{soundName}' playing at {spawnPosition} - spatialBlend={sfxSource.spatialBlend}, minDist={sfxSource.minDistance}, maxDist={sfxSource.maxDistance}");
+    }
+
+    private IEnumerator PlaySoundEffectDelayed(float delay, string soundName, float volume, float pitch, bool randomizePitch, float pitchRange, float spatialBlend, bool loop, Transform attachTo, Vector3 position, float minDist, float maxDist, string eventName)
+    {
+        Debug.Log($"[AudioManager] Delaying SFX '{soundName}' for {delay}s");
+        yield return new WaitForSeconds(delay);
+        
+        // Remove this coroutine from tracking list
+        delayedSFXCoroutines.RemoveAll(c => c == null);
+        
+        Debug.Log($"[AudioManager] Executing delayed SFX '{soundName}'");
+        PlaySoundEffectImmediate(soundName, volume, pitch, randomizePitch, pitchRange, spatialBlend, loop, attachTo, position, minDist, maxDist, eventName);
+    }
+    
+    // OPTIONAL: Method to cancel all delayed SFX
+    public void CancelAllDelayedSFX()
+    {
+        foreach (var coroutine in delayedSFXCoroutines)
+        {
+            if (coroutine != null)
+            {
+                StopCoroutine(coroutine);
+            }
+        }
+        delayedSFXCoroutines.Clear();
+        Debug.Log("[AudioManager] Cancelled all delayed SFX");
+    }
+
+    // OPTIONAL: Method to stop all looped SFX (for cleanup)
+    public void StopAllLoopedSFX()
+    {
+        // Find all SFX GameObjects (they'll be children of various transforms)
+        AudioSource[] allSources = FindObjectsOfType<AudioSource>();
+    
+        foreach (var source in allSources)
+        {
+            // Check if it's an SFX source (has our prefab structure) and is looping
+            if (source.loop && source.gameObject.name.Contains("SFX")) // Adjust name check as needed
+            {
+                Destroy(source.gameObject);
+            }
+        }
+        Debug.Log("[AudioManager] Stopped all looped SFX");
+    }
+
+    // CONVENIENCE OVERLOADS for backwards compatibility and ease of use:
+
+    // Simple single sound overload
+    public void PlaySoundEffect(string soundName, float volume = 1f, float pitch = 1f, bool randomizePitch = false, float pitchRange = 0.1f, float spatialBlend = 0f, bool loop = false, float delay = 0f, float percentChanceToPlay = 100f, Transform attachTo = null, Vector3 position = default, float minDist = 1f, float maxDist = 500f, string eventName = "")
+    {
+        PlaySoundEffect(new string[] { soundName }, volume, pitch, randomizePitch, pitchRange, spatialBlend, loop, delay, percentChanceToPlay, attachTo, position, minDist, maxDist, eventName);
+    }
+
+    // Transform-only positioning (most common use case)
+    public void PlaySoundEffectAt(Transform attachTo, string soundName, float volume = 1f, float spatialBlend = 1f, float minDist = 1f, float maxDist = 20f)
+    {
+        PlaySoundEffect(new string[] { soundName }, volume, 1f, false, 0f, spatialBlend, false, 0f, 100f, attachTo, default, minDist, maxDist, "");
+    }
+
+    // Vector3 positioning
+    public void PlaySoundEffectAt(Vector3 position, string soundName, float volume = 1f, float spatialBlend = 1f, float minDist = 1f, float maxDist = 20f)
+    {
+        PlaySoundEffect(new string[] { soundName }, volume, 1f, false, 0f, spatialBlend, false, 0f, 100f, null, position, minDist, maxDist, "");
     }
     #endregion
 }

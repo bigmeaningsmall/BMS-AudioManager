@@ -1101,6 +1101,31 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 1798408813154171869, guid: 061e1c5bd8269d545a6d42f763eea41c,
         type: 3}
+      propertyPath: testMode
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1798408813154171869, guid: 061e1c5bd8269d545a6d42f763eea41c,
+        type: 3}
+      propertyPath: maxDistance
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 1798408813154171869, guid: 061e1c5bd8269d545a6d42f763eea41c,
+        type: 3}
+      propertyPath: minDistance
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 1798408813154171869, guid: 061e1c5bd8269d545a6d42f763eea41c,
+        type: 3}
+      propertyPath: spatialBlend
+      value: 0.75
+      objectReference: {fileID: 0}
+    - target: {fileID: 1798408813154171869, guid: 061e1c5bd8269d545a6d42f763eea41c,
+        type: 3}
+      propertyPath: useCustom3DSettings
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1798408813154171869, guid: 061e1c5bd8269d545a6d42f763eea41c,
+        type: 3}
       propertyPath: triggerActiveColor.a
       value: 1
       objectReference: {fileID: 0}
@@ -2142,7 +2167,7 @@ PrefabInstance:
     - target: {fileID: 5355574976095253072, guid: 89621415efb6a794087214f779dcb9f2,
         type: 3}
       propertyPath: testMode
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5355574976095253072, guid: 89621415efb6a794087214f779dcb9f2,
         type: 3}
