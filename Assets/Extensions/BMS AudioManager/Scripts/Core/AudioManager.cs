@@ -39,9 +39,10 @@ public class AudioManager : MonoBehaviour
 
     // Prefab References (KEEP - tracks will use these)
     [Header("Audio Prefabs")]
-    [SerializeField] private GameObject musicPrefab;
-    [SerializeField] private GameObject ambientAudioPrefab;
-    [SerializeField] private GameObject dialogueAudioPrefab;
+    [SerializeField] private GameObject audioTrackPrefab; // Generic prefab for audio tracks
+    // [SerializeField] private GameObject musicPrefab;
+    // [SerializeField] private GameObject ambientAudioPrefab;
+    // [SerializeField] private GameObject dialogueAudioPrefab;
     [SerializeField] private GameObject soundEffectPrefab;
     
     [Header("SFX Settings")]
@@ -240,7 +241,7 @@ public class AudioManager : MonoBehaviour
         }
         return null;
     }
-    public GameObject GetBGMPrefab() => musicPrefab;
+    public GameObject GetBGMPrefab() => audioTrackPrefab;
     //-----------------------------------------------------------
     public AudioClip GetAmbientClip(int index) => ambientAudioTracks.TryGetValue(index, out AudioClip clip) ? clip : null;
     public AudioClip GetAmbientClip(string name)
@@ -251,7 +252,7 @@ public class AudioManager : MonoBehaviour
         }
         return null;
     }
-    public GameObject GetAmbientPrefab() => ambientAudioPrefab;
+    public GameObject GetAmbientPrefab() => audioTrackPrefab;
     //-----------------------------------------------------------
 
     public AudioClip GetDialogueClip(int index) => dialogueAudioTracks.TryGetValue(index, out AudioClip clip) ? clip : null;
@@ -264,7 +265,7 @@ public class AudioManager : MonoBehaviour
         }
         return null;
     }
-    public GameObject GetDialoguePrefab() => dialogueAudioPrefab;
+    public GameObject GetDialoguePrefab() => audioTrackPrefab;
     //-----------------------------------------------------------
     #endregion
 
@@ -753,7 +754,7 @@ public class AudioManager : MonoBehaviour
         PlaySoundEffectImmediate(soundName, volume, pitch, randomizePitch, pitchRange, spatialBlend, loop, attachTo, position, minDist, maxDist, eventName);
     }
     
-    // OPTIONAL: Method to cancel all delayed SFX
+    // OPTIONAL: Method to cancel all delayed SFX - this is useful for cleanup or resetting
     public void CancelAllDelayedSFX()
     {
         foreach (var coroutine in delayedSFXCoroutines)
@@ -770,7 +771,8 @@ public class AudioManager : MonoBehaviour
     // OPTIONAL: Method to stop all looped SFX (for cleanup)
     public void StopAllLoopedSFX()
     {
-        // Find all SFX GameObjects (they'll be children of various transforms)
+        // Find all SFX GameObjects (they'll be children of various transforms) -  WE NEED TO CHECK IF THE NAME CONTAINS "(SFX)" TO AVOID UNINTENDED DESTRUCTION
+        
         AudioSource[] allSources = FindObjectsOfType<AudioSource>();
     
         foreach (var source in allSources)
@@ -784,7 +786,7 @@ public class AudioManager : MonoBehaviour
         Debug.Log("[AudioManager] Stopped all looped SFX");
     }
 
-    // CONVENIENCE OVERLOADS for backwards compatibility and ease of use:
+    // CONVENIENCE OVERLOADS for backwards compatibility and ease of use: TODO: FIND A BETTER WAY TO DO THIS
 
     // Simple single sound overload
     public void PlaySoundEffect(string soundName, float volume = 1f, float pitch = 1f, bool randomizePitch = false, float pitchRange = 0.1f, float spatialBlend = 0f, bool loop = false, float delay = 0f, float percentChanceToPlay = 100f, Transform attachTo = null, Vector3 position = default, float minDist = 1f, float maxDist = 500f, string eventName = "")

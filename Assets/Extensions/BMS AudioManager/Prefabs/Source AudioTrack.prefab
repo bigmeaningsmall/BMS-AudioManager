@@ -9,10 +9,10 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 58932919111104339}
-  - component: {fileID: -3687377419630131310}
+  - component: {fileID: 1618194505766730724}
   - component: {fileID: 8359367033671341306}
   m_Layer: 0
-  m_Name: Source BGM
+  m_Name: Source AudioTrack
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -33,7 +33,7 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &-3687377419630131310
+--- !u!114 &1618194505766730724
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -55,11 +55,11 @@ AudioSource:
   m_GameObject: {fileID: 8822123416660145754}
   m_Enabled: 1
   serializedVersion: 4
-  OutputAudioMixerGroup: {fileID: 2268928712382745843, guid: 3c08029f3a334d8468cd0ea11728e603,
+  OutputAudioMixerGroup: {fileID: -7043283835160980907, guid: 3c08029f3a334d8468cd0ea11728e603,
     type: 2}
   m_audioClip: {fileID: 0}
   m_Resource: {fileID: 0}
-  m_PlayOnAwake: 0
+  m_PlayOnAwake: 1
   m_Volume: 1
   m_Pitch: 1
   Loop: 1
@@ -67,7 +67,7 @@ AudioSource:
   Spatialize: 0
   SpatializePostEffects: 0
   Priority: 128
-  DopplerLevel: 0
+  DopplerLevel: 0.2
   MinDistance: 10
   MaxDistance: 500
   Pan2D: 0
@@ -104,7 +104,7 @@ AudioSource:
     m_Curve:
     - serializedVersion: 3
       time: 0
-      value: 0
+      value: 1
       inSlope: 0
       outSlope: 0
       tangentMode: 0
@@ -119,7 +119,7 @@ AudioSource:
     m_Curve:
     - serializedVersion: 3
       time: 0
-      value: 0
+      value: 0.5555556
       inSlope: 0
       outSlope: 0
       tangentMode: 0
