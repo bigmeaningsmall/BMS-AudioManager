@@ -12,11 +12,18 @@ public enum AudioType
 
 public class AudioSourceType : MonoBehaviour
 {
-    public AudioType audioType = AudioType.Null;
+    [SerializeField] private AudioType audioType = AudioType.Null;
     
-    //getter setter for audioType
-    public AudioType AudioType{
-        get{ return audioType; }
-        set{ audioType = value; }
+    // Getter setter for audioType
+    public AudioType AudioType
+    {
+        get { return audioType; }
+        set { audioType = value; }
     }
+    
+    // Optional: Helper method to check if this is a specific type
+    public bool IsType(AudioType type) => audioType == type;
+    
+    // Optional: For debugging in inspector
+    public override string ToString() => $"AudioSourceType: {audioType}";
 }

@@ -271,6 +271,7 @@ public class AudioManager : MonoBehaviour
 
     
     //----------------------------------------------------------
+    // AUDIO TRACK MANAGEMENT
     
     #region Public Event Methods - Audio Tracks
     
@@ -537,81 +538,9 @@ public class AudioManager : MonoBehaviour
     
     //---------------------------------------------------------- 
     
-    private void LateUpdate()
-    {
-        // Update parameters for all track types during fading states
-        UpdateTrackParameters(AudioTrackType.BGM);
-        UpdateTrackParameters(AudioTrackType.Ambient);
-        UpdateTrackParameters(AudioTrackType.Dialogue);
-    }
+    // SFX MANAGEMENT
     
-    
-    private void UpdateTrackParameters(AudioTrackType trackType)
-    {
-        AudioTrack track = GetTrackByType(trackType);
-        AudioTrackParamters trackParams = GetTrackParameters(trackType);
-    
-        if (track == null || trackParams == null) return;
-        
-        trackParams.trackState = track.currentState;
-        // trackParams.clipProgress = track.GetComponent<AudioSource>().time;
-        // trackParams.clipLength = currentSource.clip != null ? currentSource.clip.length : 0f;
-        // trackParams.clipPercent = trackParams.clipLength > 0f ? (trackParams.clipProgress / trackParams.clipLength) * 100f : 0f;
-    
-        AudioSource currentSource;
-        
-        // Handle fadeinout and crossfade separately - to decide between cue for crossfade or outgoing for fadein/out
-        if (track.currentState == AudioTrackState.Crossfading)
-        {
-            currentSource = track.mainSource ? track.mainSource : track.cueSource;
-        }
-        else
-        {
-            currentSource = track.mainSource ? track.mainSource : track.outgoingSource;
-        }
-    
-        if (currentSource == null)
-        {
-            // Only warn if the track is supposed to be playing
-            if (track.currentState != AudioTrackState.Stopped)
-            {
-                Debug.LogWarning($"No active audio source found for {trackType} track.");
-            }
-            return;
-        }
-        
-        trackParams.clipProgress = float.Parse(currentSource.time.ToString("F3"));
-        trackParams.clipLength = currentSource.clip != null ? float.Parse(currentSource.clip.length.ToString("F3")) : 0f;
-        trackParams.clipPercent = trackParams.clipLength > 0f ? float.Parse(((trackParams.clipProgress / trackParams.clipLength) * 100f).ToString("F1")) : 0f;
-
-    
-        // Update the track parameters based on the current audio source when fading or crossfading
-        if (track.currentState == AudioTrackState.FadingIn || 
-            track.currentState == AudioTrackState.FadingOut || 
-            track.currentState == AudioTrackState.Crossfading ||
-            track.currentState == AudioTrackState.AdjustingParameters ||
-            track.currentState == AudioTrackState.FadeToPause ||
-            track.currentState == AudioTrackState.FadeFromPause)
-        {
-            trackParams.trackState = track.currentState;
-            trackParams.attachedTo = currentSource.transform.parent;
-            trackParams.volume = currentSource.volume;
-            trackParams.pitch = currentSource.pitch;
-            trackParams.spatialBlend = currentSource.spatialBlend;
-            trackParams.loop = currentSource.loop;
-            trackParams.trackName = currentSource.clip != null ? currentSource.clip.name : "No Clip";
-        
-            // Remove "(Clone)" from the track name if it exists
-            if (trackParams.trackName.Contains("(Clone)"))
-            {
-                trackParams.trackName = trackParams.trackName.Replace("(Clone)", "").Trim();
-            }
-        } 
-    }
-    
-    
-    // SFX Management (UNCHANGED)
-    #region Play Sound Effects
+    #region Public Event Methods - Sound Effects
     
     // delayed coroutines tracking for SFX (similar to tracks but specific to SFX)
     private List<Coroutine> delayedSFXCoroutines = new List<Coroutine>();
@@ -692,8 +621,20 @@ public class AudioManager : MonoBehaviour
         GameObject sfxObject = Instantiate(soundEffectPrefab, spawnPosition, Quaternion.identity, parentTransform);
         AudioSource sfxSource = sfxObject.GetComponent<AudioSource>();
         
+        // SET THE AUDIO TYPE FOR SFX
+        AudioSourceType audioSourceType = sfxObject.GetComponent<AudioSourceType>();
+        if (audioSourceType != null)
+        {
+            audioSourceType.AudioType = AudioType.SFX;
+            Debug.Log($"[AudioManager] Set AudioType to SFX for '{soundName}'");
+        }
+        else
+        {
+            Debug.LogWarning($"[AudioManager] No AudioSourceType component found on SFX prefab for '{soundName}'");
+        }
+        
         // Rename the GameObject to include the sound name and SFX tag
-        sfxObject.name = $"{soundName} (SFX)";
+        //sfxObject.name = $"{soundName} (SFX)";
         
         // More detailed naming
         sfxObject.name = $"{soundName} (SFX) - {(loop ? "Loop" : "OneShot")}";
@@ -753,39 +694,9 @@ public class AudioManager : MonoBehaviour
         Debug.Log($"[AudioManager] Executing delayed SFX '{soundName}'");
         PlaySoundEffectImmediate(soundName, volume, pitch, randomizePitch, pitchRange, spatialBlend, loop, attachTo, position, minDist, maxDist, eventName);
     }
-    
-    // OPTIONAL: Method to cancel all delayed SFX - this is useful for cleanup or resetting
-    public void CancelAllDelayedSFX()
-    {
-        foreach (var coroutine in delayedSFXCoroutines)
-        {
-            if (coroutine != null)
-            {
-                StopCoroutine(coroutine);
-            }
-        }
-        delayedSFXCoroutines.Clear();
-        Debug.Log("[AudioManager] Cancelled all delayed SFX");
-    }
 
-    // OPTIONAL: Method to stop all looped SFX (for cleanup)
-    public void StopAllLoopedSFX()
-    {
-        // Find all SFX GameObjects (they'll be children of various transforms) -  WE NEED TO CHECK IF THE NAME CONTAINS "(SFX)" TO AVOID UNINTENDED DESTRUCTION
-        
-        AudioSource[] allSources = FindObjectsOfType<AudioSource>();
     
-        foreach (var source in allSources)
-        {
-            // Check if it's an SFX source (has our prefab structure) and is looping
-            if (source.loop && source.gameObject.name.Contains("SFX")) // Adjust name check as needed
-            {
-                Destroy(source.gameObject);
-            }
-        }
-        Debug.Log("[AudioManager] Stopped all looped SFX");
-    }
-
+    // ---------------------------------------------------------------------------------------------------------
     // CONVENIENCE OVERLOADS for backwards compatibility and ease of use: TODO: FIND A BETTER WAY TO DO THIS
 
     // Simple single sound overload
@@ -805,5 +716,221 @@ public class AudioManager : MonoBehaviour
     {
         PlaySoundEffect(new string[] { soundName }, volume, 1f, false, 0f, spatialBlend, false, 0f, 100f, null, position, minDist, maxDist, "");
     }
+    
+    // --------------------------------------------------------------
+    // Additional convenience methods for SFX 
+    
+    // Method to cancel all delayed SFX - this is useful for cleanup or resetting
+    public void CancelAllDelayedSFX()
+    {
+        foreach (var coroutine in delayedSFXCoroutines)
+        {
+            if (coroutine != null)
+            {
+                StopCoroutine(coroutine);
+            }
+        }
+        delayedSFXCoroutines.Clear();
+        Debug.Log("[AudioManager] Cancelled all delayed SFX");
+    }
+
+    // Method to stop all looped SFX using AudioSourceType
+    public void StopAllLoopedSFX()
+    {
+        // Find all AudioSourceType components and filter for SFX
+        AudioSourceType[] allAudioTypes = FindObjectsOfType<AudioSourceType>();
+        int stoppedCount = 0;
+        
+        foreach (var audioType in allAudioTypes)
+        {
+            // Check if it's SFX type and is looping
+            if (audioType.AudioType == AudioType.SFX)
+            {
+                AudioSource source = audioType.GetComponent<AudioSource>();
+                if (source != null && source.loop)
+                {
+                    Debug.Log($"[AudioManager] Stopping looped SFX: {audioType.gameObject.name}");
+                    Destroy(audioType.gameObject);
+                    stoppedCount++;
+                }
+            }
+        }
+        
+        Debug.Log($"[AudioManager] Stopped {stoppedCount} looped SFX");
+    }
+
+    // Method to stop ALL SFX (looped and non-looped)
+    public void StopAllSFX()
+    {
+        AudioSourceType[] allAudioTypes = FindObjectsOfType<AudioSourceType>();
+        int stoppedCount = 0;
+        
+        foreach (var audioType in allAudioTypes)
+        {
+            if (audioType.AudioType == AudioType.SFX)
+            {
+                Debug.Log($"[AudioManager] Stopping SFX: {audioType.gameObject.name}");
+                Destroy(audioType.gameObject);
+                stoppedCount++;
+            }
+        }
+        
+        Debug.Log($"[AudioManager] Stopped {stoppedCount} SFX total");
+    }
+
+    // Method to pause/resume all SFX
+    public void PauseAllSFX(bool pause)
+    {
+        AudioSourceType[] allAudioTypes = FindObjectsOfType<AudioSourceType>();
+        int affectedCount = 0;
+        
+        foreach (var audioType in allAudioTypes)
+        {
+            if (audioType.AudioType == AudioType.SFX)
+            {
+                AudioSource source = audioType.GetComponent<AudioSource>();
+                if (source != null)
+                {
+                    if (pause)
+                    {
+                        source.Pause();
+                    }
+                    else
+                    {
+                        source.UnPause();
+                    }
+                    affectedCount++;
+                }
+            }
+        }
+        
+        string action = pause ? "Paused" : "Resumed";
+        Debug.Log($"[AudioManager] {action} {affectedCount} SFX");
+    }
+
+    // Get count of active SFX
+    public int GetActiveSFXCount()
+    {
+        AudioSourceType[] allAudioTypes = FindObjectsOfType<AudioSourceType>();
+        int count = 0;
+        
+        foreach (var audioType in allAudioTypes)
+        {
+            if (audioType.AudioType == AudioType.SFX)
+            {
+                AudioSource source = audioType.GetComponent<AudioSource>();
+                if (source != null && source.isPlaying)
+                {
+                    count++;
+                }
+            }
+        }
+        
+        return count;
+    }
+
+    // Get all active SFX names (for debugging)
+    public string[] GetActiveSFXNames()
+    {
+        AudioSourceType[] allAudioTypes = FindObjectsOfType<AudioSourceType>();
+        var activeSFXNames = new System.Collections.Generic.List<string>();
+        
+        foreach (var audioType in allAudioTypes)
+        {
+            if (audioType.AudioType == AudioType.SFX)
+            {
+                AudioSource source = audioType.GetComponent<AudioSource>();
+                if (source != null && source.isPlaying)
+                {
+                    activeSFXNames.Add(audioType.gameObject.name);
+                }
+            }
+        }
+        
+        return activeSFXNames.ToArray();
+    }
+    
+    
     #endregion
+    
+    
+    
+    //---------------------------------------------------------- 
+    // TRACK STATE MANAGEMENT & UPDATES
+    
+    #region Parameter Updates and Track State Management
+
+        private void LateUpdate()
+    {
+        // Update parameters for all track types during fading states
+        UpdateTrackParameters(AudioTrackType.BGM);
+        UpdateTrackParameters(AudioTrackType.Ambient);
+        UpdateTrackParameters(AudioTrackType.Dialogue);
+    }
+    
+    private void UpdateTrackParameters(AudioTrackType trackType)
+    {
+        AudioTrack track = GetTrackByType(trackType);
+        AudioTrackParamters trackParams = GetTrackParameters(trackType);
+    
+        if (track == null || trackParams == null) return;
+        
+        trackParams.trackState = track.currentState;
+        // trackParams.clipProgress = track.GetComponent<AudioSource>().time;
+        // trackParams.clipLength = currentSource.clip != null ? currentSource.clip.length : 0f;
+        // trackParams.clipPercent = trackParams.clipLength > 0f ? (trackParams.clipProgress / trackParams.clipLength) * 100f : 0f;
+    
+        AudioSource currentSource;
+        
+        // Handle fadeinout and crossfade separately - to decide between cue for crossfade or outgoing for fadein/out
+        if (track.currentState == AudioTrackState.Crossfading)
+        {
+            currentSource = track.mainSource ? track.mainSource : track.cueSource;
+        }
+        else
+        {
+            currentSource = track.mainSource ? track.mainSource : track.outgoingSource;
+        }
+    
+        if (currentSource == null)
+        {
+            // Only warn if the track is supposed to be playing
+            if (track.currentState != AudioTrackState.Stopped)
+            {
+                Debug.LogWarning($"No active audio source found for {trackType} track.");
+            }
+            return;
+        }
+        
+        trackParams.clipProgress = float.Parse(currentSource.time.ToString("F3"));
+        trackParams.clipLength = currentSource.clip != null ? float.Parse(currentSource.clip.length.ToString("F3")) : 0f;
+        trackParams.clipPercent = trackParams.clipLength > 0f ? float.Parse(((trackParams.clipProgress / trackParams.clipLength) * 100f).ToString("F1")) : 0f;
+
+    
+        // Update the track parameters based on the current audio source when fading or crossfading
+        if (track.currentState == AudioTrackState.FadingIn || 
+            track.currentState == AudioTrackState.FadingOut || 
+            track.currentState == AudioTrackState.Crossfading ||
+            track.currentState == AudioTrackState.AdjustingParameters ||
+            track.currentState == AudioTrackState.FadeToPause ||
+            track.currentState == AudioTrackState.FadeFromPause)
+        {
+            trackParams.trackState = track.currentState;
+            trackParams.attachedTo = currentSource.transform.parent;
+            trackParams.volume = currentSource.volume;
+            trackParams.pitch = currentSource.pitch;
+            trackParams.spatialBlend = currentSource.spatialBlend;
+            trackParams.loop = currentSource.loop;
+            trackParams.trackName = currentSource.clip != null ? currentSource.clip.name : "No Clip";
+        
+            // Remove "(Clone)" from the track name if it exists
+            if (trackParams.trackName.Contains("(Clone)"))
+            {
+                trackParams.trackName = trackParams.trackName.Replace("(Clone)", "").Trim();
+            }
+        } 
+    }
+
+    #endregion
+ 
 }

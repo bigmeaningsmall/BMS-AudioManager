@@ -1189,6 +1189,27 @@ public class AudioTrack : MonoBehaviour
         Transform parent = attachTo ?? audioManager.transform;
         GameObject audioObj = Instantiate(prefab, parent.position, Quaternion.identity, parent);
     
+        // Set the AUDIO TYPE
+        AudioSourceType audioSourceType = audioObj.GetComponent<AudioSourceType>();
+        if (audioSourceType != null)
+        {
+            // Get track type name
+            AudioType audioType = trackType switch
+            {
+                AudioTrackType.BGM => AudioType.BGM,
+                AudioTrackType.Ambient => AudioType.Ambient,
+                AudioTrackType.Dialogue => AudioType.Dialogue,
+                _ => AudioType.Null
+            };
+        
+            audioSourceType.AudioType = audioType;
+            Debug.Log($"[AudioTrack] Set AudioType to {audioType} for {trackType} track");
+        }
+        else
+        {
+            Debug.LogWarning($"[AudioTrack] No AudioSourceType component found on {trackType} track prefab");
+        }
+        
         // Get track type name
         string trackTypeName = trackType switch
         {
