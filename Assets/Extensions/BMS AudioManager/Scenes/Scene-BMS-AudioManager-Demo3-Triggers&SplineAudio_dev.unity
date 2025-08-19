@@ -1122,7 +1122,11 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 5737640405453547409, guid: ccc2f9deca1fd8440a1f8646e2051deb,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1905089426}
   m_SourcePrefab: {fileID: 100100000, guid: ccc2f9deca1fd8440a1f8646e2051deb, type: 3}
 --- !u!1 &1308476517 stripped
 GameObject:
@@ -1877,6 +1881,31 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1905089422 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5737640405453547409, guid: ccc2f9deca1fd8440a1f8646e2051deb,
+    type: 3}
+  m_PrefabInstance: {fileID: 1024325076}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1905089426
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1905089422}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6520e747f95a6914887e88c191452375, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  activeSFXCount: 0
+  delayedSFXCount: 0
+  activeSFXNames: []
+  updateInEditMode: 0
+  updateInterval: 0.5
+  maxNamesToShow: 20
+  showControlButtons: 1
 --- !u!1001 &2140064040
 PrefabInstance:
   m_ObjectHideFlags: 0

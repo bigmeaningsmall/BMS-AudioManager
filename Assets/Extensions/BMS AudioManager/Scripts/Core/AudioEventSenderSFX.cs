@@ -71,7 +71,7 @@ public class AudioEventSenderSFX : MonoBehaviour, IAudioEventSender
     public Color triggerActiveColor = new Color(1f, 0f, 0f, 0.8f); // Red when active
 
     [Space(20)]
-    [Header("TestMode : 'T' to play sound effect")]
+    [Header("TestMode : 'T' to play SFX, 'P' to pause all SFX, 'S' to stop all SFX")]
     public bool testMode = false;
 
     // For showing activation feedback
@@ -142,6 +142,20 @@ public class AudioEventSenderSFX : MonoBehaviour, IAudioEventSender
                 TriggerActivation();
                 Play();
             }
+        
+            // Use AudioManager's pause state for logging
+            if (Input.GetKeyDown(KeyCode.P))
+            {
+                bool currentState = AudioManager.Instance != null ? AudioManager.Instance.AllSFXPaused : false;
+                Debug.Log($"[EventSender] Testing Toggle SFX Pause (currently {(currentState ? "paused" : "playing")})");
+                Pause();
+            }
+        
+            if (Input.GetKeyDown(KeyCode.S))
+            {
+                Debug.Log("[EventSender] Testing Stop All SFX");
+                Stop();
+            }
         }
     }
     
@@ -193,15 +207,52 @@ public class AudioEventSenderSFX : MonoBehaviour, IAudioEventSender
         AudioEventManager.PlaySFX(sfxName, volume, pitch, randomisePitch, pitchRange, spatialBlend, loop, delay, percentageChanceToPlay, attachTo, position, minDist, maxDist, eventName);
     }
     
-    //we need these methods to implement the interface - they are not used in this script but are required (used in the AudioEventSender_BGM script)
+    // Interface methods to call SFX management functions:
     public void Stop()
     {
-        //to be implemented? - TODO - add a stop sound effect event (Unsure if this is needed)
+        StopSFX();
     }
-    
+
     public void Pause()
     {
-        //to be implemented? - TODO - add a pause sound effect event (Unsure if this is needed) 
+        PauseSFX();
+    }
+    
+    // PauseSFX to use AudioManager's toggle method:
+    /// <summary>
+    /// Toggle pause/resume all SFX - calls AudioManager.TogglePauseAllSFX
+    /// </summary>
+    private void PauseSFX()
+    {
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.TogglePauseAllSFX();
+            Debug.Log($"[EventSender] Toggled SFX pause via interface");
+        }
+        else
+        {
+            Debug.LogWarning("[EventSender] AudioManager not available for TogglePauseAllSFX");
+        }
+    }
+
+    // StopSFX (no state management needed):
+    /// <summary>
+    /// Stop all SFX - calls multiple AudioManager stop methods
+    /// </summary>
+    private void StopSFX()
+    {
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.CancelAllDelayedSFX();
+            AudioManager.Instance.StopAllLoopedSFX();
+            AudioManager.Instance.StopAllSFX(); // This now resets pause state internally
+        
+            Debug.Log("[EventSender] Called stop methods via interface");
+        }
+        else
+        {
+            Debug.LogWarning("[EventSender] AudioManager not available for Stop SFX methods");
+        }
     }
 
     #region Gizmo Visualization

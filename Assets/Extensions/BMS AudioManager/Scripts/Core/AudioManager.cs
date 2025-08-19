@@ -45,13 +45,17 @@ public class AudioManager : MonoBehaviour
     // [SerializeField] private GameObject dialogueAudioPrefab;
     [SerializeField] private GameObject soundEffectPrefab;
     
-    [Header("SFX Settings")]
+    [Header("SFX Settings & State")]
     [SerializeField] [Range(0f, 1f)] private float globalSFXAttenuation = 1f;
     public float GlobalSFXAttenuation 
     { 
         get => globalSFXAttenuation; 
         set => globalSFXAttenuation = Mathf.Clamp01(value); 
     }
+    private bool allSFXPaused = false;
+
+    // getter for external access
+    public bool AllSFXPaused => allSFXPaused;
 
     // Available Audio Lists (KEEP - for inspector visibility)
     #region Available Audio Tracks
@@ -674,11 +678,11 @@ public class AudioManager : MonoBehaviour
         // Start playing
         sfxSource.Play();
 
-        // Only auto-destroy if not looping
-        if (!loop)
-        {
-            Destroy(sfxObject, clip.length / Mathf.Abs(sfxSource.pitch));
-        }
+        // // Only auto-destroy if not looping
+        // if (!loop)
+        // {
+        //     Destroy(sfxObject, clip.length / Mathf.Abs(sfxSource.pitch));
+        // }
         
         Debug.Log($"[AudioManager] SFX '{soundName}' playing at {spawnPosition} - spatialBlend={sfxSource.spatialBlend}, minDist={sfxSource.minDistance}, maxDist={sfxSource.maxDistance}");
     }
@@ -764,7 +768,7 @@ public class AudioManager : MonoBehaviour
     {
         AudioSourceType[] allAudioTypes = FindObjectsOfType<AudioSourceType>();
         int stoppedCount = 0;
-        
+    
         foreach (var audioType in allAudioTypes)
         {
             if (audioType.AudioType == AudioType.SFX)
@@ -774,8 +778,11 @@ public class AudioManager : MonoBehaviour
                 stoppedCount++;
             }
         }
-        
-        Debug.Log($"[AudioManager] Stopped {stoppedCount} SFX total");
+    
+        // Reset pause state since no SFX are playing
+        allSFXPaused = false;
+    
+        Debug.Log($"[AudioManager] Stopped {stoppedCount} SFX total (reset pause state)");
     }
 
     // Method to pause/resume all SFX
@@ -783,7 +790,7 @@ public class AudioManager : MonoBehaviour
     {
         AudioSourceType[] allAudioTypes = FindObjectsOfType<AudioSourceType>();
         int affectedCount = 0;
-        
+    
         foreach (var audioType in allAudioTypes)
         {
             if (audioType.AudioType == AudioType.SFX)
@@ -794,18 +801,41 @@ public class AudioManager : MonoBehaviour
                     if (pause)
                     {
                         source.Pause();
+                    
+                        // For non-looped SFX, cancel the scheduled destroy
+                        if (!source.loop)
+                        {
+                            CancelInvoke(); // This cancels ALL pending destroys - simple but works
+                        }
                     }
                     else
                     {
                         source.UnPause();
+                    
+                        // For non-looped SFX, reschedule the destroy based on remaining time
+                        if (!source.loop && source.clip != null)
+                        {
+                            float remainingTime = (source.clip.length - source.time) / Mathf.Abs(source.pitch);
+                            if (remainingTime > 0)
+                            {
+                                Destroy(audioType.gameObject, remainingTime);
+                            }
+                        }
                     }
                     affectedCount++;
                 }
             }
         }
-        
+    
+        allSFXPaused = pause;
+    
         string action = pause ? "Paused" : "Resumed";
-        Debug.Log($"[AudioManager] {action} {affectedCount} SFX");
+        Debug.Log($"[AudioManager] {action} {affectedCount} SFX (state: {allSFXPaused})");
+    }
+    // toggle method for pausing/resuming all SFX
+    public void TogglePauseAllSFX()
+    {
+        PauseAllSFX(!allSFXPaused);
     }
 
     // Get count of active SFX
