@@ -178,7 +178,7 @@ public class AudioEventSender : MonoBehaviour
             targetTransform = transformToAttachTo;
         }
 
-        AudioEventManager.playTrack(audioTrackType, targetTransform, trackNumber, trackName, volume, pitch, spatialBlend, fadeType, fadeDuration, fadeTarget, loop, eventDelay, eventName);
+        AudioEventManager.playTrack(audioTrackType, trackNumber, trackName, volume, pitch, spatialBlend, fadeType, fadeDuration, fadeTarget, loop, eventDelay, targetTransform, eventName);
 
     }
 
@@ -255,7 +255,7 @@ public class AudioEventSender : MonoBehaviour
         }
         
         //send the UpdateParameters Event with parameters from the inspector
-        AudioEventManager.adjustTrack(audioTrackType, targetTransform, volume, pitch, spatialBlend, fadeDuration, fadeTarget, loop, eventDelay, eventName);
+        AudioEventManager.adjustTrack(audioTrackType, volume, pitch, spatialBlend, fadeDuration, fadeTarget, loop, eventDelay, targetTransform, eventName);
     }
     
     

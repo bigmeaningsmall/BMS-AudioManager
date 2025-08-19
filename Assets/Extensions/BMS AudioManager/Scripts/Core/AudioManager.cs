@@ -43,6 +43,14 @@ public class AudioManager : MonoBehaviour
     [SerializeField] private GameObject ambientAudioPrefab;
     [SerializeField] private GameObject dialogueAudioPrefab;
     [SerializeField] private GameObject soundEffectPrefab;
+    
+    [Header("SFX Settings")]
+    [SerializeField] [Range(0f, 1f)] private float globalSFXAttenuation = 1f;
+    public float GlobalSFXAttenuation 
+    { 
+        get => globalSFXAttenuation; 
+        set => globalSFXAttenuation = Mathf.Clamp01(value); 
+    }
 
     // Available Audio Lists (KEEP - for inspector visibility)
     #region Available Audio Tracks
@@ -271,7 +279,7 @@ public class AudioManager : MonoBehaviour
     // PLAY TRACK METHODS---------------------------------------------------------------------------------------
     
     // Audio Event Methods (just passing properties and commands to audio tracks)
-    public void PlayTrack(AudioTrackType trackType, Transform attachTo, int trackNumber, string trackName, float volume, float pitch, float spatialBlend, FadeType fadeType, float fadeDuration, FadeTarget fadeTarget, bool loop, float delay, string eventName)
+    public void PlayTrack(AudioTrackType trackType, int trackNumber, string trackName, float volume, float pitch, float spatialBlend, FadeType fadeType, float fadeDuration, FadeTarget fadeTarget, bool loop, float delay, Transform attachTo, string eventName)
     {
         // Cancel any existing delayed coroutine for this track type
         CancelDelayedTrack(trackType);
@@ -418,7 +426,7 @@ public class AudioManager : MonoBehaviour
     // UPDATE TRACK METHODS---------------------------------------------------------------------------------------
     
     //method to update parameters of audio tracks
-    public void AdjustTrack(AudioTrackType trackType, Transform attachTo, float volume, float pitch, float spatialBlend, float fadeDuration, FadeTarget fadeTarget, bool loop, float delay = 0f, string eventName = "")
+    public void AdjustTrack(AudioTrackType trackType, float volume, float pitch, float spatialBlend, float fadeDuration, FadeTarget fadeTarget, bool loop, float delay, Transform attachTo, string eventName = "")
     {
         // Cancel ANY existing delayed event for this track type
         CancelDelayedTrack(trackType);
