@@ -562,7 +562,7 @@ public class AudioTrack : MonoBehaviour
         }
 
         // Create new cue source for the new track
-        cueSource = CreateAudioSource(attachTo);
+        cueSource = CreateAudioSource(attachTo, clip);
         if (cueSource == null) return;
 
         cueSource.clip = clip;
@@ -584,7 +584,7 @@ public class AudioTrack : MonoBehaviour
     {
         Debug.Log($"[DEBUG] StartFromStopped called - fadeTarget: {fadeTarget}, fadeDuration: {fadeDuration}");
     
-        mainSource = CreateAudioSource(attachTo);
+        mainSource = CreateAudioSource(attachTo, clip);
         if (mainSource == null) return;
     
         mainSource.clip = clip;
@@ -659,7 +659,7 @@ public class AudioTrack : MonoBehaviour
         }
 
         // Create new cue source
-        cueSource = CreateAudioSource(attachTo);
+        cueSource = CreateAudioSource(attachTo, clip);
         if (cueSource == null) return;
 
         cueSource.clip = clip;
@@ -850,7 +850,7 @@ public class AudioTrack : MonoBehaviour
         float pitch, float spatialBlend, float fadeDuration, FadeTarget fadeTarget, bool loop, Transform attachTo)
     {
         // Pre-create the incoming source as cue (but don't play yet)
-        cueSource = CreateAudioSource(attachTo);
+        cueSource = CreateAudioSource(attachTo, newClip);
         if (cueSource == null) yield break;
 
         cueSource.clip = newClip;
@@ -1170,7 +1170,7 @@ public class AudioTrack : MonoBehaviour
         return null;
     }
     
-    private AudioSource CreateAudioSource(Transform attachTo = null)
+    private AudioSource CreateAudioSource(Transform attachTo = null, AudioClip clip = null)
     {
         GameObject prefab = trackType switch
         {
@@ -1179,7 +1179,7 @@ public class AudioTrack : MonoBehaviour
             AudioTrackType.Dialogue => audioManager.GetDialoguePrefab(),
             _ => null
         };
-    
+
         if (prefab == null)
         {
             Debug.LogError("No audio prefab set in AudioManager!");
@@ -1188,6 +1188,31 @@ public class AudioTrack : MonoBehaviour
 
         Transform parent = attachTo ?? audioManager.transform;
         GameObject audioObj = Instantiate(prefab, parent.position, Quaternion.identity, parent);
+    
+        // Get track type name
+        string trackTypeName = trackType switch
+        {
+            AudioTrackType.BGM => "BGM",
+            AudioTrackType.Ambient => "Ambient", 
+            AudioTrackType.Dialogue => "Dialogue",
+            _ => "Audio"
+        };
+    
+        // Get clip name (clean it up)
+        string clipName = "Unknown";
+        if (clip != null)
+        {
+            clipName = clip.name;
+            // Remove "(Clone)" if it exists
+            if (clipName.Contains("(Clone)"))
+            {
+                clipName = clipName.Replace("(Clone)", "").Trim();
+            }
+        }
+    
+        // Simple naming: ClipName (Type)
+        audioObj.name = $"{clipName} ({trackTypeName})"; // todo consider adding the state to the name as well
+    
         return audioObj.GetComponent<AudioSource>();
     }
 
