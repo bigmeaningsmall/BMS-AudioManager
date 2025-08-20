@@ -383,11 +383,11 @@ If upgrading from the previous version:
 
 ---
 
-## 🤝 Contributing
+## Contributing
 
 This is an ongoing work in progress. The system is designed to be modular and extensible. Feel free to contribute improvements or report issues.
 
-## 📄 License
+## License
 
 Open source - feel free to use and modify for your projects.
 
