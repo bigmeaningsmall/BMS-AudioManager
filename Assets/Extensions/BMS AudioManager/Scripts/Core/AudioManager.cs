@@ -316,7 +316,7 @@ public class AudioManager : MonoBehaviour
     // PLAY TRACK METHODS---------------------------------------------------------------------------------------
     
     // Audio Event Methods (just passing properties and commands to audio tracks)
-    public void PlayTrack(AudioTrackType trackType, int trackNumber, string trackName, float volume, float pitch, float spatialBlend, FadeType fadeType, float fadeDuration, FadeTarget fadeTarget, bool loop, float delay, Transform attachTo, string eventName)
+    private void PlayTrack(AudioTrackType trackType, int trackNumber, string trackName, float volume, float pitch, float spatialBlend, FadeType fadeType, float fadeDuration, FadeTarget fadeTarget, bool loop, float delay, Transform attachTo, string eventName)
     {
         // Cancel any existing delayed coroutine for this track type
         CancelDelayedTrack(trackType);
@@ -382,7 +382,7 @@ public class AudioManager : MonoBehaviour
 
     // STOP TRACK METHODS---------------------------------------------------------------------------------------
     
-    public void StopTrack(AudioTrackType trackType, float fadeDuration, FadeTarget fadeTarget, float delay = 0f, string eventName = "")
+    private void StopTrack(AudioTrackType trackType, float fadeDuration, FadeTarget fadeTarget, float delay = 0f, string eventName = "")
     {
         CancelDelayedTrack(trackType); // Cancel any pending events for this track
     
@@ -422,7 +422,7 @@ public class AudioManager : MonoBehaviour
 
     // PAUSE TRACK METHODS---------------------------------------------------------------------------------------
     
-    public void PauseTrack(AudioTrackType trackType, float fadeDuration, FadeTarget fadeTarget, float delay = 0f, string eventName = "")
+    private void PauseTrack(AudioTrackType trackType, float fadeDuration, FadeTarget fadeTarget, float delay = 0f, string eventName = "")
     {
         CancelDelayedTrack(trackType); // Cancel any pending events for this track
     
@@ -463,7 +463,7 @@ public class AudioManager : MonoBehaviour
     // UPDATE TRACK METHODS---------------------------------------------------------------------------------------
     
     //method to update parameters of audio tracks
-    public void AdjustTrack(AudioTrackType trackType, float volume, float pitch, float spatialBlend, float fadeDuration, FadeTarget fadeTarget, bool loop, float delay, Transform attachTo, string eventName = "")
+    private void AdjustTrack(AudioTrackType trackType, float volume, float pitch, float spatialBlend, float fadeDuration, FadeTarget fadeTarget, bool loop, float delay, Transform attachTo, string eventName = "")
     {
         // Cancel ANY existing delayed event for this track type
         CancelDelayedTrack(trackType);
@@ -582,7 +582,7 @@ public class AudioManager : MonoBehaviour
     
     // PlaySoundEffect method with all parameters
     // Note: soundNames is an array to allow random selection from multiple options
-    public void PlaySoundEffect(string[] soundNames, float volume, float pitch, bool randomizePitch, float pitchRange, float spatialBlend, bool loop, float delay, float percentChanceToPlay, Transform attachTo, Vector3 position, float minDist, float maxDist, string eventName)
+    private void PlaySoundEffect(string[] soundNames, float volume, float pitch, bool randomizePitch, float pitchRange, float spatialBlend, bool loop, float delay, float percentChanceToPlay, Transform attachTo, Vector3 position, float minDist, float maxDist, string eventName)
     {
         // Check if the sound should play based on the percentage chance
         if (percentChanceToPlay < 100f)
@@ -730,27 +730,6 @@ public class AudioManager : MonoBehaviour
         PlaySoundEffectImmediate(soundName, volume, pitch, randomizePitch, pitchRange, spatialBlend, loop, attachTo, position, minDist, maxDist, eventName);
     }
 
-    
-    // ---------------------------------------------------------------------------------------------------------
-    // CONVENIENCE OVERLOADS for backwards compatibility and ease of use: TODO: FIND A BETTER WAY TO DO THIS
-
-    // Simple single sound overload
-    public void PlaySoundEffect(string soundName, float volume = 1f, float pitch = 1f, bool randomizePitch = false, float pitchRange = 0.1f, float spatialBlend = 0f, bool loop = false, float delay = 0f, float percentChanceToPlay = 100f, Transform attachTo = null, Vector3 position = default, float minDist = 1f, float maxDist = 500f, string eventName = "")
-    {
-        PlaySoundEffect(new string[] { soundName }, volume, pitch, randomizePitch, pitchRange, spatialBlend, loop, delay, percentChanceToPlay, attachTo, position, minDist, maxDist, eventName);
-    }
-
-    // Transform-only positioning (most common use case)
-    public void PlaySoundEffectAt(Transform attachTo, string soundName, float volume = 1f, float spatialBlend = 1f, float minDist = 1f, float maxDist = 20f)
-    {
-        PlaySoundEffect(new string[] { soundName }, volume, 1f, false, 0f, spatialBlend, false, 0f, 100f, attachTo, default, minDist, maxDist, "");
-    }
-
-    // Vector3 positioning
-    public void PlaySoundEffectAt(Vector3 position, string soundName, float volume = 1f, float spatialBlend = 1f, float minDist = 1f, float maxDist = 20f)
-    {
-        PlaySoundEffect(new string[] { soundName }, volume, 1f, false, 0f, spatialBlend, false, 0f, 100f, null, position, minDist, maxDist, "");
-    }
     
     // --------------------------------------------------------------
     // Additional convenience methods for SFX 
