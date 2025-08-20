@@ -14,15 +14,14 @@ public class AudioEventSenderSFX : MonoBehaviour, IAudioEventSender
 {
     
     [Space(20)]
-    //  USE THIS AS A TAG TO DETERMINE WHICH EVENT TO SEND (Mutiple scripts can be attached to the same object)
+    //  USE THIS AS A TAG TO DETERMINE WHICH EVENT TO SEND (Multiple scripts can be attached to the same object)
     // Loop through the AudioEventSender_SFX scripts on the object and send the event with the matching eventName
     public string eventName = "Custom SFX Event Name"; //for future use //todo - add a custom event name to the AudioEventManager class
     
     [Space(10)] 
     [Header("Sound FX Event Parameters (SFX)")] [Space(5)]
     [Space(20)]
-    public string [] sfxName = new string[1]; // The name of the sound effects to play - can be multiple sounds to play randomly
-    private string sfxNameToPlay; // The name of the sound effect to play
+    public string[] sfxName = new string[1]; // The name of the sound effects to play - can be multiple sounds to play randomly
     
     [Space(20)]
     public bool playOnEnabled = true;
@@ -35,6 +34,9 @@ public class AudioEventSenderSFX : MonoBehaviour, IAudioEventSender
     public bool randomisePitch = true;
     [Range(0, 1f)] public float pitchRange = 0.1f;
     [Range(0, 1f)] public float spatialBlend = 0.5f;
+    
+    [Space(10)]
+    public bool loop = false;
 
     [Space(10)] 
     public bool randomiseDelay = false;
@@ -44,6 +46,17 @@ public class AudioEventSenderSFX : MonoBehaviour, IAudioEventSender
     [Space(10)]
     [Range(0,100)]
     public int percentageChanceToPlay = 100;
+    
+    [Space(10)]
+    [Header("3D Audio Settings")]
+    public bool useCustom3DSettings = false;
+    [Range(0f, 100f)] public float minDistance = 1f;
+    [Range(1f, 500f)] public float maxDistance = 500f;
+    
+    [Space(10)]
+    [Header("Position Override")]
+    public bool useCustomPosition = false;
+    public Vector3 customPosition = Vector3.zero;
 
     [Header("Collider Settings")] 
     public CollisionType collisionType = CollisionType.Trigger; // Use trigger or collision
@@ -58,7 +71,7 @@ public class AudioEventSenderSFX : MonoBehaviour, IAudioEventSender
     public Color triggerActiveColor = new Color(1f, 0f, 0f, 0.8f); // Red when active
 
     [Space(20)]
-    [Header("TestMode : 'T' to play sound effect")]
+    [Header("TestMode : 'T' to play SFX, 'P' to pause all SFX, 'S' to stop all SFX")]
     public bool testMode = false;
 
     // For showing activation feedback
@@ -129,65 +142,117 @@ public class AudioEventSenderSFX : MonoBehaviour, IAudioEventSender
                 TriggerActivation();
                 Play();
             }
-        }
-    }
-    
-    public void Play(){
-        //check if the sound should play based on the percentage chance
-        if (percentageChanceToPlay < 100){
-            int random = Random.Range(0, 100);
-            if (random > percentageChanceToPlay){
-                return;
+        
+            // Use AudioManager's pause state for logging
+            if (Input.GetKeyDown(KeyCode.P))
+            {
+                bool currentState = AudioManager.Instance != null ? AudioManager.Instance.AllSFXPaused : false;
+                Debug.Log($"[EventSender] Testing Toggle SFX Pause (currently {(currentState ? "paused" : "playing")})");
+                Pause();
+            }
+        
+            if (Input.GetKeyDown(KeyCode.S))
+            {
+                Debug.Log("[EventSender] Testing Stop All SFX");
+                Stop();
             }
         }
-        
-        sfxNameToPlay = sfxName[Random.Range(0, sfxName.Length)];
-        
-        if(eventDelay <= 0)
-        {
-            PlaySFX();
-        }
-        else
-        {
-            StartCoroutine(PlaySFX_Delayed(eventDelay));
-        }
     }
     
+    public void Play()
+    {
+        PlaySFX();
+    }
+    
+    // Play SFX with parameters from the inspector
     private void PlaySFX()
     {
-        if (attachSoundToThisTransform){
-            //send the PlaySFX Event with parameters from the inspector
-            AudioEventManager.PlaySFX(this.transform, sfxNameToPlay, volume, pitch, randomisePitch, pitchRange, spatialBlend, eventName);
+        // Transform attachment logic: 
+        // 1. This transform (if enabled)
+        // 2. Custom transform (if provided) 
+        // 3. AudioManager transform (default)
+        Transform attachTo = null;
+        Vector3 position = default;
+    
+        if (useCustomPosition)
+        {
+            // Use custom Vector3 position, will attach to AudioManager
+            position = customPosition;
         }
-        else{
-            //send the PlaySFX Event with parameters from the inspector
-            AudioEventManager.PlaySFX(transformToAttachTo, sfxNameToPlay, volume, pitch, randomisePitch, pitchRange, spatialBlend, eventName);
+        else if (attachSoundToThisTransform)
+        {
+            // Attach to this EventSender's transform
+            attachTo = this.transform;
         }
-    }
-    private IEnumerator PlaySFX_Delayed(float delay)
-    {
-        if(randomiseDelay){
+        else if (transformToAttachTo != null)
+        {
+            // Attach to specified custom transform
+            attachTo = transformToAttachTo;
+        }
+        // else: attachTo remains null, AudioManager will use its own transform (default behavior)
+    
+        // Determine 3D audio settings
+        float minDist = useCustom3DSettings ? minDistance : 1f;
+        float maxDist = useCustom3DSettings ? maxDistance : 500f;
+    
+        Debug.Log($"[EventSender] SFX attachment: attachTo={(attachTo?.name ?? "AudioManager(default)")}, position={position}, spatialBlend={spatialBlend}");
+        
+        float delay = eventDelay;
+        if (randomiseDelay)
+        {
             delay = Random.Range(0, eventDelay);
         }
         
-        yield return new WaitForSeconds(delay);
-        
-        if (attachSoundToThisTransform){
-            //send the PlaySFX Event with parameters from the inspector
-            AudioEventManager.PlaySFX(this.transform, sfxNameToPlay, volume, pitch, randomisePitch, pitchRange, spatialBlend, eventName);
-        }
-        else{
-            //send the PlaySFX Event with parameters from the inspector
-            AudioEventManager.PlaySFX(transformToAttachTo, sfxNameToPlay, volume, pitch, randomisePitch, pitchRange, spatialBlend, eventName);
-        }
+        // Send the PlaySFX Event
+        AudioEventManager.PlaySFX(sfxName, volume, pitch, randomisePitch, pitchRange, spatialBlend, loop, delay, percentageChanceToPlay, attachTo, position, minDist, maxDist, eventName);
     }
     
-    //we need these methods to implement the interface - they are not used in this script but are required (used in the AudioEventSender_BGM script)
-    public void Stop(){
-        //to be implemented? - TODO - add a stop sound effect event (Unsure if this is needed)
+    // Interface methods to call SFX management functions:
+    public void Stop()
+    {
+        StopSFX();
     }
-    public void Pause(){
-        //to be implemented? - TODO - add a pause sound effect event (Unsure if this is needed)
+
+    public void Pause()
+    {
+        PauseSFX();
+    }
+    
+    // PauseSFX to use AudioManager's toggle method:
+    /// <summary>
+    /// Toggle pause/resume all SFX - calls AudioManager.TogglePauseAllSFX
+    /// </summary>
+    private void PauseSFX()
+    {
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.TogglePauseAllSFX();
+            Debug.Log($"[EventSender] Toggled SFX pause via interface");
+        }
+        else
+        {
+            Debug.LogWarning("[EventSender] AudioManager not available for TogglePauseAllSFX");
+        }
+    }
+
+    // StopSFX (no state management needed):
+    /// <summary>
+    /// Stop all SFX - calls multiple AudioManager stop methods
+    /// </summary>
+    private void StopSFX()
+    {
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.CancelAllDelayedSFX();
+            AudioManager.Instance.StopAllLoopedSFX();
+            AudioManager.Instance.StopAllSFX(); // This now resets pause state internally
+        
+            Debug.Log("[EventSender] Called stop methods via interface");
+        }
+        else
+        {
+            Debug.LogWarning("[EventSender] AudioManager not available for Stop SFX methods");
+        }
     }
 
     #region Gizmo Visualization
@@ -223,7 +288,7 @@ public class AudioEventSenderSFX : MonoBehaviour, IAudioEventSender
         if (spatialBlend > 0f)
         {
             Gizmos.color = new Color(1f, 1f, 0f, 0.1f); // Yellow, very transparent
-            Gizmos.DrawSphere(transform.position, 10f); // Approximate audio range
+            Gizmos.DrawSphere(transform.position, maxDistance); // Show max audio range
         }
         #endif
     }
