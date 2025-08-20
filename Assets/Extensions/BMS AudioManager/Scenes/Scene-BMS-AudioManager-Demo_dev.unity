@@ -883,65 +883,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 1798408813154171869, guid: 061e1c5bd8269d545a6d42f763eea41c,
-        type: 3}
-      propertyPath: testMode
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 1798408813154171869, guid: 061e1c5bd8269d545a6d42f763eea41c,
-        type: 3}
-      propertyPath: maxDistance
-      value: 4
-      objectReference: {fileID: 0}
-    - target: {fileID: 1798408813154171869, guid: 061e1c5bd8269d545a6d42f763eea41c,
-        type: 3}
-      propertyPath: minDistance
-      value: 2
-      objectReference: {fileID: 0}
-    - target: {fileID: 1798408813154171869, guid: 061e1c5bd8269d545a6d42f763eea41c,
-        type: 3}
-      propertyPath: spatialBlend
-      value: 0.75
-      objectReference: {fileID: 0}
-    - target: {fileID: 1798408813154171869, guid: 061e1c5bd8269d545a6d42f763eea41c,
-        type: 3}
-      propertyPath: useCustom3DSettings
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 1798408813154171869, guid: 061e1c5bd8269d545a6d42f763eea41c,
-        type: 3}
-      propertyPath: triggerActiveColor.a
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 1798408813154171869, guid: 061e1c5bd8269d545a6d42f763eea41c,
-        type: 3}
-      propertyPath: triggerActiveColor.b
-      value: 0.1296277
-      objectReference: {fileID: 0}
     - target: {fileID: 5348913106041535006, guid: 061e1c5bd8269d545a6d42f763eea41c,
         type: 3}
       propertyPath: m_Name
       value: Audio SFX - Event Zone
-      objectReference: {fileID: 0}
-    - target: {fileID: 5348913106041535006, guid: 061e1c5bd8269d545a6d42f763eea41c,
-        type: 3}
-      propertyPath: m_IsActive
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 7370856478632272372, guid: 061e1c5bd8269d545a6d42f763eea41c,
-        type: 3}
-      propertyPath: m_LocalScale.x
-      value: 2
-      objectReference: {fileID: 0}
-    - target: {fileID: 7370856478632272372, guid: 061e1c5bd8269d545a6d42f763eea41c,
-        type: 3}
-      propertyPath: m_LocalScale.y
-      value: 2
-      objectReference: {fileID: 0}
-    - target: {fileID: 7370856478632272372, guid: 061e1c5bd8269d545a6d42f763eea41c,
-        type: 3}
-      propertyPath: m_LocalScale.z
-      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 7370856478632272372, guid: 061e1c5bd8269d545a6d42f763eea41c,
         type: 3}
@@ -1070,6 +1015,52 @@ PrefabInstance:
       insertIndex: -1
       addedObject: {fileID: 1905089426}
   m_SourcePrefab: {fileID: 100100000, guid: ccc2f9deca1fd8440a1f8646e2051deb, type: 3}
+--- !u!1 &1214705720
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1214705722}
+  - component: {fileID: 1214705721}
+  m_Layer: 0
+  m_Name: Example Usage
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1214705721
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1214705720}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4487e1fdcf311e14faa98da012b1153a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  playerTransform: {fileID: 2146425261}
+  ambientLocationTransform: {fileID: 961739753}
+--- !u!4 &1214705722
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1214705720}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1308476517 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 8972554719354881190, guid: d3011a8d9e8e2cb47ad213dfabb34e15,
@@ -1861,66 +1852,6 @@ PrefabInstance:
       propertyPath: m_Name
       value: Audio Track - Event Zone
       objectReference: {fileID: 0}
-    - target: {fileID: 5274121441138690220, guid: 89621415efb6a794087214f779dcb9f2,
-        type: 3}
-      propertyPath: m_IsActive
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 5355574976095253072, guid: 89621415efb6a794087214f779dcb9f2,
-        type: 3}
-      propertyPath: loop
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 5355574976095253072, guid: 89621415efb6a794087214f779dcb9f2,
-        type: 3}
-      propertyPath: volume
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 5355574976095253072, guid: 89621415efb6a794087214f779dcb9f2,
-        type: 3}
-      propertyPath: testMode
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 5355574976095253072, guid: 89621415efb6a794087214f779dcb9f2,
-        type: 3}
-      propertyPath: trackName
-      value: NormConnors_VaporStarship
-      objectReference: {fileID: 0}
-    - target: {fileID: 5355574976095253072, guid: 89621415efb6a794087214f779dcb9f2,
-        type: 3}
-      propertyPath: trackNumber
-      value: 3
-      objectReference: {fileID: 0}
-    - target: {fileID: 5355574976095253072, guid: 89621415efb6a794087214f779dcb9f2,
-        type: 3}
-      propertyPath: audioTrackType
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 5355574976095253072, guid: 89621415efb6a794087214f779dcb9f2,
-        type: 3}
-      propertyPath: showTriggerInfo
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 5355574976095253072, guid: 89621415efb6a794087214f779dcb9f2,
-        type: 3}
-      propertyPath: ambientTrackNumber
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5355574976095253072, guid: 89621415efb6a794087214f779dcb9f2,
-        type: 3}
-      propertyPath: triggerActiveColor.b
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5355574976095253072, guid: 89621415efb6a794087214f779dcb9f2,
-        type: 3}
-      propertyPath: triggerActiveColor.g
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 5355574976095253072, guid: 89621415efb6a794087214f779dcb9f2,
-        type: 3}
-      propertyPath: triggerActiveColor.r
-      value: 0
-      objectReference: {fileID: 0}
     - target: {fileID: 6014174656882223073, guid: 89621415efb6a794087214f779dcb9f2,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -2065,3 +1996,4 @@ SceneRoots:
   - {fileID: 711655765}
   - {fileID: 472493437}
   - {fileID: 1608705822}
+  - {fileID: 1214705722}

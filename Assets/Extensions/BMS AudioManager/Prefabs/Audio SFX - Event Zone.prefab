@@ -134,13 +134,19 @@ MonoBehaviour:
   pitch: 1
   randomisePitch: 1
   pitchRange: 0.1
-  spatialBlend: 0
+  spatialBlend: 0.75
+  loop: 0
   randomiseDelay: 0
   eventDelay: 0
   percentageChanceToPlay: 100
+  useCustom3DSettings: 1
+  minDistance: 2
+  maxDistance: 4
+  useCustomPosition: 0
+  customPosition: {x: 0, y: 0, z: 0}
   collisionType: 2
   targetTag: Player
   useTransformScale: 1
   showTriggerInfo: 1
   triggerActiveColor: {r: 1, g: 0, b: 0.1296277, a: 1}
-  testMode: 0
+  testMode: 1

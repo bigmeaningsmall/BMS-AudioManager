@@ -209,20 +209,20 @@ public class AudioManager : MonoBehaviour
     #region Event Subscriptions
     private void OnEnable()
     {
-        AudioEventManager.playTrack += PlayTrack;
-        AudioEventManager.stopTrack += StopTrack;
-        AudioEventManager.pauseTrack += PauseTrack;
-        AudioEventManager.adjustTrack += AdjustTrack;
+        AudioEventManager.PlayTrack += PlayTrack;
+        AudioEventManager.StopTrack += StopTrack;
+        AudioEventManager.PauseTrack += PauseTrack;
+        AudioEventManager.AdjustTrack += AdjustTrack;
         
         AudioEventManager.PlaySFX += PlaySoundEffect;
     }
 
     private void OnDisable()
     {
-        AudioEventManager.playTrack -= PlayTrack;
-        AudioEventManager.stopTrack -= StopTrack;
-        AudioEventManager.pauseTrack -= PauseTrack;
-        AudioEventManager.adjustTrack -= AdjustTrack;
+        AudioEventManager.PlayTrack -= PlayTrack;
+        AudioEventManager.StopTrack -= StopTrack;
+        AudioEventManager.PauseTrack -= PauseTrack;
+        AudioEventManager.AdjustTrack -= AdjustTrack;
         
         AudioEventManager.PlaySFX -= PlaySoundEffect;
     }
@@ -316,7 +316,20 @@ public class AudioManager : MonoBehaviour
     // PLAY TRACK METHODS---------------------------------------------------------------------------------------
     
     // Audio Event Methods (just passing properties and commands to audio tracks)
-    private void PlayTrack(AudioTrackType trackType, int trackNumber, string trackName, float volume, float pitch, float spatialBlend, FadeType fadeType, float fadeDuration, FadeTarget fadeTarget, bool loop, float delay, Transform attachTo, string eventName)
+    private void PlayTrack(
+        AudioTrackType trackType, 
+        int trackNumber = -1, 
+        string trackName = "", 
+        float volume = 1.0f, 
+        float pitch = 1.0f, 
+        float spatialBlend = 0.0f, 
+        FadeType fadeType = FadeType.FadeInOut, 
+        float fadeDuration = 0.5f, 
+        FadeTarget fadeTarget = FadeTarget.FadeVolume, 
+        bool loop = true, 
+        float delay = 0f, 
+        Transform attachTo = null, 
+        string eventName = "")
     {
         // Cancel any existing delayed coroutine for this track type
         CancelDelayedTrack(trackType);
@@ -382,7 +395,12 @@ public class AudioManager : MonoBehaviour
 
     // STOP TRACK METHODS---------------------------------------------------------------------------------------
     
-    private void StopTrack(AudioTrackType trackType, float fadeDuration, FadeTarget fadeTarget, float delay = 0f, string eventName = "")
+    private void StopTrack(
+        AudioTrackType trackType, 
+        float fadeDuration = 0f, 
+        FadeTarget fadeTarget = FadeTarget.FadeVolume, 
+        float delay = 0f, 
+        string eventName = "")
     {
         CancelDelayedTrack(trackType); // Cancel any pending events for this track
     
@@ -422,7 +440,12 @@ public class AudioManager : MonoBehaviour
 
     // PAUSE TRACK METHODS---------------------------------------------------------------------------------------
     
-    private void PauseTrack(AudioTrackType trackType, float fadeDuration, FadeTarget fadeTarget, float delay = 0f, string eventName = "")
+    private void PauseTrack(
+        AudioTrackType trackType, 
+        float fadeDuration = 0f, 
+        FadeTarget fadeTarget = FadeTarget.FadeVolume, 
+        float delay = 0f, 
+        string eventName = "")
     {
         CancelDelayedTrack(trackType); // Cancel any pending events for this track
     
@@ -463,7 +486,17 @@ public class AudioManager : MonoBehaviour
     // UPDATE TRACK METHODS---------------------------------------------------------------------------------------
     
     //method to update parameters of audio tracks
-    private void AdjustTrack(AudioTrackType trackType, float volume, float pitch, float spatialBlend, float fadeDuration, FadeTarget fadeTarget, bool loop, float delay, Transform attachTo, string eventName = "")
+    private void AdjustTrack(
+        AudioTrackType trackType, 
+        float volume = 1.0f, 
+        float pitch = 1.0f, 
+        float spatialBlend = 0.0f, 
+        float fadeDuration = 0f, 
+        FadeTarget fadeTarget = FadeTarget.FadeBoth, 
+        bool loop = true, 
+        float delay = 0f, 
+        Transform attachTo = null, 
+        string eventName = "")
     {
         // Cancel ANY existing delayed event for this track type
         CancelDelayedTrack(trackType);
@@ -582,7 +615,21 @@ public class AudioManager : MonoBehaviour
     
     // PlaySoundEffect method with all parameters
     // Note: soundNames is an array to allow random selection from multiple options
-    private void PlaySoundEffect(string[] soundNames, float volume, float pitch, bool randomizePitch, float pitchRange, float spatialBlend, bool loop, float delay, float percentChanceToPlay, Transform attachTo, Vector3 position, float minDist, float maxDist, string eventName)
+    private void PlaySoundEffect(
+        string[] soundNames, 
+        float volume = 1.0f, 
+        float pitch = 1.0f, 
+        bool randomizePitch = false, 
+        float pitchRange = 0.1f, 
+        float spatialBlend = 0.0f, 
+        bool loop = false, 
+        float delay = 0f, 
+        float percentChanceToPlay = 100f, 
+        Transform attachTo = null, 
+        Vector3 position = default(Vector3), 
+        float minDist = 1f, 
+        float maxDist = 500f, 
+        string eventName = "")
     {
         // Check if the sound should play based on the percentage chance
         if (percentChanceToPlay < 100f)

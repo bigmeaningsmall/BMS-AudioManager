@@ -43,13 +43,13 @@ public static class AudioEventManager
     
     // --- Events --- Generic Audio Tracks 
     // playing ambient music
-    public static AudioEvent_PlayAudio_Track playTrack;
+    public static AudioEvent_PlayAudio_Track PlayTrack;
     // stopping ambient music
-    public static AudioEvent_StopAudio_Track stopTrack;
+    public static AudioEvent_StopAudio_Track StopTrack;
     // pausing ambient music
-    public static AudioEvent_PauseAudio_Track pauseTrack;
+    public static AudioEvent_PauseAudio_Track PauseTrack;
     // updating ambient music
-    public static AudioEvent_AdjustAudio_Track adjustTrack;
+    public static AudioEvent_AdjustAudio_Track AdjustTrack;
     
     
     // --- Events --- SFX - OneShots

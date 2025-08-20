@@ -121,12 +121,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e91a017eacbc87646a9581339fde84f4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  audioTrackType: 1
+  audioTrackType: 0
   eventName: Custom Event Name
   attachToThisTransform: 0
   transformToAttachTo: {fileID: 0}
-  ambientTrackNumber: -1
-  ambientTrackName: NormConnors_VaporStarship
+  trackNumber: 0
+  trackName: MainTheme
   playOnEnabled: 0
   loop: 1
   spatialBlend: 0
@@ -141,5 +141,5 @@ MonoBehaviour:
   stopOnExit: 1
   useTransformScale: 1
   showTriggerInfo: 1
-  triggerActiveColor: {r: 0, g: 1, b: 0, a: 0.8}
-  testMode: 0
+  triggerActiveColor: {r: 0, g: 0, b: 1, a: 0.8}
+  testMode: 1

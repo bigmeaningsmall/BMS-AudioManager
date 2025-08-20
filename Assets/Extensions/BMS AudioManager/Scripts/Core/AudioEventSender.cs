@@ -178,7 +178,7 @@ public class AudioEventSender : MonoBehaviour
             targetTransform = transformToAttachTo;
         }
 
-        AudioEventManager.playTrack(audioTrackType, trackNumber, trackName, volume, pitch, spatialBlend, fadeType, fadeDuration, fadeTarget, loop, eventDelay, targetTransform, eventName);
+        AudioEventManager.PlayTrack(audioTrackType, trackNumber, trackName, volume, pitch, spatialBlend, fadeType, fadeDuration, fadeTarget, loop, eventDelay, targetTransform, eventName);
 
     }
 
@@ -211,7 +211,7 @@ public class AudioEventSender : MonoBehaviour
 
     private void StopTrack()
     {
-        AudioEventManager.stopTrack(audioTrackType, fadeDuration, fadeTarget, eventDelay, eventName);
+        AudioEventManager.StopTrack(audioTrackType, fadeDuration, fadeTarget, eventDelay, eventName);
     }
 
     private IEnumerator StopTrack_Delayed(float delay)
@@ -230,7 +230,7 @@ public class AudioEventSender : MonoBehaviour
     private void PauseTrack()
     {
         //send the Pause Event with parameters from the inspector
-        AudioEventManager.pauseTrack(audioTrackType, fadeDuration, fadeTarget, eventDelay, eventName);
+        AudioEventManager.PauseTrack(audioTrackType, fadeDuration, fadeTarget, eventDelay, eventName);
     }
     
     
@@ -255,7 +255,7 @@ public class AudioEventSender : MonoBehaviour
         }
         
         //send the UpdateParameters Event with parameters from the inspector
-        AudioEventManager.adjustTrack(audioTrackType, volume, pitch, spatialBlend, fadeDuration, fadeTarget, loop, eventDelay, targetTransform, eventName);
+        AudioEventManager.AdjustTrack(audioTrackType, volume, pitch, spatialBlend, fadeDuration, fadeTarget, loop, eventDelay, targetTransform, eventName);
     }
     
     
