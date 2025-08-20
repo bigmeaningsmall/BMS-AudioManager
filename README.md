@@ -1,236 +1,396 @@
+# BMS Audio Manager v1.4
+
+A comprehensive Unity audio management system featuring sophisticated track management, 3-source crossfading, and flexible event-driven architecture. Best used in small projects requiring professional-quality audio transitions and sound management.
+
+## Key Features
+
+- **3-Source Audio System**: Seamless crossfading and fade transitions without audio gaps
+- **Track-Based Management**: Separate BGM, Ambient, and Dialogue tracks with individual control
+- **Spatial Audio Support**: Full 3D audio with distance attenuation and positioning
+- **Event-Driven Architecture**: Flexible triggering via events, triggers, colliders, or direct code calls
+- **Advanced Fade Control**: Multiple fade types (FadeInOut, Crossfade) with customizable targets
+- **SFX Management**: Comprehensive sound effects system with pooling and state management
+- **Real-Time Parameter Control**: Adjust volume, pitch, and spatial blend during playback
+- **Visual Debugging**: Custom editor tools for monitoring audio states and waveforms
 
 ---
-#### currently rearchitecting the audiomanager! 1.2 package is working but repo is in a fluid state atm..
----
-# BMS Audio Manager
 
-The BMS Audio Manager is a Unity-based audio management system that allows you to play, pause, and stop background music (BGM), ambient audio, and sound effects (SFX) using event-based triggers or direct method calls from your scripts.
+## Quick Setup
 
-## Installation
-
-1. Copy the `BMS AudioManager` folder into your Unity project's `Assets` directory or import the Unity package.
-2. Ensure all necessary scripts and audio files are placed in the appropriate directories.
-3. Run the demo scene to check the functionality.
-
----
-
-### Loading Audio from Resources
-
-Ensure that your audio files are placed in a `Resources` folder within your `Assets` directory. The `AudioManager` will make these audio files available in catagory pools at runtime.
-
-**Directory structure**:
+### 1. Installation
+1. Import the BMS Audio Manager package into your Unity project
+2. Place the AudioManager prefab in your scene
+3. Ensure your audio files are organized in the Resources folder structure:
 
 ```
 Assets/
 └── Resources/
-    ├── BGM/
-    │   └── TrackName.wav
-    ├── Ambient/
-    │   └── AmbientTrack.wav
-    └── SFX/
-        └── SFXName.wav
+    └── Audio/
+        ├── BGM/
+        │   └── MainTheme.wav
+        ├── Ambient/
+        │   └── ForestAmbient.wav
+        ├── Dialogue/
+        │   └── NPCDialogue.wav
+        └── SFX/
+            └── ButtonClick.wav
 ```
 
-Note - Files in any sub folders will be available in the `AudioManager` and can be organised in folder names or catagories in your projects assets `Resources` folder.
+### 2. Basic Usage
+The simplest way to play audio:
+
+```csharp
+// Play background music
+AudioEvent.PlayTrack(AudioTrackType.BGM, "MainTheme");
+
+// Play a sound effect
+AudioEvent.PlaySFX("ButtonClick");
+
+// Play ambient audio at a location
+AudioEvent.PlayTrack(AudioTrackType.Ambient, "ForestAmbient", 0.7f, 2f, forestTransform);
+```
 
 ---
 
-### Calling Audio Events from Code
+## Usage Guide
 
-#### Background Music (BGM)
+### Method 1: Helper Methods (Recommended for Most Use Cases)
 
-1. **Play BGM**:
-   ```csharp
-   AudioEventManager.PlayBGM(index, trackName, volume, fadeType, fadeDuration, loopBGM, eventName);
-   ```
+The `AudioEvent` static class provides easy-to-use methods with sensible defaults:
 
-   **Parameters**:
-   - **`index` (int)**: Track index for playlist management.
-   - **`trackName` (string)**: Name of the BGM file in `Resources/BGM`.
-   - **`volume` (float)**: Initial volume (1.0 for full volume).
-   - **`fadeType` (FadeType)**: Type of fade (`FadeInOut` or `Crossfade`).
-   - **`fadeDuration` (float)**: Duration of the fade effect.
-   - **`loopBGM` (bool)**: Set to `true` to loop the track.
-   - **`eventName` (string)**: Identifier for tracking this music event.
+#### Track Management
+```csharp
+// Simple track playback
+AudioEvent.PlayTrack(AudioTrackType.BGM, "MainTheme");
+AudioEvent.PlayTrack(AudioTrackType.BGM, "MainTheme", 0.8f); // with volume
+AudioEvent.PlayTrack(AudioTrackType.BGM, "MainTheme", 0.8f, 2f); // with fade duration
 
-2. **Pause BGM**:
-   ```csharp
-   AudioEventManager.PauseBGM(fadeDuration);
-   ```
-   
-   **Parameters**:
-   - **`fadeDuration` (float)**: Duration of fade-out before pausing.
+// Stop and pause
+AudioEvent.StopTrack(AudioTrackType.BGM);
+AudioEvent.StopTrack(AudioTrackType.BGM, 2f); // with fade out
+AudioEvent.PauseTrack(AudioTrackType.Ambient);
 
-3. **Stop BGM**:
-   ```csharp
-   AudioEventManager.StopBGM(fadeDuration);
-   ```
+// Adjust parameters
+AudioEvent.AdjustTrackVolume(AudioTrackType.BGM, 0.5f);
+AudioEvent.AdjustTrackVolume(AudioTrackType.BGM, 0.5f, 2f); // with fade
+AudioEvent.AdjustTrack(AudioTrackType.BGM, 0.7f, 1.2f); // volume and pitch
+```
 
-   **Parameters**:
-   - **`fadeDuration` (float)**: Duration of fade-out before stopping.
+#### Sound Effects
+```csharp
+// Basic SFX
+AudioEvent.PlaySFX("ButtonClick");
+AudioEvent.PlaySFX("Explosion", 0.8f);
 
----
+// Random selection from multiple sounds
+AudioEvent.PlaySFX(new string[] { "Footstep1", "Footstep2", "Footstep3" });
 
-#### Ambient Audio
+// 3D positioned audio
+AudioEvent.PlaySFX("MagicSpell", 0.8f, playerTransform); // attached to transform
+AudioEvent.PlaySFX("Explosion", 1f, new Vector3(10, 0, 5)); // world position
 
-1. **Play Ambient Audio**:
-   ```csharp
-   AudioEventManager.PlayAmbientAudio(attachTo, index, trackName, volume, pitch, spatialBlend, fadeType, fadeDuration, loopAmbient, eventName);
-   ```
+// Advanced SFX
+AudioEvent.PlaySFX3D("DistantThunder", 0.6f, thunderLocation, 5f, 100f); // with distance settings
+AudioEvent.PlayLoopedSFX("EngineHum", 0.7f, carTransform);
+AudioEvent.PlayRandomSFX(new string[] { "Bird1", "Bird2", "Bird3" }, 0.4f, 30f, 2f); // with chance and delay
+```
 
-   **Parameters**:
-   - **`attachTo` (Transform)**: The transform where the audio source will be positioned.
-   - **`index` (int)**: Track index for playlist management.
-   - **`trackName` (string)**: Name of the ambient audio file in `Resources/Ambient`.
-   - **`volume` (float)**: Volume level (1.0 for full volume).
-   - **`pitch` (float)**: Pitch (1.0 for normal pitch).
-   - **`spatialBlend` (float)**: Controls the 2D/3D blend (0 for 2D, 1 for 3D).
-   - **`fadeType` (FadeType)**: Type of fade (`FadeInOut` or `Crossfade`).
-   - **`fadeDuration` (float)**: Duration of the fade effect.
-   - **`loopAmbient` (bool)**: Set to `true` to loop the ambient audio.
-   - **`eventName` (string)**: Identifier for tracking this ambient audio event.
+### Method 2: Direct Event Calls (Full Control)
 
-2. **Pause Ambient Audio**:
-   ```csharp
-   AudioEventManager.PauseAmbientAudio(fadeDuration);
-   ```
-   
-   **Parameters**:
-   - **`fadeDuration` (float)**: Duration of fade-out before pausing.
+For maximum control over all parameters, use `AudioEventManager` directly:
 
-3. **Stop Ambient Audio**:
-   ```csharp
-   AudioEventManager.StopAmbientAudio(fadeDuration);
-   ```
+#### Background Music with Crossfade
+```csharp
+AudioEventManager.playTrack(
+    AudioTrackType.BGM,           // Track type
+    -1,                          // Track index (-1 to use name)
+    "CombatTheme",               // Track name
+    0.9f,                        // Volume
+    1f,                          // Pitch
+    0f,                          // Spatial blend (0 = 2D)
+    FadeType.Crossfade,          // Fade type
+    3f,                          // Fade duration
+    FadeTarget.FadeBoth,         // Fade target (volume and pitch)
+    true,                        // Loop
+    0f,                          // Delay
+    null,                        // Attach to transform
+    "Combat Music"               // Event name
+);
+```
 
-   **Parameters**:
-   - **`fadeDuration` (float)**: Duration of fade-out before stopping.
+#### Advanced SFX with All Parameters
+```csharp
+AudioEventManager.PlaySFX(
+    new string[] { "Explosion1", "Explosion2" }, // Sound name array (random selection)
+    0.8f,                        // Volume
+    1f,                          // Pitch
+    true,                        // Randomize pitch
+    0.3f,                        // Pitch range
+    1f,                          // Spatial blend (1 = 3D)
+    false,                       // Loop
+    0.5f,                        // Delay
+    80f,                         // Percentage chance to play
+    explosionPoint,              // Attach to transform
+    Vector3.zero,                // Custom position (if not using transform)
+    2f,                          // Min distance
+    50f,                         // Max distance
+    "Explosion Effect"           // Event name
+);
+```
 
----
+### Method 3: Visual Event Senders (No Code Required)
 
-#### Sound Effects (SFX)
+Use the provided MonoBehaviour components for trigger-based audio:
 
-1. **Play SFX**:
-   ```csharp
-   AudioEventManager.PlaySFX(attachTo, soundName, volume, pitch, randomizePitch, pitchRange, spatialBlend, eventName);
-   ```
+#### AudioEventSender (for Tracks)
+Attach to GameObjects for trigger-based track control:
 
-   **Parameters**:
-   - **`attachTo` (Transform)**: If provided, positions the sound source at this transform.
-   - **`soundName` (string)**: Name of the sound file in `Resources/SFX`.
-   - **`volume` (float)**: Volume level (1.0 for full volume).
-   - **`pitch` (float)**: Pitch (1.0 for normal pitch).
-   - **`randomizePitch` (bool)**: If `true`, adds slight pitch variation.
-   - **`pitchRange` (float)**: Range for pitch randomisation.
-   - **`spatialBlend` (float)**: Controls the 2D/3D blend (0 for 2D, 1 for 3D).
-   - **`eventName` (string)**: Identifier for tracking this SFX event.
+- **Collision/Trigger Support**: Automatically plays when player enters area
+- **Visual Debugging**: Shows trigger zones and activation states in Scene view
+- **Inspector Configuration**: All parameters exposed for easy tweaking
 
+```csharp
+// Available public methods for script/button integration:
+audioEventSender.Play();
+audioEventSender.Stop();
+audioEventSender.Pause();
+audioEventSender.AdjustParameters();
+```
 
----
+#### AudioEventSenderSFX
+Perfect for environmental sounds and interactive elements:
 
-## Usage - Audio Event Senders
+- **Multiple Sound Support**: Random selection from sound arrays
+- **3D Audio Configuration**: Custom min/max distances and positioning
+- **Probability System**: Percentage chance for sound variation
+- **Transform Attachment**: Follow moving objects or play at fixed positions
 
-
-1. **Inspector-Exposed Events**: Audio event classes, such as `AudioEventSender_SFX`, `AudioEventSender_BGM`, and `AudioEventSender_Ambient`, expose public events that can be viewed and configured directly in the Unity Inspector. This setup allows for easy event linking without additional code.
-
-2. **Flexible Setup Options**: By exposing these events, you can connect audio triggering to various sources, including triggers, colliders, and UI buttons, or even integrate them with custom scripts. This flexibility supports both simple and complex audio setups tailored to your game’s needs.
-
-3. **Component-Based Audio Control**: Attaching these audio event classes as components enables your GameObjects to handle audio directly. With this approach, you can configure and control sound playback through component properties, making it easy to adjust audio settings in specific game areas or events.
-
-4. **Dynamic Interaction with Unity Events**: The exposed public events can be linked to Unity Events (like `OnClick` for buttons or `OnTriggerEnter` for colliders), allowing seamless integration with Unity’s event system for intuitive and responsive audio feedback.
-
-5. **Modular and Reusable**: Each audio event class serves as a self-contained audio trigger, making it modular and reusable across different GameObjects and scenes. This design reduces the need for repeated code and enables consistent audio handling throughout your project. 
-
-Using these inspector-exposed audio event classes, you can set up robust audio interactions that are easy to configure, adjust, and link to other game events without additional coding. This design is ideal for both designers and developers who want streamlined control over audio in Unity.
-
-
-### Using Event Senders via Triggers, Colliders, or Direct Calls
-
-#### `AudioEventSender_SFX`
-
-The `AudioEventSender_SFX` script allows you to trigger sound effects using various methods:
-
-1. **Attaching to GameObjects with Triggers or Colliders**:
-   - Attach the `AudioEventSender_SFX` script to any GameObject in your scene.
-   - Configure parameters in the Inspector, such as `sfxName`, `volume`, `pitch`, etc.
-   - Set the `collisionType` to either `Trigger` or `Collision`.
-   - Specify the `targetTag` to determine which objects can trigger the audio event.
-
-   This setup allows sound effects to play automatically when an object enters the trigger or collider.
-
-2. **Calling Directly in Code**:
-   - `AudioEventSender_SFX` can be called directly in your scripts by getting the component and using its public `Play()` method.
-   - Example:
-     ```csharp
-     AudioEventSender_SFX sfxSender = GetComponent<AudioEventSender_SFX>();
-     sfxSender.Play();
-     ```
-
-3. **Using Unity Events (e.g., Buttons)**:
-   - You can use Unity Events (such as UI buttons) to trigger the `Play()` method of `AudioEventSender_SFX`.
-   - In the Unity Inspector, simply link the button’s OnClick event to the `Play()` method of the `AudioEventSender_SFX` component on the target GameObject.
+```csharp
+// Public methods available:
+sfxEventSender.Play();
+sfxEventSender.Stop();  // Stops all SFX
+sfxEventSender.Pause(); // Toggles pause state
+```
 
 ---
 
-### `AudioEventSender_BGM`
+## 🎛Advanced Features
 
-The `AudioEventSender_BGM` script is designed to manage background music with the following public methods:
+### Fade Types and Targets
 
-1. **Play BGM**: Starts playing the specified BGM track.
-   ```csharp
-   AudioEventSender_BGM bgmSender = GetComponent<AudioEventSender_BGM>();
-   bgmSender.Play();
-   ```
+#### Fade Types
+- **`FadeInOut`**: Fade out current audio, then fade in new audio
+- **`Crossfade`**: Simultaneously fade out old and fade in new audio
 
-2. **Pause BGM**: Pauses the currently playing BGM track.
-   ```csharp
-   bgmSender.Pause();
-   ```
+#### Fade Targets
+- **`FadeVolume`**: Only fade volume (pitch changes instantly)
+- **`FadePitch`**: Only fade pitch (volume changes instantly)
+- **`FadeBoth`**: Fade both volume and pitch
+- **`Ignore`**: No fading (instant change)
 
-3. **Stop BGM**: Stops the BGM playback entirely.
-   ```csharp
-   bgmSender.Stop();
-   ```
+### Real-Time Parameter Adjustment
 
-These methods can also be triggered through Unity Events like buttons, allowing for easy UI integration.
+```csharp
+// Adjust track parameters during playback
+AudioEvent.AdjustTrack(AudioTrackType.BGM, 0.3f, 1.5f, 2f); // Duck volume, increase pitch
+
+// Direct parameter control
+AudioEventManager.adjustTrack(
+    AudioTrackType.Ambient,
+    0.4f,                    // New volume
+    0.8f,                    // New pitch
+    1f,                      // Spatial blend
+    1.5f,                    // Fade duration
+    FadeTarget.FadeBoth,     // Fade target
+    true,                    // Loop
+    0f,                      // Delay
+    newLocation,             // New transform
+    "Environment Change"     // Event name
+);
+```
+
+### SFX Management
+
+```csharp
+// Global SFX control
+AudioManager.Instance.StopAllSFX();
+AudioManager.Instance.StopAllLoopedSFX();
+AudioManager.Instance.TogglePauseAllSFX();
+AudioManager.Instance.CancelAllDelayedSFX();
+
+// Get SFX information
+int activeSFXCount = AudioManager.Instance.GetActiveSFXCount();
+string[] activeSFXNames = AudioManager.Instance.GetActiveSFXNames();
+bool isPaused = AudioManager.Instance.AllSFXPaused;
+```
 
 ---
 
-### `AudioEventSender_Ambient`
+## Real-World Examples
 
-The `AudioEventSender_Ambient` script controls ambient audio with similar functionality:
+### Combat Music Transition
+```csharp
+public void StartCombatMusic()
+{
+    // Crossfade from exploration to combat music
+    AudioEventManager.playTrack(
+        AudioTrackType.BGM, -1, "CombatTheme", 
+        0.8f, 1f, 0f, FadeType.Crossfade, 
+        2f, FadeTarget.FadeBoth, true, 0f, null, "Combat Start"
+    );
+}
+```
 
-1. **Play Ambient Audio**:
-   ```csharp
-   AudioEventSender_Ambient ambientSender = GetComponent<AudioEventSender_Ambient>();
-   ambientSender.Play();
-   ```
+### Environmental Audio Zone
+```csharp
+public class EnvironmentalAudioZone : MonoBehaviour
+{
+    [SerializeField] private string ambientTrackName = "CaveAmbient";
+    [SerializeField] private float volume = 0.6f;
+    
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.CompareTag("Player"))
+        {
+            // Crossfade to zone ambient
+            AudioEvent.PlayTrack(AudioTrackType.Ambient, ambientTrackName, volume, 3f, transform);
+        }
+    }
+    
+    private void OnTriggerExit(Collider other)
+    {
+        if (other.CompareTag("Player"))
+        {
+            AudioEvent.StopTrack(AudioTrackType.Ambient, 2f);
+        }
+    }
+}
+```
 
-2. **Pause Ambient Audio**:
-   ```csharp
-   ambientSender.Pause();
-   ```
+### Dialogue System Integration
+```csharp
+public class DialogueManager : MonoBehaviour
+{
+    public void StartDialogue(string dialogueTrack)
+    {
+        // Duck background music for dialogue
+        AudioEvent.AdjustTrackVolume(AudioTrackType.BGM, 0.2f, 0.5f);
+        
+        // Play dialogue
+        AudioEvent.PlayTrack(AudioTrackType.Dialogue, dialogueTrack, 1f, 0.3f);
+    }
+    
+    public void EndDialogue()
+    {
+        // Stop dialogue and restore BGM volume
+        AudioEvent.StopTrack(AudioTrackType.Dialogue, 0.3f);
+        AudioEvent.AdjustTrackVolume(AudioTrackType.BGM, 0.8f, 1f);
+    }
+}
+```
 
-3. **Stop Ambient Audio**:
-   ```csharp
-   ambientSender.Stop();
-   ```
-
-These methods, like `AudioEventSender_SFX`, can also be assigned to Unity Events, such as UI buttons, for easy control over ambient audio from your game’s interface.
+### Interactive Sound Effects
+```csharp
+public class WeaponSounds : MonoBehaviour
+{
+    [SerializeField] private string[] fireSound = { "GunShot1", "GunShot2", "GunShot3" };
+    [SerializeField] private string reloadSound = "Reload";
+    
+    public void OnFire()
+    {
+        // Random gunshot with pitch variation
+        AudioEventManager.PlaySFX(
+            fireSound, 0.9f, 1f, true, 0.1f, 0.8f, false, 0f, 100f,
+            transform, Vector3.zero, 1f, 30f, "Weapon Fire"
+        );
+    }
+    
+    public void OnReload()
+    {
+        AudioEvent.PlaySFX(reloadSound, 0.7f, transform);
+    }
+}
+```
 
 ---
 
-With these components, you have flexible options for triggering audio in your game. You can use triggers, colliders, code calls, or Unity Events to play, pause, and stop audio, giving you precise control over when and how audio elements are managed within your scenes.
+## Debugging and Monitoring
 
+### Built-in Debug Components
 
-## Conclusion
+#### AudioTrackParameterDisplay
+Attach to any GameObject to monitor all track states in real-time:
+- Live parameter updates
+- Track state visualization
+- Performance monitoring
 
-The BMS Audio Manager provides a flexible and easy-to-use system for managing audio in your Unity projects. Whether you use event-based triggers or call audio events directly from code, this system allows for seamless integration and precise control over your game's audio.
+#### SFXDebugDisplay
+Monitor SFX system health and activity:
+- Active SFX count and names
+- Delayed SFX tracking
+- One-click SFX management controls
 
+### Custom Editor Tools
 
-# UML
+The system includes custom editors with:
+- **Real-time waveform visualization**
+- **3-source state monitoring**
+- **Volume/pitch sliders**
+- **Playback progress bars**
+- **Scene view audio source visualization**
 
+### Console Debugging
 
-<img width="793" height="1169" alt="bms audio manager uml" src="https://github.com/user-attachments/assets/918971a4-d278-4af4-8025-5e323deb12bf" />
+Enable detailed logging by checking AudioManager debug options:
+```csharp
+[ContextMenu("Validate Audio Track Setup")]
+public void ValidateSetup() // Available in AudioManager context menu
+```
 
+---
 
+## Best Practices
+
+### Performance Optimization
+- Use streaming audio for long ambient tracks
+- Set appropriate AudioClip load types based on usage
+- Monitor active SFX count to prevent audio overflow
+- Use object pooling for frequently played sounds
+
+### Audio Organization
+- Keep BGM tracks under 2MB for memory efficiency
+- Use compressed formats (OGG) for ambient audio
+- Organize SFX by category in subfolders
+- Name audio files descriptively for easy identification
+
+### Fade Configuration
+- Use crossfades for musical transitions
+- Use FadeInOut for dramatic scene changes
+- Keep fade durations between 0.5-3 seconds for natural feel
+- Match fade targets to the type of transition needed
+
+---
+
+## Migration from v1.2
+
+If upgrading from the previous version:
+
+1. **AudioEventManager Changes**: Method signatures now include additional parameters
+2. **New Helper Methods**: Use `AudioEvent` class for simplified calls
+3. **Track System**: BGM and Ambient are now unified under track types
+4. **SFX Enhancements**: New parameters for 3D audio and randomization
+5. **Component Updates**: EventSender components have new configuration options
+
+---
+
+## 🤝 Contributing
+
+This is an ongoing work in progress. The system is designed to be modular and extensible. Feel free to contribute improvements or report issues.
+
+## 📄 License
+
+Open source - feel free to use and modify for your projects.
+
+---
+
+*BMS Audio Manager v1.4 - Professional audio management for Unity games*
