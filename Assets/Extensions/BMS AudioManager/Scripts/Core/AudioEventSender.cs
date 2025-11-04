@@ -437,7 +437,7 @@ public class AudioEventSender : MonoBehaviour
         UnityEditor.EditorUtility.SetDirty(this);
         #endif
         
-        Debug.Log($"Set up {bestColliderType.Name} to match transform scale. Use transform scale to adjust trigger zone size.");
+        AudioDebug.Log($"Set up {bestColliderType.Name} to match transform scale. Use transform scale to adjust trigger zone size.");
     }
 
     private System.Type DetectBestColliderType()

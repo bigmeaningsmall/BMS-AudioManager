@@ -298,7 +298,7 @@ public class AudioTrackEditor : Editor
         }
         catch (System.Exception e)
         {
-            Debug.LogWarning($"Cannot generate waveform for {clip.name}: {e.Message}");
+            AudioDebug.LogWarning($"Cannot generate waveform for {clip.name}: {e.Message}");
             
             // Create a "no data" texture
             Color[] pixels = new Color[WAVEFORM_WIDTH * WAVEFORM_HEIGHT];

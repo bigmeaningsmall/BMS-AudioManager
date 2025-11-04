@@ -147,13 +147,13 @@ public class AudioEventSenderSFX : MonoBehaviour, IAudioEventSender
             if (Input.GetKeyDown(KeyCode.P))
             {
                 bool currentState = AudioManager.Instance != null ? AudioManager.Instance.AllSFXPaused : false;
-                Debug.Log($"[EventSender] Testing Toggle SFX Pause (currently {(currentState ? "paused" : "playing")})");
+                AudioDebug.Log($"[EventSender] Testing Toggle SFX Pause (currently {(currentState ? "paused" : "playing")})");
                 Pause();
             }
         
             if (Input.GetKeyDown(KeyCode.S))
             {
-                Debug.Log("[EventSender] Testing Stop All SFX");
+                AudioDebug.Log("[EventSender] Testing Stop All SFX");
                 Stop();
             }
         }
@@ -195,7 +195,7 @@ public class AudioEventSenderSFX : MonoBehaviour, IAudioEventSender
         float minDist = useCustom3DSettings ? minDistance : 1f;
         float maxDist = useCustom3DSettings ? maxDistance : 500f;
     
-        Debug.Log($"[EventSender] SFX attachment: attachTo={(attachTo?.name ?? "AudioManager(default)")}, position={position}, spatialBlend={spatialBlend}");
+        AudioDebug.Log($"[EventSender] SFX attachment: attachTo={(attachTo?.name ?? "AudioManager(default)")}, position={position}, spatialBlend={spatialBlend}");
         
         float delay = eventDelay;
         if (randomiseDelay)
@@ -227,11 +227,11 @@ public class AudioEventSenderSFX : MonoBehaviour, IAudioEventSender
         if (AudioManager.Instance != null)
         {
             AudioManager.Instance.TogglePauseAllSFX();
-            Debug.Log($"[EventSender] Toggled SFX pause via interface");
+            AudioDebug.Log($"[EventSender] Toggled SFX pause via interface");
         }
         else
         {
-            Debug.LogWarning("[EventSender] AudioManager not available for TogglePauseAllSFX");
+            AudioDebug.LogWarning("[EventSender] AudioManager not available for TogglePauseAllSFX");
         }
     }
 
@@ -247,11 +247,11 @@ public class AudioEventSenderSFX : MonoBehaviour, IAudioEventSender
             AudioManager.Instance.StopAllLoopedSFX();
             AudioManager.Instance.StopAllSFX(); // This now resets pause state internally
         
-            Debug.Log("[EventSender] Called stop methods via interface");
+            AudioDebug.Log("[EventSender] Called stop methods via interface");
         }
         else
         {
-            Debug.LogWarning("[EventSender] AudioManager not available for Stop SFX methods");
+            AudioDebug.LogWarning("[EventSender] AudioManager not available for Stop SFX methods");
         }
     }
 
@@ -379,7 +379,7 @@ public class AudioEventSenderSFX : MonoBehaviour, IAudioEventSender
         UnityEditor.EditorUtility.SetDirty(this);
         #endif
         
-        Debug.Log($"Set up {bestColliderType.Name} to match transform scale. Use transform scale to adjust trigger zone size.");
+        AudioDebug.Log($"Set up {bestColliderType.Name} to match transform scale. Use transform scale to adjust trigger zone size.");
     }
 
     private System.Type DetectBestColliderType()

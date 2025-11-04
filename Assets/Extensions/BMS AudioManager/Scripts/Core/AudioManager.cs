@@ -21,7 +21,17 @@ public enum AudioTrackType
 public class AudioManager : MonoBehaviour
 {
     [Header("VERSION")]
-    [SerializeField] private string version = "v2.0.0";
+    [SerializeField] private string version = "v2.1.0";
+
+    [Header("DEBUG SETTINGS")]
+    [SerializeField] private bool enableDebugLogging = true;
+    [Tooltip("Enable/disable all debug logging for the audio system")]
+    public bool EnableDebugLogging 
+    { 
+        get => enableDebugLogging; 
+        set => enableDebugLogging = value; 
+    }
+    
     public static AudioManager Instance { get; private set; }
 
     // Track Components (these handle everything)
@@ -110,7 +120,7 @@ public class AudioManager : MonoBehaviour
 
     private void InitializeTrackTypes()
     {
-        Debug.Log("[AudioManager] Dynamically initializing track types from child transforms...");
+        AudioDebug.Log("[AudioManager] Dynamically initializing track types from child transforms...");
         
         // Find AudioTrack components in child transforms by name
         bgmTrack = FindChildAudioTrack("BGM");
@@ -121,36 +131,36 @@ public class AudioManager : MonoBehaviour
         if (bgmTrack != null)
         {
             bgmTrack.SetTrackType(AudioTrackType.BGM);
-            Debug.Log($"[AudioManager] BGM track found and initialized: {bgmTrack.name}");
+            AudioDebug.Log($"[AudioManager] BGM track found and initialized: {bgmTrack.name}");
         }
         else
         {
-            Debug.LogError("[AudioManager] BGM track not found! Please ensure there's a child GameObject named 'BGM' with an AudioTrack component.");
+            AudioDebug.LogError("[AudioManager] BGM track not found! Please ensure there's a child GameObject named 'BGM' with an AudioTrack component.");
         }
         
         if (ambientTrack != null)
         {
             ambientTrack.SetTrackType(AudioTrackType.Ambient);
-            Debug.Log($"[AudioManager] Ambient track found and initialized: {ambientTrack.name}");
+            AudioDebug.Log($"[AudioManager] Ambient track found and initialized: {ambientTrack.name}");
         }
         else
         {
-            Debug.LogError("[AudioManager] Ambient track not found! Please ensure there's a child GameObject named 'Ambient' with an AudioTrack component.");
+            AudioDebug.LogError("[AudioManager] Ambient track not found! Please ensure there's a child GameObject named 'Ambient' with an AudioTrack component.");
         }
         
         if (dialogueTrack != null)
         {
             dialogueTrack.SetTrackType(AudioTrackType.Dialogue);
-            Debug.Log($"[AudioManager] Dialogue track found and initialized: {dialogueTrack.name}");
+            AudioDebug.Log($"[AudioManager] Dialogue track found and initialized: {dialogueTrack.name}");
         }
         else
         {
-            Debug.LogError("[AudioManager] Dialogue track not found! Please ensure there's a child GameObject named 'Dialogue' with an AudioTrack component.");
+            AudioDebug.LogError("[AudioManager] Dialogue track not found! Please ensure there's a child GameObject named 'Dialogue' with an AudioTrack component.");
         }
         
         // Summary
         int foundTracks = (bgmTrack != null ? 1 : 0) + (ambientTrack != null ? 1 : 0) + (dialogueTrack != null ? 1 : 0);
-        Debug.Log($"[AudioManager] Track initialization complete: {foundTracks}/3 tracks found");
+        AudioDebug.Log($"[AudioManager] Track initialization complete: {foundTracks}/3 tracks found");
     }
 
     // helper method:
@@ -160,7 +170,7 @@ public class AudioManager : MonoBehaviour
         Transform childTransform = transform.Find(childName);
         if (childTransform == null)
         {
-            Debug.LogWarning($"[AudioManager] Child GameObject '{childName}' not found");
+            AudioDebug.LogWarning($"[AudioManager] Child GameObject '{childName}' not found");
             return null;
         }
         
@@ -168,7 +178,7 @@ public class AudioManager : MonoBehaviour
         AudioTrack audioTrack = childTransform.GetComponent<AudioTrack>();
         if (audioTrack == null)
         {
-            Debug.LogWarning($"[AudioManager] AudioTrack component not found on child '{childName}'");
+            AudioDebug.LogWarning($"[AudioManager] AudioTrack component not found on child '{childName}'");
             return null;
         }
         
@@ -179,28 +189,28 @@ public class AudioManager : MonoBehaviour
     [ContextMenu("Validate Audio Track Setup")]
     public void ValidateAudioTrackSetup()
     {
-        Debug.Log("=== AudioManager Track Validation ===");
+        AudioDebug.Log("=== AudioManager Track Validation ===");
         
         if (bgmTrack == null)
-            Debug.LogError("[AudioManager] BGM Track reference is NULL!");
+            AudioDebug.LogError("[AudioManager] BGM Track reference is NULL!");
         else
-            Debug.Log($"[AudioManager] BGM Track: {bgmTrack.name} (Type: {bgmTrack.TrackType}) on GameObject: {bgmTrack.gameObject.name}");
+            AudioDebug.Log($"[AudioManager] BGM Track: {bgmTrack.name} (Type: {bgmTrack.TrackType}) on GameObject: {bgmTrack.gameObject.name}");
             
         if (ambientTrack == null)
-            Debug.LogError("[AudioManager] Ambient Track reference is NULL!");
+            AudioDebug.LogError("[AudioManager] Ambient Track reference is NULL!");
         else
-            Debug.Log($"[AudioManager] Ambient Track: {ambientTrack.name} (Type: {ambientTrack.TrackType}) on GameObject: {ambientTrack.gameObject.name}");
+            AudioDebug.Log($"[AudioManager] Ambient Track: {ambientTrack.name} (Type: {ambientTrack.TrackType}) on GameObject: {ambientTrack.gameObject.name}");
             
         if (dialogueTrack == null)
-            Debug.LogError("[AudioManager] Dialogue Track reference is NULL!");
+            AudioDebug.LogError("[AudioManager] Dialogue Track reference is NULL!");
         else
-            Debug.Log($"[AudioManager] Dialogue Track: {dialogueTrack.name} (Type: {dialogueTrack.TrackType}) on GameObject: {dialogueTrack.gameObject.name}");
+            AudioDebug.Log($"[AudioManager] Dialogue Track: {dialogueTrack.name} (Type: {dialogueTrack.TrackType}) on GameObject: {dialogueTrack.gameObject.name}");
             
-        Debug.Log("=== Audio Resources ===");
-        Debug.Log($"BGM tracks loaded: {musicTracks.Count}");
-        Debug.Log($"Ambient tracks loaded: {ambientAudioTracks.Count}");
-        Debug.Log($"Dialogue tracks loaded: {dialogueAudioTracks.Count}");
-        Debug.Log($"SFX loaded: {soundEffects.Count}");
+        AudioDebug.Log("=== Audio Resources ===");
+        AudioDebug.Log($"BGM tracks loaded: {musicTracks.Count}");
+        AudioDebug.Log($"Ambient tracks loaded: {ambientAudioTracks.Count}");
+        AudioDebug.Log($"Dialogue tracks loaded: {dialogueAudioTracks.Count}");
+        AudioDebug.Log($"SFX loaded: {soundEffects.Count}");
     }
     
     #endregion
@@ -352,14 +362,14 @@ public class AudioManager : MonoBehaviour
         {
             if (existingCoroutine != null)
             {
-                Debug.Log($"[AudioManager] CANCELLING delayed {trackType} event"); // Add this line
+                AudioDebug.Log($"[AudioManager] CANCELLING delayed {trackType} event"); // Add this line
                 StopCoroutine(existingCoroutine);
             }
             delayedCoroutines.Remove(trackType);
         }
         else
         {
-            Debug.Log($"[AudioManager] No delayed {trackType} event to cancel"); // Add this line too
+            AudioDebug.Log($"[AudioManager] No delayed {trackType} event to cancel"); // Add this line too
         }
     }
     private void PlayTrackImmediate(AudioTrackType trackType, Transform attachTo, int trackNumber, string trackName, float volume, float pitch, float spatialBlend, FadeType fadeType, float fadeDuration, FadeTarget fadeTarget, bool loop, string eventName)
@@ -367,7 +377,7 @@ public class AudioManager : MonoBehaviour
         AudioTrack targetTrack = GetTrackByType(trackType);
         if (targetTrack == null)
         {
-            Debug.LogError($"{trackType}Track reference is null!");
+            AudioDebug.LogError($"{trackType}Track reference is null!");
             return;
         }
         
@@ -382,13 +392,13 @@ public class AudioManager : MonoBehaviour
     
     private IEnumerator PlayTrackDelayed(float delay, AudioTrackType trackType, Transform attachTo, int trackNumber, string trackName, float volume, float pitch, float spatialBlend, FadeType fadeType, float fadeDuration, FadeTarget fadeTarget, bool loop, string eventName)
     {
-        Debug.Log($"[AudioManager] Delaying {trackType} track for {delay}s");
+        AudioDebug.Log($"[AudioManager] Delaying {trackType} track for {delay}s");
         yield return new WaitForSeconds(delay);
     
         // Clean up the coroutine reference since it's completing
         delayedCoroutines.Remove(trackType);
     
-        Debug.Log($"[AudioManager] Executing delayed {trackType} track");
+        AudioDebug.Log($"[AudioManager] Executing delayed {trackType} track");
         PlayTrackImmediate(trackType, attachTo, trackNumber, trackName, volume, pitch, spatialBlend, fadeType, fadeDuration, fadeTarget, loop, eventName);
     }
 
@@ -420,7 +430,7 @@ public class AudioManager : MonoBehaviour
         AudioTrack targetTrack = GetTrackByType(trackType);
         if (targetTrack == null)
         {
-            Debug.LogError($"{trackType}Track reference is null!");
+            AudioDebug.LogError($"{trackType}Track reference is null!");
             return;
         }
         targetTrack.Stop(fadeDuration, fadeTarget);
@@ -428,13 +438,13 @@ public class AudioManager : MonoBehaviour
 
     private IEnumerator StopTrackDelayed(float delay, AudioTrackType trackType, float fadeDuration, FadeTarget fadeTarget)
     {
-        Debug.Log($"[AudioManager] Delaying {trackType} stop for {delay}s");
+        AudioDebug.Log($"[AudioManager] Delaying {trackType} stop for {delay}s");
         yield return new WaitForSeconds(delay);
     
         // Clean up the coroutine reference since it's completing
         delayedCoroutines.Remove(trackType);
     
-        Debug.Log($"[AudioManager] Executing delayed {trackType} stop");
+        AudioDebug.Log($"[AudioManager] Executing delayed {trackType} stop");
         StopTrackImmediate(trackType, fadeDuration, fadeTarget);
     }
 
@@ -465,7 +475,7 @@ public class AudioManager : MonoBehaviour
         AudioTrack targetTrack = GetTrackByType(trackType);
         if (targetTrack == null)
         {
-            Debug.LogError($"{trackType}Track reference is null!");
+            AudioDebug.LogError($"{trackType}Track reference is null!");
             return;
         }
         targetTrack.PauseToggle(fadeDuration, fadeTarget);
@@ -473,13 +483,13 @@ public class AudioManager : MonoBehaviour
 
     private IEnumerator PauseTrackDelayed(float delay, AudioTrackType trackType, float fadeDuration, FadeTarget fadeTarget)
     {
-        Debug.Log($"[AudioManager] Delaying {trackType} pause for {delay}s");
+        AudioDebug.Log($"[AudioManager] Delaying {trackType} pause for {delay}s");
         yield return new WaitForSeconds(delay);
     
         // Clean up the coroutine reference since it's completing
         delayedCoroutines.Remove(trackType);
     
-        Debug.Log($"[AudioManager] Executing delayed {trackType} pause");
+        AudioDebug.Log($"[AudioManager] Executing delayed {trackType} pause");
         PauseTrackImmediate(trackType, fadeDuration, fadeTarget);
     }
     
@@ -517,7 +527,7 @@ public class AudioManager : MonoBehaviour
         AudioTrack targetTrack = GetTrackByType(trackType);
         if (targetTrack == null)
         {
-            Debug.LogError($"{trackType}Track reference is null!");
+            AudioDebug.LogError($"{trackType}Track reference is null!");
             return;
         }
         
@@ -543,13 +553,13 @@ public class AudioManager : MonoBehaviour
 
     private IEnumerator AdjustTrackDelayed(float delay, AudioTrackType trackType, Transform attachTo, float volume, float pitch, float spatialBlend, float fadeDuration, FadeTarget fadeTarget, bool loop, string eventName)
     {
-        Debug.Log($"[AudioManager] Delaying {trackType} update for {delay}s");
+        AudioDebug.Log($"[AudioManager] Delaying {trackType} update for {delay}s");
         yield return new WaitForSeconds(delay);
         
         // Clean up the coroutine reference since it's completing
         delayedCoroutines.Remove(trackType);
         
-        Debug.Log($"[AudioManager] Executing delayed {trackType} update");
+        AudioDebug.Log($"[AudioManager] Executing delayed {trackType} update");
         AdjustTrackImmediate(trackType, attachTo, volume, pitch, spatialBlend, fadeDuration, fadeTarget, loop, eventName);
     }
 
@@ -637,7 +647,7 @@ public class AudioManager : MonoBehaviour
             int random = Random.Range(0, 100);
             if (random > percentChanceToPlay)
             {
-                Debug.Log($"[AudioManager] SFX '{string.Join(", ", soundNames)}' skipped due to chance ({random} > {percentChanceToPlay})");
+                AudioDebug.Log($"[AudioManager] SFX '{string.Join(", ", soundNames)}' skipped due to chance ({random} > {percentChanceToPlay})");
                 return;
             }
         }
@@ -645,12 +655,12 @@ public class AudioManager : MonoBehaviour
         // Select a random sound effect name from the array
         if (soundNames == null || soundNames.Length == 0)
         {
-            Debug.LogError("[AudioManager] No sound names provided for SFX!");
+            AudioDebug.LogError("[AudioManager] No sound names provided for SFX!");
             return;
         }
         
         string selectedSoundName = soundNames[Random.Range(0, soundNames.Length)];
-        Debug.Log($"[AudioManager] Selected SFX: '{selectedSoundName}' from {soundNames.Length} options");
+        AudioDebug.Log($"[AudioManager] Selected SFX: '{selectedSoundName}' from {soundNames.Length} options");
         
         if (delay <= 0f)
         {
@@ -665,11 +675,11 @@ public class AudioManager : MonoBehaviour
 
     private void PlaySoundEffectImmediate(string soundName, float volume, float pitch, bool randomizePitch, float pitchRange, float spatialBlend, bool loop, Transform attachTo, Vector3 position, float minDist, float maxDist, string eventName)
     {
-        Debug.Log($"Playing sound effect '{soundName}' with volume {volume}, pitch {pitch}, spatial blend {spatialBlend}, loop {loop}");
+        AudioDebug.Log($"Playing sound effect '{soundName}' with volume {volume}, pitch {pitch}, spatial blend {spatialBlend}, loop {loop}");
         
         if (!soundEffects.TryGetValue(soundName, out AudioClip clip))
         {
-            Debug.LogWarning($"Sound '{soundName}' not found in Resources/Audio/SFX!");
+            AudioDebug.LogWarning($"Sound '{soundName}' not found in Resources/Audio/SFX!");
             return;
         }
         
@@ -682,7 +692,7 @@ public class AudioManager : MonoBehaviour
             // Use specified transform position and parent
             spawnPosition = attachTo.position;
             parentTransform = attachTo;
-            Debug.Log($"[AudioManager] Attaching SFX to: {attachTo.name}");
+            AudioDebug.Log($"[AudioManager] Attaching SFX to: {attachTo.name}");
         }
         else if (position != default(Vector3))
         {
@@ -690,14 +700,14 @@ public class AudioManager : MonoBehaviour
             spawnPosition = position;
             parentTransform = transform;
             spatialBlend = Mathf.Max(spatialBlend, 0.1f); // Ensure some 3D when using world position
-            Debug.Log($"[AudioManager] Using custom position: {position}");
+            AudioDebug.Log($"[AudioManager] Using custom position: {position}");
         }
         else
         {
             // Default: Use AudioManager position and parent
             spawnPosition = transform.position;
             parentTransform = transform;
-            Debug.Log($"[AudioManager] Using AudioManager default position with spatialBlend={spatialBlend}");
+            AudioDebug.Log($"[AudioManager] Using AudioManager default position with spatialBlend={spatialBlend}");
         }
         
         GameObject sfxObject = Instantiate(soundEffectPrefab, spawnPosition, Quaternion.identity, parentTransform);
@@ -708,11 +718,11 @@ public class AudioManager : MonoBehaviour
         if (audioSourceType != null)
         {
             audioSourceType.AudioType = AudioType.SFX;
-            Debug.Log($"[AudioManager] Set AudioType to SFX for '{soundName}'");
+            AudioDebug.Log($"[AudioManager] Set AudioType to SFX for '{soundName}'");
         }
         else
         {
-            Debug.LogWarning($"[AudioManager] No AudioSourceType component found on SFX prefab for '{soundName}'");
+            AudioDebug.LogWarning($"[AudioManager] No AudioSourceType component found on SFX prefab for '{soundName}'");
         }
         
         // Rename the GameObject to include the sound name and SFX tag
@@ -742,7 +752,7 @@ public class AudioManager : MonoBehaviour
             sfxSource.spread = 0f; // Directional sound
             sfxSource.dopplerLevel = 1f; // Enable doppler effect
             
-            Debug.Log($"[AudioManager] Applied 3D settings: minDist={minDist}, maxDist={maxDist}, rolloff={sfxSource.rolloffMode}");
+            AudioDebug.Log($"[AudioManager] Applied 3D settings: minDist={minDist}, maxDist={maxDist}, rolloff={sfxSource.rolloffMode}");
         }
         else
         {
@@ -750,7 +760,7 @@ public class AudioManager : MonoBehaviour
             sfxSource.rolloffMode = AudioRolloffMode.Logarithmic; // This still works for 2D
             sfxSource.minDistance = 1f;
             sfxSource.maxDistance = 500f;
-            Debug.Log("[AudioManager] 2D audio - spatial blend = 0");
+            AudioDebug.Log("[AudioManager] 2D audio - spatial blend = 0");
         }
         
         // Start playing
@@ -762,18 +772,18 @@ public class AudioManager : MonoBehaviour
         //     Destroy(sfxObject, clip.length / Mathf.Abs(sfxSource.pitch));
         // }
         
-        Debug.Log($"[AudioManager] SFX '{soundName}' playing at {spawnPosition} - spatialBlend={sfxSource.spatialBlend}, minDist={sfxSource.minDistance}, maxDist={sfxSource.maxDistance}");
+        AudioDebug.Log($"[AudioManager] SFX '{soundName}' playing at {spawnPosition} - spatialBlend={sfxSource.spatialBlend}, minDist={sfxSource.minDistance}, maxDist={sfxSource.maxDistance}");
     }
 
     private IEnumerator PlaySoundEffectDelayed(float delay, string soundName, float volume, float pitch, bool randomizePitch, float pitchRange, float spatialBlend, bool loop, Transform attachTo, Vector3 position, float minDist, float maxDist, string eventName)
     {
-        Debug.Log($"[AudioManager] Delaying SFX '{soundName}' for {delay}s");
+        AudioDebug.Log($"[AudioManager] Delaying SFX '{soundName}' for {delay}s");
         yield return new WaitForSeconds(delay);
         
         // Remove this coroutine from tracking list
         delayedSFXCoroutines.RemoveAll(c => c == null);
         
-        Debug.Log($"[AudioManager] Executing delayed SFX '{soundName}'");
+        AudioDebug.Log($"[AudioManager] Executing delayed SFX '{soundName}'");
         PlaySoundEffectImmediate(soundName, volume, pitch, randomizePitch, pitchRange, spatialBlend, loop, attachTo, position, minDist, maxDist, eventName);
     }
 
@@ -792,7 +802,7 @@ public class AudioManager : MonoBehaviour
             }
         }
         delayedSFXCoroutines.Clear();
-        Debug.Log("[AudioManager] Cancelled all delayed SFX");
+        AudioDebug.Log("[AudioManager] Cancelled all delayed SFX");
     }
 
     // Method to stop all looped SFX using AudioSourceType
@@ -810,14 +820,14 @@ public class AudioManager : MonoBehaviour
                 AudioSource source = audioType.GetComponent<AudioSource>();
                 if (source != null && source.loop)
                 {
-                    Debug.Log($"[AudioManager] Stopping looped SFX: {audioType.gameObject.name}");
+                    AudioDebug.Log($"[AudioManager] Stopping looped SFX: {audioType.gameObject.name}");
                     Destroy(audioType.gameObject);
                     stoppedCount++;
                 }
             }
         }
         
-        Debug.Log($"[AudioManager] Stopped {stoppedCount} looped SFX");
+        AudioDebug.Log($"[AudioManager] Stopped {stoppedCount} looped SFX");
     }
 
     // Method to stop ALL SFX (looped and non-looped)
@@ -830,7 +840,7 @@ public class AudioManager : MonoBehaviour
         {
             if (audioType.AudioType == AudioType.SFX)
             {
-                Debug.Log($"[AudioManager] Stopping SFX: {audioType.gameObject.name}");
+                AudioDebug.Log($"[AudioManager] Stopping SFX: {audioType.gameObject.name}");
                 Destroy(audioType.gameObject);
                 stoppedCount++;
             }
@@ -839,7 +849,7 @@ public class AudioManager : MonoBehaviour
         // Reset pause state since no SFX are playing
         allSFXPaused = false;
     
-        Debug.Log($"[AudioManager] Stopped {stoppedCount} SFX total (reset pause state)");
+        AudioDebug.Log($"[AudioManager] Stopped {stoppedCount} SFX total (reset pause state)");
     }
 
     // Method to pause/resume all SFX
@@ -887,7 +897,7 @@ public class AudioManager : MonoBehaviour
         allSFXPaused = pause;
     
         string action = pause ? "Paused" : "Resumed";
-        Debug.Log($"[AudioManager] {action} {affectedCount} SFX (state: {allSFXPaused})");
+        AudioDebug.Log($"[AudioManager] {action} {affectedCount} SFX (state: {allSFXPaused})");
     }
     // toggle method for pausing/resuming all SFX
     public void TogglePauseAllSFX()
@@ -984,7 +994,7 @@ public class AudioManager : MonoBehaviour
             // Only warn if the track is supposed to be playing
             if (track.currentState != AudioTrackState.Stopped)
             {
-                Debug.LogWarning($"No active audio source found for {trackType} track.");
+                AudioDebug.LogWarning($"No active audio source found for {trackType} track.");
             }
             return;
         }

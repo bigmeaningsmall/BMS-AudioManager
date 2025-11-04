@@ -4,7 +4,7 @@ using UnityEngine;
 /// CORRECTED usage examples showing the right way to use AudioManager
 /// Uses both direct event calls (with all parameters) and helper method overloads
 /// </summary>
-public class AudioManagerUsageExamplesCorrected : MonoBehaviour
+public class AudioManagerUsageExample : MonoBehaviour
 {
     [Header("Example Objects")]
     public Transform playerTransform;
@@ -31,7 +31,7 @@ public class AudioManagerUsageExamplesCorrected : MonoBehaviour
     /// </summary>
     private void DirectEventExamples()
     {
-        Debug.Log("=== DIRECT EVENT EXAMPLES (All Parameters Required) ===");
+        AudioDebug.Log("=== DIRECT EVENT EXAMPLES (All Parameters Required) ===");
         
         // PLAY TRACK - ALL parameters must be provided
         AudioEventManager.PlayTrack(
@@ -107,7 +107,7 @@ public class AudioManagerUsageExamplesCorrected : MonoBehaviour
     /// </summary>
     private void HelperMethodExamples()
     {
-        Debug.Log("=== HELPER METHOD EXAMPLES (Easy Usage) ===");
+        AudioDebug.Log("=== HELPER METHOD EXAMPLES (Easy Usage) ===");
         
         // SIMPLE TRACK OPERATIONS
         AudioEvent.PlayTrack(AudioTrackType.BGM, "MainTheme");
@@ -147,7 +147,7 @@ public class AudioManagerUsageExamplesCorrected : MonoBehaviour
     /// </summary>
     private void ComplexScenarioExamples()
     {
-        Debug.Log("=== COMPLEX SCENARIO EXAMPLES ===");
+        AudioDebug.Log("=== COMPLEX SCENARIO EXAMPLES ===");
         
         StartCoroutine(CombatSequenceExample());
         StartCoroutine(EnvironmentalTransitionExample());
@@ -155,7 +155,7 @@ public class AudioManagerUsageExamplesCorrected : MonoBehaviour
     
     private System.Collections.IEnumerator CombatSequenceExample()
     {
-        Debug.Log("Starting Combat Sequence...");
+        AudioDebug.Log("Starting Combat Sequence...");
         
         // 1. Quick fade out current music
         AudioEvent.StopTrack(AudioTrackType.BGM, 1f);
@@ -185,12 +185,12 @@ public class AudioManagerUsageExamplesCorrected : MonoBehaviour
             "Combat Start"               // eventName
         );
         
-        Debug.Log("Combat Sequence Complete!");
+        AudioDebug.Log("Combat Sequence Complete!");
     }
     
     private System.Collections.IEnumerator EnvironmentalTransitionExample()
     {
-        Debug.Log("Starting Environmental Transition...");
+        AudioDebug.Log("Starting Environmental Transition...");
         
         // 1. Start forest ambient (simple)
         AudioEvent.PlayTrack(AudioTrackType.Ambient, "ForestAmbient", 0.7f, 1f, ambientLocationTransform);
@@ -242,7 +242,7 @@ public class AudioManagerUsageExamplesCorrected : MonoBehaviour
             "Enter Cave"
         );
         
-        Debug.Log("Environmental Transition Complete!");
+        AudioDebug.Log("Environmental Transition Complete!");
     }
     
     // ==================== CONVENIENCE WRAPPER METHODS ====================

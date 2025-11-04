@@ -95,7 +95,7 @@ public class SFXDebugDisplay : MonoBehaviour
     public void RefreshSFXInformation()
     {
         UpdateSFXInformation();
-        Debug.Log("[SFXDebugDisplay] SFX information refreshed manually");
+        AudioDebug.Log("[SFXDebugDisplay] SFX information refreshed manually");
     }
     
     /// <summary>
@@ -107,7 +107,7 @@ public class SFXDebugDisplay : MonoBehaviour
         if (AudioManager.Instance != null)
         {
             AudioManager.Instance.StopAllSFX();
-            Debug.Log("[SFXDebugDisplay] Stopped all SFX via debug display");
+            AudioDebug.Log("[SFXDebugDisplay] Stopped all SFX via debug display");
         }
     }
     
@@ -120,7 +120,7 @@ public class SFXDebugDisplay : MonoBehaviour
         if (AudioManager.Instance != null)
         {
             AudioManager.Instance.StopAllLoopedSFX();
-            Debug.Log("[SFXDebugDisplay] Stopped all looped SFX via debug display");
+            AudioDebug.Log("[SFXDebugDisplay] Stopped all looped SFX via debug display");
         }
     }
     
@@ -133,7 +133,7 @@ public class SFXDebugDisplay : MonoBehaviour
         if (AudioManager.Instance != null)
         {
             AudioManager.Instance.PauseAllSFX(true);
-            Debug.Log("[SFXDebugDisplay] Paused all SFX via debug display");
+            AudioDebug.Log("[SFXDebugDisplay] Paused all SFX via debug display");
         }
     }
     
@@ -146,7 +146,7 @@ public class SFXDebugDisplay : MonoBehaviour
         if (AudioManager.Instance != null)
         {
             AudioManager.Instance.PauseAllSFX(false);
-            Debug.Log("[SFXDebugDisplay] Resumed all SFX via debug display");
+            AudioDebug.Log("[SFXDebugDisplay] Resumed all SFX via debug display");
         }
     }
     
@@ -159,7 +159,7 @@ public class SFXDebugDisplay : MonoBehaviour
         if (AudioManager.Instance != null)
         {
             AudioManager.Instance.CancelAllDelayedSFX();
-            Debug.Log("[SFXDebugDisplay] Cancelled all delayed SFX via debug display");
+            AudioDebug.Log("[SFXDebugDisplay] Cancelled all delayed SFX via debug display");
         }
     }
     
@@ -171,31 +171,31 @@ public class SFXDebugDisplay : MonoBehaviour
     {
         if (AudioManager.Instance == null)
         {
-            Debug.LogWarning("[SFXDebugDisplay] AudioManager not available");
+            AudioDebug.LogWarning("[SFXDebugDisplay] AudioManager not available");
             return;
         }
         
         string[] sfxNames = AudioManager.Instance.GetActiveSFXNames();
         int count = AudioManager.Instance.GetActiveSFXCount();
         
-        Debug.Log($"[SFXDebugDisplay] === SFX DEBUG REPORT ===");
-        Debug.Log($"[SFXDebugDisplay] Active SFX Count: {count}");
-        Debug.Log($"[SFXDebugDisplay] Delayed SFX Count: {delayedSFXCount}");
+        AudioDebug.Log($"[SFXDebugDisplay] === SFX DEBUG REPORT ===");
+        AudioDebug.Log($"[SFXDebugDisplay] Active SFX Count: {count}");
+        AudioDebug.Log($"[SFXDebugDisplay] Delayed SFX Count: {delayedSFXCount}");
         
         if (sfxNames.Length > 0)
         {
-            Debug.Log($"[SFXDebugDisplay] Active SFX Names:");
+            AudioDebug.Log($"[SFXDebugDisplay] Active SFX Names:");
             for (int i = 0; i < sfxNames.Length; i++)
             {
-                Debug.Log($"[SFXDebugDisplay]   {i + 1}. {sfxNames[i]}");
+                AudioDebug.Log($"[SFXDebugDisplay]   {i + 1}. {sfxNames[i]}");
             }
         }
         else
         {
-            Debug.Log($"[SFXDebugDisplay] No active SFX currently playing");
+            AudioDebug.Log($"[SFXDebugDisplay] No active SFX currently playing");
         }
         
-        Debug.Log($"[SFXDebugDisplay] === END REPORT ===");
+        AudioDebug.Log($"[SFXDebugDisplay] === END REPORT ===");
     }
     
     /// <summary>

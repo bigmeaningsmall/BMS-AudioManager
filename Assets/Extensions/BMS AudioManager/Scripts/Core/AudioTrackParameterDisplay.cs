@@ -69,7 +69,7 @@ public class AudioTrackParameterDisplay : MonoBehaviour
     public void RefreshParameters()
     {
         UpdateTrackParameters();
-        Debug.Log("[AudioParameterDisplay] Parameters refreshed manually");
+        AudioDebug.Log("[AudioParameterDisplay] Parameters refreshed manually");
     }
     
     /// <summary>
