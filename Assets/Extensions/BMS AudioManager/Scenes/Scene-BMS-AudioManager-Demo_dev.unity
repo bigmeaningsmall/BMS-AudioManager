@@ -1006,6 +1006,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: BMS - Audio Manager
       objectReference: {fileID: 0}
+    - target: {fileID: 7366141512683043284, guid: ccc2f9deca1fd8440a1f8646e2051deb,
+        type: 3}
+      propertyPath: enableDebugLogging
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -1851,6 +1856,31 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: Audio Track - Event Zone
+      objectReference: {fileID: 0}
+    - target: {fileID: 5355574976095253072, guid: 89621415efb6a794087214f779dcb9f2,
+        type: 3}
+      propertyPath: trackNumber
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 5355574976095253072, guid: 89621415efb6a794087214f779dcb9f2,
+        type: 3}
+      propertyPath: fadeDuration
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 5355574976095253072, guid: 89621415efb6a794087214f779dcb9f2,
+        type: 3}
+      propertyPath: audioTrackType
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5355574976095253072, guid: 89621415efb6a794087214f779dcb9f2,
+        type: 3}
+      propertyPath: triggerActiveColor.b
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5355574976095253072, guid: 89621415efb6a794087214f779dcb9f2,
+        type: 3}
+      propertyPath: triggerActiveColor.g
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6014174656882223073, guid: 89621415efb6a794087214f779dcb9f2,
         type: 3}
