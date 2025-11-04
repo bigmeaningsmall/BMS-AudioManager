@@ -182,7 +182,7 @@ public class AudioTrack : MonoBehaviour
         {
             Resume(fadeDuration, fadeTarget);
         }
-        else if (currentState == AudioTrackState.FadingOut && mainCoroutine != null)
+        else if (currentState == AudioTrackState.FadeToPause && mainCoroutine != null)
         {
             // Interrupt fade-to-pause and reverse to fade-from-pause
             StopCoroutine(mainCoroutine);
@@ -195,7 +195,7 @@ public class AudioTrack : MonoBehaviour
                 mainCoroutine = StartCoroutine(FadeFromPause(fadeDuration, fadeTarget));
             }
         }
-        else if (currentState == AudioTrackState.FadingIn && mainCoroutine != null)
+        else if (currentState == AudioTrackState.FadeFromPause && mainCoroutine != null)
         {
             // Interrupt fade-from-pause and reverse to fade-to-pause
             StopCoroutine(mainCoroutine);
