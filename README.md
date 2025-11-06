@@ -1,4 +1,4 @@
-# BMS Audio Manager v1.4
+# BMS Audio Manager v1.5
 
 A comprehensive Unity audio management system featuring sophisticated track management, 3-source crossfading, and flexible event-driven architecture. Best used in small projects requiring professional-quality audio transitions and sound management.
 
