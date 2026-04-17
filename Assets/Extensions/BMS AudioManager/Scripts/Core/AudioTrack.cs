@@ -167,8 +167,8 @@ public class AudioTrack : MonoBehaviour
                 break;
                 
             case AudioTrackState.FadingOut:
-                // Let fade out complete, then start new
-                AudioDebug.Log("Currently fading out. New play request will start after fade completes.");
+                // Interrupt fade-out and crossfade to new track
+                HandlePlayDuringFadeOut(clip, volume, pitch, spatialBlend, fadeType, fadeDuration, fadeTarget, loop, attachTo);
                 break;
         }
     }
@@ -577,8 +577,61 @@ public class AudioTrack : MonoBehaviour
         cueCoroutine = StartCoroutine(FadeInCue(fadeDuration, fadeTarget, volume, pitch));
     }
     
+    private void HandlePlayDuringFadeOut(AudioClip clip, float volume, float pitch, float spatialBlend,
+        FadeType fadeType, float fadeDuration, FadeTarget fadeTarget, bool loop, Transform attachTo)
+    {
+        AudioDebug.Log("[Track] Handling Play during FadeOut - interrupting fade, crossfading to new track");
+
+        // Stop all active coroutines
+        if (mainCoroutine != null) { StopCoroutine(mainCoroutine); mainCoroutine = null; }
+        if (outgoingCoroutine != null) { StopCoroutine(outgoingCoroutine); outgoingCoroutine = null; }
+        if (cueCoroutine != null) { StopCoroutine(cueCoroutine); cueCoroutine = null; }
+
+        // Destroy any waiting cue (pending from FadeOutThenFadeIn scenario)
+        if (cueSource != null)
+        {
+            cueSource.Stop();
+            Destroy(cueSource.gameObject);
+            cueSource = null;
+        }
+
+        // Consolidate: if mainSource exists (Stop() scenario), move it to outgoing
+        if (mainSource != null)
+        {
+            if (outgoingSource != null)
+            {
+                outgoingSource.Stop();
+                Destroy(outgoingSource.gameObject);
+                outgoingSource = null;
+            }
+            outgoingSource = mainSource;
+            mainSource = null;
+        }
+
+        // Continue fading out the outgoing source from its current volume
+        if (outgoingSource != null)
+        {
+            outgoingCoroutine = StartCoroutine(FadeOutAndDestroy(outgoingSource, fadeDuration, fadeTarget));
+        }
+
+        // Create and start the new cue source
+        cueSource = CreateAudioSource(attachTo, clip);
+        if (cueSource == null) return;
+
+        cueSource.clip = clip;
+        cueSource.loop = loop;
+        cueSource.spatialBlend = spatialBlend;
+        cueSource.volume = (fadeTarget == FadeTarget.FadeVolume || fadeTarget == FadeTarget.FadeBoth) ? 0f : volume;
+        cueSource.pitch = (fadeTarget == FadeTarget.FadePitch || fadeTarget == FadeTarget.FadeBoth) ? 0f : pitch;
+        cueSource.Play();
+
+        // FadeInCue promotes cue → main and sets state to Playing when done
+        currentState = AudioTrackState.Crossfading;
+        cueCoroutine = StartCoroutine(FadeInCue(fadeDuration, fadeTarget, volume, pitch));
+    }
+
     // ==================== STATE TRANSITION METHODS ====================
-    
+
     private void StartFromStopped(AudioClip clip, float volume, float pitch, float spatialBlend,
         float fadeDuration, FadeTarget fadeTarget, bool loop, Transform attachTo)
     {
