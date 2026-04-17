@@ -185,7 +185,29 @@ public static class AudioEvent
     {
         AudioEventManager.PlaySFX(new string[] { soundName }, volume, 1f, false, 0.1f, 1f, false, 0f, 100f, attachTo, Vector3.zero, 1f, 500f, "");
     }
-    
+
+    /// <summary> i think this works // todo test in a project as its going to be the common call...
+    /// Play SFX with explicit pitch range (x = min, y = max) attached to transform (3D audio).
+    /// e.g. new Vector2(0.9f, 1.2f) randomises pitch between 0.9 and 1.2 on each play.
+    /// </summary>
+    public static void PlaySFX(string soundName, float volume, Vector2 pitchRange, Transform attachTo)
+    {
+        float pitchCentre = (pitchRange.x + pitchRange.y) / 2f;
+        float pitchVariance = (pitchRange.y - pitchRange.x) / 2f;
+        float spatialBlend = attachTo != null ? 1f : 0f;
+        AudioEventManager.PlaySFX(new string[] { soundName }, volume, pitchCentre, true, pitchVariance, spatialBlend, false, 0f, 100f, attachTo, Vector3.zero, 1f, 500f, "");
+    }
+
+    /// <summary>
+    /// Play SFX with pitch randomisation toggle attached to transform (3D audio).
+    /// Uses default pitch variance of +-0.1.
+    /// </summary>
+    public static void PlaySFX(string soundName, float volume, bool randomizePitch, Transform attachTo)
+    {
+        float spatialBlend = attachTo != null ? 1f : 0f;
+        AudioEventManager.PlaySFX(new string[] { soundName }, volume, 1f, randomizePitch, 0.1f, spatialBlend, false, 0f, 100f, attachTo, Vector3.zero, 1f, 500f, "");
+    }
+
     /// <summary>
     /// Play SFX at world position (3D audio)
     /// </summary>
