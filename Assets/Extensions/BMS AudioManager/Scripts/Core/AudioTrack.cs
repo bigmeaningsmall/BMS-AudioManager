@@ -608,26 +608,45 @@ public class AudioTrack : MonoBehaviour
             mainSource = null;
         }
 
-        // Continue fading out the outgoing source from its current volume
-        if (outgoingSource != null)
+        if (fadeType == FadeType.Crossfade)
         {
-            outgoingCoroutine = StartCoroutine(FadeOutAndDestroy(outgoingSource, fadeDuration, fadeTarget));
+            // Both fade simultaneously: outgoing continues down while new fades in
+            if (outgoingSource != null)
+            {
+                outgoingCoroutine = StartCoroutine(FadeOutAndDestroy(outgoingSource, fadeDuration, fadeTarget));
+            }
+
+            cueSource = CreateAudioSource(attachTo, clip);
+            if (cueSource == null) return;
+
+            cueSource.clip = clip;
+            cueSource.loop = loop;
+            cueSource.spatialBlend = spatialBlend;
+            cueSource.volume = (fadeTarget == FadeTarget.FadeVolume || fadeTarget == FadeTarget.FadeBoth) ? 0f : volume;
+            cueSource.pitch = (fadeTarget == FadeTarget.FadePitch || fadeTarget == FadeTarget.FadeBoth) ? 0f : pitch;
+            cueSource.Play();
+
+            // FadeInCue promotes cue → main and sets state to Playing when done
+            currentState = AudioTrackState.Crossfading;
+            cueCoroutine = StartCoroutine(FadeInCue(fadeDuration, fadeTarget, volume, pitch));
         }
-
-        // Create and start the new cue source
-        cueSource = CreateAudioSource(attachTo, clip);
-        if (cueSource == null) return;
-
-        cueSource.clip = clip;
-        cueSource.loop = loop;
-        cueSource.spatialBlend = spatialBlend;
-        cueSource.volume = (fadeTarget == FadeTarget.FadeVolume || fadeTarget == FadeTarget.FadeBoth) ? 0f : volume;
-        cueSource.pitch = (fadeTarget == FadeTarget.FadePitch || fadeTarget == FadeTarget.FadeBoth) ? 0f : pitch;
-        cueSource.Play();
-
-        // FadeInCue promotes cue → main and sets state to Playing when done
-        currentState = AudioTrackState.Crossfading;
-        cueCoroutine = StartCoroutine(FadeInCue(fadeDuration, fadeTarget, volume, pitch));
+        else
+        {
+            // FadeInOut: finish fading out the outgoing, then fade in the new track
+            // FadeOutThenFadeIn starts from the source's current volume, so the remaining
+            // fade duration is respected naturally
+            if (outgoingSource != null)
+            {
+                currentState = AudioTrackState.FadingOut;
+                outgoingCoroutine = StartCoroutine(FadeOutThenFadeIn(outgoingSource, clip, volume, pitch,
+                    spatialBlend, fadeDuration, fadeTarget, loop, attachTo));
+            }
+            else
+            {
+                // Nothing left to fade out, start immediately
+                StartFromStopped(clip, volume, pitch, spatialBlend, fadeDuration, fadeTarget, loop, attachTo);
+            }
+        }
     }
 
     // ==================== STATE TRANSITION METHODS ====================
