@@ -2,13 +2,16 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Audio;
 using Random = UnityEngine.Random;
 
 public enum AudioTrackType
 {
     BGM,
-    Ambient, 
-    Dialogue
+    Ambient,
+    Dialogue,
+    Aux1,
+    Aux2
 }
 
 /// <summary>
@@ -39,21 +42,31 @@ public class AudioManager : MonoBehaviour
     [HideInInspector] private AudioTrack bgmTrack;
     [HideInInspector] private AudioTrack ambientTrack;
     [HideInInspector] private AudioTrack dialogueTrack;
+    [HideInInspector] private AudioTrack aux1Track;
+    [HideInInspector] private AudioTrack aux2Track;
     
     // Audio Resource Dictionaries (KEEP - centralized loading)
     [Header("Audio Resources")]
     private Dictionary<int, AudioClip> musicTracks = new Dictionary<int, AudioClip>();
     private Dictionary<int, AudioClip> ambientAudioTracks = new Dictionary<int, AudioClip>();
     private Dictionary<int, AudioClip> dialogueAudioTracks = new Dictionary<int, AudioClip>();
+    private Dictionary<int, AudioClip> aux1AudioTracks = new Dictionary<int, AudioClip>();
+    private Dictionary<int, AudioClip> aux2AudioTracks = new Dictionary<int, AudioClip>();
     private Dictionary<string, AudioClip> soundEffects = new Dictionary<string, AudioClip>();
 
     // Prefab References (KEEP - tracks will use these)
     [Header("Audio Prefabs")]
     [SerializeField] private GameObject audioTrackPrefab; // Generic prefab for audio tracks
-    // [SerializeField] private GameObject musicPrefab;
-    // [SerializeField] private GameObject ambientAudioPrefab;
-    // [SerializeField] private GameObject dialogueAudioPrefab;
     [SerializeField] private GameObject soundEffectPrefab;
+
+    [Header("Mixer Groups")]
+    [Tooltip("Assign each mixer group to route tracks to the correct channel")]
+    [SerializeField] private AudioMixerGroup bgmMixerGroup;
+    [SerializeField] private AudioMixerGroup ambientMixerGroup;
+    [SerializeField] private AudioMixerGroup dialogueMixerGroup;
+    [SerializeField] private AudioMixerGroup aux1MixerGroup;
+    [SerializeField] private AudioMixerGroup aux2MixerGroup;
+    [SerializeField] private AudioMixerGroup sfxMixerGroup;
     
     [Header("SFX Settings & State")]
     [SerializeField] [Range(0f, 1f)] private float globalSFXAttenuation = 1f;
@@ -77,7 +90,13 @@ public class AudioManager : MonoBehaviour
 
     [Header("Available Dialogue Audio Tracks")]
     [SerializeField] private List<string> dialogueTrackNames = new List<string>();
-    
+
+    [Header("Available Aux1 Audio Tracks")]
+    [SerializeField] private List<string> aux1TrackNames = new List<string>();
+
+    [Header("Available Aux2 Audio Tracks")]
+    [SerializeField] private List<string> aux2TrackNames = new List<string>();
+
     [Header("Available Sound Effects")]
     [SerializeField] private List<string> soundEffectNames = new List<string>();
     #endregion
@@ -88,11 +107,15 @@ public class AudioManager : MonoBehaviour
     private AudioTrackParamters bgmTrackParameters;
     private AudioTrackParamters ambientTrackParameters;
     private AudioTrackParamters dialogueTrackParameters;
+    private AudioTrackParamters aux1TrackParameters;
+    private AudioTrackParamters aux2TrackParameters;
 
     // public readonly getters -- optional, but useful for other scripts to access track parameters
     public AudioTrackParamters BGMParameters => bgmTrackParameters;
     public AudioTrackParamters AmbientParameters => ambientTrackParameters;
     public AudioTrackParamters DialogueParameters => dialogueTrackParameters;
+    public AudioTrackParamters Aux1Parameters => aux1TrackParameters;
+    public AudioTrackParamters Aux2Parameters => aux2TrackParameters;
     
     
     /// <summary>
@@ -157,10 +180,33 @@ public class AudioManager : MonoBehaviour
         {
             AudioDebug.LogError("[AudioManager] Dialogue track not found! Please ensure there's a child GameObject named 'Dialogue' with an AudioTrack component.");
         }
-        
+
+        aux1Track = FindChildAudioTrack("Aux1");
+        if (aux1Track != null)
+        {
+            aux1Track.SetTrackType(AudioTrackType.Aux1);
+            AudioDebug.Log($"[AudioManager] Aux1 track found and initialized: {aux1Track.name}");
+        }
+        else
+        {
+            AudioDebug.LogError("[AudioManager] Aux1 track not found! Please ensure there's a child GameObject named 'Aux1' with an AudioTrack component.");
+        }
+
+        aux2Track = FindChildAudioTrack("Aux2");
+        if (aux2Track != null)
+        {
+            aux2Track.SetTrackType(AudioTrackType.Aux2);
+            AudioDebug.Log($"[AudioManager] Aux2 track found and initialized: {aux2Track.name}");
+        }
+        else
+        {
+            AudioDebug.LogError("[AudioManager] Aux2 track not found! Please ensure there's a child GameObject named 'Aux2' with an AudioTrack component.");
+        }
+
         // Summary
-        int foundTracks = (bgmTrack != null ? 1 : 0) + (ambientTrack != null ? 1 : 0) + (dialogueTrack != null ? 1 : 0);
-        AudioDebug.Log($"[AudioManager] Track initialization complete: {foundTracks}/3 tracks found");
+        int foundTracks = (bgmTrack != null ? 1 : 0) + (ambientTrack != null ? 1 : 0) + (dialogueTrack != null ? 1 : 0)
+                        + (aux1Track != null ? 1 : 0) + (aux2Track != null ? 1 : 0);
+        AudioDebug.Log($"[AudioManager] Track initialization complete: {foundTracks}/5 tracks found");
     }
 
     // helper method:
@@ -205,11 +251,23 @@ public class AudioManager : MonoBehaviour
             AudioDebug.LogError("[AudioManager] Dialogue Track reference is NULL!");
         else
             AudioDebug.Log($"[AudioManager] Dialogue Track: {dialogueTrack.name} (Type: {dialogueTrack.TrackType}) on GameObject: {dialogueTrack.gameObject.name}");
-            
+
+        if (aux1Track == null)
+            AudioDebug.LogError("[AudioManager] Aux1 Track reference is NULL!");
+        else
+            AudioDebug.Log($"[AudioManager] Aux1 Track: {aux1Track.name} (Type: {aux1Track.TrackType}) on GameObject: {aux1Track.gameObject.name}");
+
+        if (aux2Track == null)
+            AudioDebug.LogError("[AudioManager] Aux2 Track reference is NULL!");
+        else
+            AudioDebug.Log($"[AudioManager] Aux2 Track: {aux2Track.name} (Type: {aux2Track.TrackType}) on GameObject: {aux2Track.gameObject.name}");
+
         AudioDebug.Log("=== Audio Resources ===");
         AudioDebug.Log($"BGM tracks loaded: {musicTracks.Count}");
         AudioDebug.Log($"Ambient tracks loaded: {ambientAudioTracks.Count}");
         AudioDebug.Log($"Dialogue tracks loaded: {dialogueAudioTracks.Count}");
+        AudioDebug.Log($"Aux1 tracks loaded: {aux1AudioTracks.Count}");
+        AudioDebug.Log($"Aux2 tracks loaded: {aux2AudioTracks.Count}");
         AudioDebug.Log($"SFX loaded: {soundEffects.Count}");
     }
     
@@ -262,7 +320,21 @@ public class AudioManager : MonoBehaviour
             dialogueAudioTracks[i] = dialogueClips[i];
             dialogueTrackNames.Add(dialogueClips[i].name);
         }
-        
+
+        AudioClip[] aux1Clips = Resources.LoadAll<AudioClip>("Audio/Aux1");
+        for (int i = 0; i < aux1Clips.Length; i++)
+        {
+            aux1AudioTracks[i] = aux1Clips[i];
+            aux1TrackNames.Add(aux1Clips[i].name);
+        }
+
+        AudioClip[] aux2Clips = Resources.LoadAll<AudioClip>("Audio/Aux2");
+        for (int i = 0; i < aux2Clips.Length; i++)
+        {
+            aux2AudioTracks[i] = aux2Clips[i];
+            aux2TrackNames.Add(aux2Clips[i].name);
+        }
+
         AudioClip[] sfxClips = Resources.LoadAll<AudioClip>("Audio/SFX");
         foreach (var clip in sfxClips)
         {
@@ -311,6 +383,46 @@ public class AudioManager : MonoBehaviour
         return null;
     }
     public GameObject GetDialoguePrefab() => audioTrackPrefab;
+    //-----------------------------------------------------------
+    public AudioClip GetAux1Clip(int index) => aux1AudioTracks.TryGetValue(index, out AudioClip clip) ? clip : null;
+
+    public AudioClip GetAux1Clip(string name)
+    {
+        foreach (var track in aux1AudioTracks)
+        {
+            if (track.Value.name == name) return track.Value;
+        }
+        return null;
+    }
+    public GameObject GetAux1Prefab() => audioTrackPrefab;
+    //-----------------------------------------------------------
+    public AudioClip GetAux2Clip(int index) => aux2AudioTracks.TryGetValue(index, out AudioClip clip) ? clip : null;
+
+    public AudioClip GetAux2Clip(string name)
+    {
+        foreach (var track in aux2AudioTracks)
+        {
+            if (track.Value.name == name) return track.Value;
+        }
+        return null;
+    }
+    public GameObject GetAux2Prefab() => audioTrackPrefab;
+    //-----------------------------------------------------------
+
+    public AudioMixerGroup GetMixerGroup(AudioTrackType trackType)
+    {
+        return trackType switch
+        {
+            AudioTrackType.BGM      => bgmMixerGroup,
+            AudioTrackType.Ambient  => ambientMixerGroup,
+            AudioTrackType.Dialogue => dialogueMixerGroup,
+            AudioTrackType.Aux1     => aux1MixerGroup,
+            AudioTrackType.Aux2     => aux2MixerGroup,
+            _                       => null
+        };
+    }
+
+    public AudioMixerGroup GetSFXMixerGroup() => sfxMixerGroup;
     //-----------------------------------------------------------
     #endregion
 
@@ -580,6 +692,8 @@ public class AudioManager : MonoBehaviour
             AudioTrackType.BGM => bgmTrack,
             AudioTrackType.Ambient => ambientTrack,
             AudioTrackType.Dialogue => dialogueTrack,
+            AudioTrackType.Aux1 => aux1Track,
+            AudioTrackType.Aux2 => aux2Track,
             _ => null
         };
     }
@@ -592,6 +706,8 @@ public class AudioManager : MonoBehaviour
             AudioTrackType.BGM => bgmTrackParameters,
             AudioTrackType.Ambient => ambientTrackParameters,
             AudioTrackType.Dialogue => dialogueTrackParameters,
+            AudioTrackType.Aux1 => aux1TrackParameters,
+            AudioTrackType.Aux2 => aux2TrackParameters,
             _ => null
         };
     }
@@ -608,6 +724,12 @@ public class AudioManager : MonoBehaviour
                 break;
             case AudioTrackType.Dialogue:
                 dialogueTrackParameters = parameters;
+                break;
+            case AudioTrackType.Aux1:
+                aux1TrackParameters = parameters;
+                break;
+            case AudioTrackType.Aux2:
+                aux2TrackParameters = parameters;
                 break;
         }
     }
@@ -712,7 +834,11 @@ public class AudioManager : MonoBehaviour
         
         GameObject sfxObject = Instantiate(soundEffectPrefab, spawnPosition, Quaternion.identity, parentTransform);
         AudioSource sfxSource = sfxObject.GetComponent<AudioSource>();
-        
+
+        // Route to the SFX mixer group
+        if (sfxSource != null && sfxMixerGroup != null)
+            sfxSource.outputAudioMixerGroup = sfxMixerGroup;
+
         // SET THE AUDIO TYPE FOR SFX
         AudioSourceType audioSourceType = sfxObject.GetComponent<AudioSourceType>();
         if (audioSourceType != null)
@@ -963,6 +1089,8 @@ public class AudioManager : MonoBehaviour
         UpdateTrackParameters(AudioTrackType.BGM);
         UpdateTrackParameters(AudioTrackType.Ambient);
         UpdateTrackParameters(AudioTrackType.Dialogue);
+        UpdateTrackParameters(AudioTrackType.Aux1);
+        UpdateTrackParameters(AudioTrackType.Aux2);
     }
     
     private void UpdateTrackParameters(AudioTrackType trackType)

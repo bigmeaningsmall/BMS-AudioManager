@@ -49,6 +49,55 @@ MonoBehaviour:
   cueSource: {fileID: 0}
   outgoingSource: {fileID: 0}
   currentState: 0
+--- !u!1 &4759862608125751135
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8020168339071048810}
+  - component: {fileID: 2917086127213057319}
+  m_Layer: 0
+  m_Name: Aux2
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &8020168339071048810
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4759862608125751135}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1627499547365978731}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2917086127213057319
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4759862608125751135}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7382d7b606514ed45ad25b2811994a0c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  trackType: 4
+  mainSource: {fileID: 0}
+  cueSource: {fileID: 0}
+  outgoingSource: {fileID: 0}
+  currentState: 0
 --- !u!1 &5737640405453547409
 GameObject:
   m_ObjectHideFlags: 0
@@ -83,6 +132,8 @@ Transform:
   - {fileID: 3157879194883005049}
   - {fileID: 754296530196990961}
   - {fileID: 9072857043474054856}
+  - {fileID: 7441465759634701150}
+  - {fileID: 8020168339071048810}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &7366141512683043284
@@ -98,17 +149,29 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   version: v1.4
-  bgmTrack: {fileID: 6490469370851105204}
-  ambientTrack: {fileID: 2613053519276540711}
-  dialogueTrack: {fileID: 8896130139973777079}
+  enableDebugLogging: 1
   audioTrackPrefab: {fileID: 8822123416660145754, guid: be37be929a4c7cc448bf059b8b2745f4,
     type: 3}
   soundEffectPrefab: {fileID: 7698994631750102530, guid: fe18fd3b82aee3244a8132f55ee67eb0,
     type: 3}
+  bgmMixerGroup: {fileID: 2268928712382745843, guid: 3c08029f3a334d8468cd0ea11728e603,
+    type: 2}
+  ambientMixerGroup: {fileID: -7043283835160980907, guid: 3c08029f3a334d8468cd0ea11728e603,
+    type: 2}
+  dialogueMixerGroup: {fileID: 5139705278188082868, guid: 3c08029f3a334d8468cd0ea11728e603,
+    type: 2}
+  aux1MixerGroup: {fileID: 6855176129112198792, guid: 3c08029f3a334d8468cd0ea11728e603,
+    type: 2}
+  aux2MixerGroup: {fileID: 8424294672188000679, guid: 3c08029f3a334d8468cd0ea11728e603,
+    type: 2}
+  sfxMixerGroup: {fileID: 7842468050713168027, guid: 3c08029f3a334d8468cd0ea11728e603,
+    type: 2}
   globalSFXAttenuation: 1
   musicTrackNames: []
   ambientAudioTrackNames: []
   dialogueTrackNames: []
+  aux1TrackNames: []
+  aux2TrackNames: []
   soundEffectNames: []
 --- !u!114 &4855772116050727572
 MonoBehaviour:
@@ -161,8 +224,83 @@ MonoBehaviour:
     clipLength: 0
     clipPercent: 0
     eventName: 
+  aux1Parameters:
+    trackState: 0
+    attachedTo: {fileID: 0}
+    index: 0
+    trackName: 
+    volume: 0
+    pitch: 0
+    spatialBlend: 0
+    loop: 0
+    clipProgress: 0
+    clipLength: 0
+    clipPercent: 0
+    eventName: 
+  aux2Parameters:
+    trackState: 0
+    attachedTo: {fileID: 0}
+    index: 0
+    trackName: 
+    volume: 0
+    pitch: 0
+    spatialBlend: 0
+    loop: 0
+    clipProgress: 0
+    clipLength: 0
+    clipPercent: 0
+    eventName: 
   updateInEditMode: 1
   updateInterval: 0.1
+--- !u!1 &5742145046754320366
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7441465759634701150}
+  - component: {fileID: 5021447077210985719}
+  m_Layer: 0
+  m_Name: Aux1
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &7441465759634701150
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5742145046754320366}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1627499547365978731}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &5021447077210985719
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5742145046754320366}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7382d7b606514ed45ad25b2811994a0c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  trackType: 3
+  mainSource: {fileID: 0}
+  cueSource: {fileID: 0}
+  outgoingSource: {fileID: 0}
+  currentState: 0
 --- !u!1 &7513853769372798051
 GameObject:
   m_ObjectHideFlags: 0

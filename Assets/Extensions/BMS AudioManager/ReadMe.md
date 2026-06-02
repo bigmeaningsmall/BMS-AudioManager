@@ -50,6 +50,10 @@ Assets/
         │   └── ForestAmbient.wav
         ├── Dialogue/
         │   └── NPCDialogue.wav
+        ├── Aux1/
+        │   └── StingerHit.wav
+        ├── Aux2/
+        │   └── UIMusic.wav
         └── SFX/
             └── ButtonClick.wav
 ```
@@ -249,8 +253,10 @@ sfxEventSender.Pause();  // Toggles pause for all SFX
 | `AudioTrackType.BGM` | Background music, combat themes, menus |
 | `AudioTrackType.Ambient` | Environmental beds, room tone, weather |
 | `AudioTrackType.Dialogue` | NPC speech, narration, cutscene audio |
+| `AudioTrackType.Aux1` | General purpose auxiliary — stingers, secondary music layers, UI music |
+| `AudioTrackType.Aux2` | General purpose auxiliary — additional concurrent track |
 
-Each type is an independent track with its own state machine and 3-source system. All three can play simultaneously.
+Each type is an independent track with its own state machine and 3-source system. All five can play simultaneously.
 
 ### State Machine
 

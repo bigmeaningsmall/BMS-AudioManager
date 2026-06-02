@@ -7,6 +7,8 @@ public enum AudioType
     BGM,        // Background Music
     Ambient,    // Ambient Sounds
     Dialogue,   // Dialogue Sounds
+    Aux1,       // Auxiliary Track 1
+    Aux2,       // Auxiliary Track 2
     SFX         // Sound Effects
 }
 

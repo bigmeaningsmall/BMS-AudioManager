@@ -256,6 +256,8 @@ AudioTrackParamters bgmState = AudioManager.Instance.GetTrackParameters(AudioTra
 AudioTrackType.BGM
 AudioTrackType.Ambient
 AudioTrackType.Dialogue
+AudioTrackType.Aux1     // general purpose auxiliary track
+AudioTrackType.Aux2     // general purpose auxiliary track
 
 // How to transition when playing a new track over an existing one
 FadeType.FadeInOut    // fade out current first, then fade in new (sequential)

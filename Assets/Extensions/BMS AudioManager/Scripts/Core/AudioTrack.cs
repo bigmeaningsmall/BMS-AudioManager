@@ -1255,12 +1255,14 @@ public class AudioTrack : MonoBehaviour
                 AudioTrackType.BGM => audioManager.GetBGMClip(trackName),
                 AudioTrackType.Ambient => audioManager.GetAmbientClip(trackName),
                 AudioTrackType.Dialogue => audioManager.GetDialogueClip(trackName),
+                AudioTrackType.Aux1 => audioManager.GetAux1Clip(trackName),
+                AudioTrackType.Aux2 => audioManager.GetAux2Clip(trackName),
                 _ => null
             };
-        
+
             if (clip != null) return clip;
         }
-    
+
         // ONLY use track number if trackNumber >= 0 (your original logic)
         if (trackNumber >= 0)
         {
@@ -1269,6 +1271,8 @@ public class AudioTrack : MonoBehaviour
                 AudioTrackType.BGM => audioManager.GetBGMClip(trackNumber),
                 AudioTrackType.Ambient => audioManager.GetAmbientClip(trackNumber),
                 AudioTrackType.Dialogue => audioManager.GetDialogueClip(trackNumber),
+                AudioTrackType.Aux1 => audioManager.GetAux1Clip(trackNumber),
+                AudioTrackType.Aux2 => audioManager.GetAux2Clip(trackNumber),
                 _ => null
             };
         }
@@ -1283,6 +1287,8 @@ public class AudioTrack : MonoBehaviour
             AudioTrackType.BGM => audioManager.GetBGMPrefab(),
             AudioTrackType.Ambient => audioManager.GetAmbientPrefab(),
             AudioTrackType.Dialogue => audioManager.GetDialoguePrefab(),
+            AudioTrackType.Aux1 => audioManager.GetAux1Prefab(),
+            AudioTrackType.Aux2 => audioManager.GetAux2Prefab(),
             _ => null
         };
 
@@ -1294,7 +1300,16 @@ public class AudioTrack : MonoBehaviour
 
         Transform parent = attachTo ?? audioManager.transform;
         GameObject audioObj = Instantiate(prefab, parent.position, Quaternion.identity, parent);
-    
+
+        // Route to the correct mixer group for this track type
+        AudioSource createdSource = audioObj.GetComponent<AudioSource>();
+        if (createdSource != null)
+        {
+            var mixerGroup = audioManager.GetMixerGroup(trackType);
+            if (mixerGroup != null)
+                createdSource.outputAudioMixerGroup = mixerGroup;
+        }
+
         // Set the AUDIO TYPE
         AudioSourceType audioSourceType = audioObj.GetComponent<AudioSourceType>();
         if (audioSourceType != null)
@@ -1305,6 +1320,8 @@ public class AudioTrack : MonoBehaviour
                 AudioTrackType.BGM => AudioType.BGM,
                 AudioTrackType.Ambient => AudioType.Ambient,
                 AudioTrackType.Dialogue => AudioType.Dialogue,
+                AudioTrackType.Aux1 => AudioType.Aux1,
+                AudioTrackType.Aux2 => AudioType.Aux2,
                 _ => AudioType.Null
             };
         
@@ -1320,8 +1337,10 @@ public class AudioTrack : MonoBehaviour
         string trackTypeName = trackType switch
         {
             AudioTrackType.BGM => "BGM",
-            AudioTrackType.Ambient => "Ambient", 
+            AudioTrackType.Ambient => "Ambient",
             AudioTrackType.Dialogue => "Dialogue",
+            AudioTrackType.Aux1 => "Aux1",
+            AudioTrackType.Aux2 => "Aux2",
             _ => "Audio"
         };
     

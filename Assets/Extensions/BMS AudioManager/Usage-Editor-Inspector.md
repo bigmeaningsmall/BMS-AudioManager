@@ -31,7 +31,7 @@ Use this to play, stop, or pause a BGM / Ambient / Dialogue track when a player 
 
 | Field | What it does |
 |---|---|
-| **Audio Track Type** | Which track to control: BGM, Ambient, or Dialogue |
+| **Audio Track Type** | Which track to control: BGM, Ambient, Dialogue, Aux1, or Aux2 |
 | **Track Name** | Clip filename (without extension) e.g. `ForestAmbient` |
 | **Track Number** | Play by index instead of name (leave at -1 to use Track Name) |
 | **Volume** | Playback volume 0–1 |

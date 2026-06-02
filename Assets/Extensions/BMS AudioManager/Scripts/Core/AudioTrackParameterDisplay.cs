@@ -17,7 +17,13 @@ public class AudioTrackParameterDisplay : MonoBehaviour
     
     [Header("Dialogue Track")]
     [SerializeField] private AudioTrackParamters dialogueParameters;
-    
+
+    [Header("Aux1 Track")]
+    [SerializeField] private AudioTrackParamters aux1Parameters;
+
+    [Header("Aux2 Track")]
+    [SerializeField] private AudioTrackParamters aux2Parameters;
+
     [Space(10)]
     [Header("Settings")]
     [SerializeField] private bool updateInEditMode = false;
@@ -55,6 +61,8 @@ public class AudioTrackParameterDisplay : MonoBehaviour
         bgmParameters = AudioManager.Instance.GetTrackParameters(AudioTrackType.BGM);
         ambientParameters = AudioManager.Instance.GetTrackParameters(AudioTrackType.Ambient);
         dialogueParameters = AudioManager.Instance.GetTrackParameters(AudioTrackType.Dialogue);
+        aux1Parameters = AudioManager.Instance.GetTrackParameters(AudioTrackType.Aux1);
+        aux2Parameters = AudioManager.Instance.GetTrackParameters(AudioTrackType.Aux2);
         
         // Alternative: Non-generic method approach (commented out)
         // bgmParameters = AudioManager.Instance.BGMParameters;
@@ -82,15 +90,18 @@ public class AudioTrackParameterDisplay : MonoBehaviour
             AudioTrackType.BGM => bgmParameters,
             AudioTrackType.Ambient => ambientParameters,
             AudioTrackType.Dialogue => dialogueParameters,
+            AudioTrackType.Aux1 => aux1Parameters,
+            AudioTrackType.Aux2 => aux2Parameters,
             _ => null
         };
     }
-    
+
     /// <summary>
     /// Check if all tracks are available
     /// </summary>
     public bool AreParametersValid()
     {
-        return bgmParameters != null && ambientParameters != null && dialogueParameters != null;
+        return bgmParameters != null && ambientParameters != null && dialogueParameters != null
+            && aux1Parameters != null && aux2Parameters != null;
     }
 }
