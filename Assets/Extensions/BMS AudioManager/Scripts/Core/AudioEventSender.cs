@@ -53,7 +53,10 @@ public class AudioEventSender : MonoBehaviour
     [Header("Collider Settings")]
     public CollisionType collisionType = CollisionType.Trigger;
     public string targetTag = "Player";
-    public bool stopOnExit = true;
+    [Tooltip("Action to perform when the target enters the trigger/collision zone")]
+    public TriggerAction onEnterAction = TriggerAction.Play;
+    [Tooltip("Action to perform when the target exits the trigger/collision zone")]
+    public TriggerAction onExitAction  = TriggerAction.Stop;
 
     [Header("Trigger Zone Visualization")]
     [Tooltip("Use transform scale and material for trigger zone visualization")]
@@ -105,7 +108,7 @@ public class AudioEventSender : MonoBehaviour
         if (collisionType == CollisionType.Trigger && other.CompareTag(targetTag))
         {
             TriggerActivation();
-            Play();
+            ExecuteAction(onEnterAction);
         }
     }
 
@@ -114,7 +117,7 @@ public class AudioEventSender : MonoBehaviour
         if (collisionType == CollisionType.Collision && collision.collider.CompareTag(targetTag))
         {
             TriggerActivation();
-            Play();
+            ExecuteAction(onEnterAction);
         }
     }
 
@@ -185,20 +188,24 @@ public class AudioEventSender : MonoBehaviour
     private void OnTriggerExit(Collider other)
     {
         if (collisionType == CollisionType.Trigger && other.CompareTag(targetTag))
-        {
-            if(stopOnExit){
-                Stop();
-            }
-        }
+            ExecuteAction(onExitAction);
     }
 
     private void OnCollisionExit(Collision collision)
     {
         if (collisionType == CollisionType.Collision && collision.collider.CompareTag(targetTag))
+            ExecuteAction(onExitAction);
+    }
+
+    private void ExecuteAction(TriggerAction action)
+    {
+        switch (action)
         {
-            if(stopOnExit){
-                Stop();
-            }
+            case TriggerAction.Play:             Play();               break;
+            case TriggerAction.Stop:             Stop();               break;
+            case TriggerAction.Pause:            Pause();              break;
+            case TriggerAction.AdjustParameters: AdjustParameters();   break;
+            case TriggerAction.None:                                   break;
         }
     }
     
@@ -319,9 +326,11 @@ public class AudioEventSender : MonoBehaviour
     {
         return audioTrackType switch
         {
-            AudioTrackType.BGM => "BGM",
-            AudioTrackType.Ambient => "Ambient",
+            AudioTrackType.BGM      => "BGM",
+            AudioTrackType.Ambient  => "Ambient",
             AudioTrackType.Dialogue => "Dialogue",
+            AudioTrackType.Aux1     => "Aux1",
+            AudioTrackType.Aux2     => "Aux2",
             _ => "Unknown"
         };
     }
@@ -330,9 +339,11 @@ public class AudioEventSender : MonoBehaviour
     {
         return audioTrackType switch
         {
-            AudioTrackType.BGM => new Color(0f, 0f, 1f, 0.8f),      // Blue for BGM
-            AudioTrackType.Ambient => new Color(0f, 1f, 0f, 0.8f),  // Green for Ambient
-            AudioTrackType.Dialogue => new Color(1f, 0.5f, 0f, 0.8f), // Orange for Dialogue
+            AudioTrackType.BGM      => new Color(0f, 0f, 1f, 0.8f),      // Blue
+            AudioTrackType.Ambient  => new Color(0f, 1f, 0f, 0.8f),      // Green
+            AudioTrackType.Dialogue => new Color(1f, 0.5f, 0f, 0.8f),    // Orange
+            AudioTrackType.Aux1     => new Color(0.8f, 0f, 0.8f, 0.8f),  // Purple
+            AudioTrackType.Aux2     => new Color(0f, 0.8f, 0.8f, 0.8f),  // Cyan
             _ => Color.white
         };
     }
@@ -341,9 +352,11 @@ public class AudioEventSender : MonoBehaviour
     {
         return audioTrackType switch
         {
-            AudioTrackType.BGM => "♫ TRIGGERED ♫",
-            AudioTrackType.Ambient => "~ TRIGGERED ~",
+            AudioTrackType.BGM      => "♫ TRIGGERED ♫",
+            AudioTrackType.Ambient  => "~ TRIGGERED ~",
             AudioTrackType.Dialogue => "💬 TRIGGERED 💬",
+            AudioTrackType.Aux1     => "* TRIGGERED *",
+            AudioTrackType.Aux2     => "* TRIGGERED *",
             _ => "⚡ TRIGGERED ⚡"
         };
     }

@@ -13,6 +13,15 @@ public enum CollisionType
     Collision,
     Trigger
 }
+
+public enum TriggerAction
+{
+    None,               // Do nothing
+    Play,               // Play the track
+    Stop,               // Stop the track
+    Pause,              // Toggle pause
+    AdjustParameters    // Re-apply current volume/pitch/spatial settings
+}
 public enum FadeTarget
 {
     Ignore,         // Don't fade anything (instant change)
