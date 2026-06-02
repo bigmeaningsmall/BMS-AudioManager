@@ -7,6 +7,9 @@ A Unity audio management system featuring 3-source crossfading, an event-driven 
 
 Full documentation is in [`Assets/Extensions/BMS AudioManager/ReadMe.md`](Assets/Extensions/BMS%20AudioManager/ReadMe.md).
 
+- [Code API Reference](Assets/Extensions/BMS%20AudioManager/Usage-Code-API.md) — calling audio from scripts
+- [Inspector & Editor Usage](Assets/Extensions/BMS%20AudioManager/Usage-Editor-Inspector.md) — audio zones and components without code
+
 ---
 
 ## Key Features
@@ -40,6 +43,8 @@ See the full README for the complete API, examples, and improvement roadmap.
 
 ## License
 
-Open source — free to use and modify for your projects.
+Licensed under **CC BY-ND 4.0** — free to use in any project including commercial. No redistributing modified versions.
+
+© 2026 Niall Mc Shane — [creativecommons.org/licenses/by-nd/4.0](https://creativecommons.org/licenses/by-nd/4.0/)
 
 *BMS Audio Manager v2.1.0 — Unity 6*

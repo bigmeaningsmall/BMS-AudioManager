@@ -7,6 +7,13 @@ A Unity audio management system featuring 3-source crossfading, an event-driven 
 
 ---
 
+## Documentation
+
+- [Code API Reference](Usage-Code-API.md) — how to call audio from scripts
+- [Inspector & Editor Usage](Usage-Editor-Inspector.md) — how to set up audio zones and components without code
+
+---
+
 ## Key Features
 
 - **3-Source Audio System** — Seamless crossfading and fade transitions with no audio gaps
@@ -528,7 +535,11 @@ The bridge maps BMS track/clip names to middleware event paths via a serialized 
 
 ## License
 
-Open source — free to use and modify for your projects.
+This project is licensed under **CC BY-ND 4.0**.
+
+Free to use in any project, including commercial. You may not redistribute modified versions of the package itself.
+
+© 2026 Niall Mc Shane — [creativecommons.org/licenses/by-nd/4.0](https://creativecommons.org/licenses/by-nd/4.0/)
 
 ---
 
