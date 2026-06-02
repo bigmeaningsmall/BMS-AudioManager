@@ -4,7 +4,6 @@
   "displayName": "BMS Audio Manager",
   "description": "Unity audio management system with 5-track crossfading, spatial audio, assignable trigger zones, and audio mixer routing. Designed for small to medium projects.",
   "unity": "6000.0",
-  "unityRelease": "4.8f1",
   "author": {
     "name": "Big Meaning Small"
   },
