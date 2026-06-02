@@ -53,9 +53,20 @@ Use this to play, stop, or pause a BGM / Ambient / Dialogue track when a player 
 |---|---|
 | **Collision Type** | `Trigger` (OnTriggerEnter) or `Collision` (OnCollisionEnter), or `Null` to disable |
 | **Target Tag** | Only respond to objects with this tag (e.g. `Player`) |
-| **Stop On Exit** | Automatically stop the track when the object leaves the collider |
+| **On Enter Action** | What happens when the target enters — `Play`, `Stop`, `Pause`, `AdjustParameters`, or `None` |
+| **On Exit Action** | What happens when the target exits — same options as above |
 
 > The GameObject also needs a **Collider** set as a Trigger (or a solid collider if using Collision mode).
+
+**Common zone configurations:**
+
+| Goal | On Enter | On Exit |
+|---|---|---|
+| Play on enter, stop on exit | `Play` | `Stop` |
+| Stop any music when entering a zone | `Stop` | `None` |
+| Pause on exit, resume on re-entry | `Play` | `Pause` |
+| Zone that never auto-stops | `Play` | `None` |
+| Adjust parameters only | `AdjustParameters` | `None` |
 
 ### Stop / Pause / Adjust via UnityEvents or Buttons
 
@@ -183,6 +194,21 @@ Select the **AudioManager** in the Hierarchy to:
 
 - Toggle **Enable Debug Logging** for verbose console output
 - **Right-click → Validate Audio Track Setup** to check that tracks are correctly configured
+
+### Mixer Groups
+
+The **Mixer Groups** section has one slot per track type plus one for SFX. Drag your mixer groups from the Audio Mixer window into each slot. Each `AudioSource` created at runtime will have its `outputAudioMixerGroup` assigned automatically — the shared prefab's baked-in output is overridden.
+
+| Slot | Routes to |
+|---|---|
+| BGM Mixer Group | BGM track sources |
+| Ambient Mixer Group | Ambient track sources |
+| Dialogue Mixer Group | Dialogue track sources |
+| Aux1 Mixer Group | Aux1 track sources |
+| Aux2 Mixer Group | Aux2 track sources |
+| SFX Mixer Group | All instantiated SFX sources |
+
+Slots left empty will fall back to the prefab's default output.
 
 ---
 

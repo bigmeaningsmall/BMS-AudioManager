@@ -1,4 +1,4 @@
-# BMS Audio Manager v2.1.0
+# BMS Audio Manager v2.2.0
 
 A Unity audio management system featuring 3-source crossfading, an event-driven architecture, spatial audio, and inspector-driven audio zones. Designed for small-to-medium projects requiring clean audio transitions and flexible sound management.
 
@@ -17,12 +17,13 @@ A Unity audio management system featuring 3-source crossfading, an event-driven 
 ## Key Features
 
 - **3-Source Audio System** — Seamless crossfading and fade transitions with no audio gaps
-- **3 Independent Tracks** — BGM, Ambient, and Dialogue with separate state machines
+- **5 Independent Tracks** — BGM, Ambient, Dialogue, Aux1, and Aux2 with separate state machines
 - **Full Fade Control** — FadeInOut and Crossfade types; target volume, pitch, or both
 - **SFX System** — Dynamic instantiation, looping, 3D positioning, pitch randomization, probability-based playback
 - **Spatial Audio** — Full 3D audio with transform attachment, distance attenuation, and world-position playback
+- **Audio Mixer Routing** — Each track and SFX route to their own mixer group automatically
 - **Event-Driven Architecture** — Three API tiers from one-liner helpers to full event control
-- **Inspector Audio Zones** — Trigger/collision-based audio with no code required
+- **Assignable Zone Actions** — Per-zone enter/exit actions (Play, Stop, Pause, Adjust) configurable in the Inspector
 - **Spline Audio** — Audio sources that follow Unity Spline paths with sleep optimization
 - **Real-Time Parameter Control** — Adjust volume, pitch, and spatial blend during playback
 - **Editor Tooling** — Custom inspector with live waveform, 3-source state visualization, scene gizmos
@@ -200,7 +201,8 @@ Attach to any GameObject to play, stop, or pause a track when the player enters 
 | Loop | Loop the track |
 | Collision Type | Trigger or Collision |
 | Target Tag | Only react to objects with this tag |
-| Stop On Exit | Stop track when object leaves the zone |
+| On Enter Action | What to do when the target enters — `Play`, `Stop`, `Pause`, `AdjustParameters`, or `None` |
+| On Exit Action | What to do when the target exits — same options as above |
 | Event Delay | Seconds to wait before playing |
 | Attach To This Transform | Audio follows this zone object |
 
@@ -289,6 +291,23 @@ Each track moves through these states automatically:
 | `FadeTarget.FadePitch` | Only pitch transitions; volume snaps immediately |
 | `FadeTarget.FadeBoth` | Both volume and pitch transition together |
 | `FadeTarget.Ignore` | Instant change — no fading |
+
+---
+
+## Audio Mixer Routing
+
+The AudioManager has a **Mixer Groups** section in the Inspector with one slot per track type plus one for SFX. Assign your mixer groups there — each instantiated `AudioSource` automatically has its `outputAudioMixerGroup` set at runtime, regardless of what is baked into the shared prefab.
+
+| Inspector Slot | Routes |
+|---|---|
+| BGM Mixer Group | All BGM track sources |
+| Ambient Mixer Group | All Ambient track sources |
+| Dialogue Mixer Group | All Dialogue track sources |
+| Aux1 Mixer Group | All Aux1 track sources |
+| Aux2 Mixer Group | All Aux2 track sources |
+| SFX Mixer Group | All instantiated SFX sources |
+
+Slots can be left empty — unassigned tracks route to the prefab's default output.
 
 ---
 
@@ -532,10 +551,10 @@ The bridge maps BMS track/clip names to middleware event paths via a serialized 
 
 ## Known Limitations
 
-- Only one BGM, one Ambient, and one Dialogue clip can play at a time (by design — use SFX for additional concurrent sounds)
+- Only one clip per track type can play at a time (BGM, Ambient, Dialogue, Aux1, Aux2 — by design; use SFX for additional concurrent sounds)
 - SFX clips are loaded synchronously on first play; consider pre-warming critical sounds
 - `SplineFollower` requires `com.unity.splines` — the project will not compile if the package is absent and these scripts are included
-- No built-in audio mixer integration — volume/pitch are controlled directly on AudioSource; for mixer group routing, assign mixer groups to the AudioManager's sources in the Inspector
+- Mixer group slots on the AudioManager are optional — if left unassigned, audio sources route to whatever is set on the shared prefab
 
 ---
 
@@ -549,4 +568,4 @@ Free to use in any project, including commercial. You may not redistribute modif
 
 ---
 
-*BMS Audio Manager v2.1.0 — Unity 6*
+*BMS Audio Manager v2.2.0 — Unity 6*

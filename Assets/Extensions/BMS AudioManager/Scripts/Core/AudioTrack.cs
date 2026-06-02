@@ -2,12 +2,6 @@ using System;
 using System.Collections;
 using UnityEngine;
 
-// public enum AudioTrackType
-// {
-//     BGM,
-//     Ambient, 
-//     Dialogue
-// }
 
 public enum AudioTrackState
 {
@@ -1357,7 +1351,7 @@ public class AudioTrack : MonoBehaviour
         }
     
         // Simple naming: ClipName (Type)
-        audioObj.name = $"{clipName} ({trackTypeName})"; // todo consider adding the state to the name as well
+        audioObj.name = $"{clipName} ({trackTypeName})";
     
         return audioObj.GetComponent<AudioSource>();
     }

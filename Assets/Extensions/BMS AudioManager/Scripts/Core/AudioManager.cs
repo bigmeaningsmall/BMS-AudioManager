@@ -24,7 +24,7 @@ public enum AudioTrackType
 public class AudioManager : MonoBehaviour
 {
     [Header("VERSION")]
-    [SerializeField] private string version = "v2.1.0";
+    [SerializeField] private string version = "v2.2.0";
 
     [Header("DEBUG SETTINGS")]
     [SerializeField] private bool enableDebugLogging = true;
@@ -102,7 +102,7 @@ public class AudioManager : MonoBehaviour
     #endregion
 
 
-    // Parameter and Porperty References for tracks - these are for checking and reference
+    // Parameter and Property References for tracks - these are for checking and reference
     // Parameters for audio - used for getting current state info
     private AudioTrackParamters bgmTrackParameters;
     private AudioTrackParamters ambientTrackParameters;

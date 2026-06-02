@@ -41,9 +41,8 @@ public static class AudioEventManager
     public delegate void AudioEvent_AdjustAudio_Track(AudioTrackType trackType, float volume, float pitch, float spatialBlend, float fadeDuration, FadeTarget fadeTarget, bool loop, float delay, Transform attachTo, string eventName);
 
     
-    // Define a delegate for audio events - SFX // todo add delay
-    //public delegate void AudioEvent_PlaySFX(Transform attachTo, string soundName, float volume, float pitch, bool randomizePitch, float pitchRange,  float spatialBlend, string eventName);
-    
+    // Define a delegate for audio events - SFX
+
     public delegate void AudioEvent_PlaySFX(string[] soundName, float volume, float pitch, bool randomisePitch, float pitchRange, float spatialBlend, bool loop, float delay, float percentChanceToPlay, Transform attachTo, Vector3 position, float minDist, float maxDist, string eventName);
     
     

@@ -1,4 +1,4 @@
-# BMS Audio Manager v2.1.0
+# BMS Audio Manager v2.2.0
 
 A Unity audio management system featuring 3-source crossfading, an event-driven architecture, spatial audio, and inspector-driven audio zones. Designed for small-to-medium projects requiring clean audio transitions and flexible sound management.
 
@@ -15,11 +15,12 @@ Full documentation is in [`Assets/Extensions/BMS AudioManager/ReadMe.md`](Assets
 ## Key Features
 
 - **3-Source Audio System** — Seamless crossfading with no audio gaps
-- **3 Independent Tracks** — BGM, Ambient, and Dialogue with separate state machines
+- **5 Independent Tracks** — BGM, Ambient, Dialogue, Aux1, Aux2 with separate state machines
 - **Full Fade Control** — FadeInOut and Crossfade types; target volume, pitch, or both
 - **SFX System** — Dynamic instantiation, looping, 3D positioning, pitch randomization, probability-based playback
+- **Audio Mixer Routing** — Per-track and SFX mixer group assignment in the AudioManager Inspector
 - **Event-Driven Architecture** — Three API tiers from one-liner helpers to full event control
-- **Inspector Audio Zones** — Trigger/collision-based audio with no code required
+- **Assignable Zone Actions** — Enter/exit trigger actions (Play, Stop, Pause, Adjust) set in the Inspector
 - **Spline Audio** — Audio sources that follow Unity Spline paths with sleep optimization
 - **Real-Time Parameter Control** — Adjust volume, pitch, and spatial blend during playback
 - **Editor Tooling** — Custom inspector with live waveform, 3-source state visualization, scene gizmos
@@ -29,7 +30,7 @@ Full documentation is in [`Assets/Extensions/BMS AudioManager/ReadMe.md`](Assets
 ## Quick Start
 
 1. Import the package and place the **AudioManager prefab** in your scene
-2. Put audio clips in `Assets/Resources/Audio/BGM/`, `Ambient/`, `Dialogue/`, or `SFX/`
+2. Put audio clips in `Assets/Resources/Audio/BGM/`, `Ambient/`, `Dialogue/`, `Aux1/`, `Aux2/`, or `SFX/`
 3. Call:
 
 ```csharp
@@ -47,4 +48,4 @@ Licensed under **CC BY-ND 4.0** — free to use in any project including commerc
 
 © 2026 Niall Mc Shane — [creativecommons.org/licenses/by-nd/4.0](https://creativecommons.org/licenses/by-nd/4.0/)
 
-*BMS Audio Manager v2.1.0 — Unity 6*
+*BMS Audio Manager v2.2.0 — Unity 6*

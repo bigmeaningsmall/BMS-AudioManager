@@ -7,9 +7,8 @@ public class AudioEventSender : MonoBehaviour
     public AudioTrackType audioTrackType = AudioTrackType.Ambient; // Set the type of audio track this sender will handle
     
     [Space(20)]
-    ///  USE THIS TO DETERMINE WHICH EVENT TO SEND (Multiple scripts can be attached to the same object) //todo this is confusing currenlty as its not implemented and i cant remember the exact plan!!!
-    /// Loop through the AudioEventSender_Ambient scripts on the object and send the event with the matching eventName
-    public string eventName = "Custom Event Name"; //for future use
+    [Tooltip("Optional label used in debug logs to identify this sender. Reserved for future multi-sender filtering.")]
+    public string eventName = ""; // used for debug identification; multi-sender filtering not yet implemented
 
     [Space(20)]
     [Header("Attach The AudioSource to Transform -  Null to Attach to AudioManager")]

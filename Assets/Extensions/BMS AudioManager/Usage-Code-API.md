@@ -263,6 +263,13 @@ AudioTrackType.Aux2     // general purpose auxiliary track
 FadeType.FadeInOut    // fade out current first, then fade in new (sequential)
 FadeType.Crossfade    // both overlap — old fades out while new fades in
 
+// What an AudioEventSender zone does on enter or exit (Inspector only)
+TriggerAction.Play
+TriggerAction.Stop
+TriggerAction.Pause
+TriggerAction.AdjustParameters
+TriggerAction.None
+
 // Which parameter(s) to animate during a fade
 FadeTarget.FadeVolume  // only volume transitions
 FadeTarget.FadePitch   // only pitch transitions
