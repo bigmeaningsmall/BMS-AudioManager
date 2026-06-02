@@ -12,6 +12,38 @@ Full documentation is in [`Assets/Extensions/BMS AudioManager/ReadMe.md`](Assets
 
 ---
 
+## Installation
+
+### Via Unity Package Manager (Git URL) — Recommended
+
+1. Open **Window → Package Manager**
+2. Click **+** → **Add package from git URL**
+3. Paste:
+
+```
+https://github.com/bigmeaningsmall/BMS-AudioManager.git?path=Assets/Extensions/BMS AudioManager
+```
+
+> The `?path=` suffix tells Unity where the `package.json` lives inside the repo.
+
+### Pinning to a specific version
+
+To lock to a release tag rather than always pulling the latest:
+
+```
+https://github.com/bigmeaningsmall/BMS-AudioManager.git?path=Assets/Extensions/BMS AudioManager#v2.2.0
+```
+
+Change `v2.2.0` to whichever tag you want. Tags are listed on the [GitHub Releases](../../releases) page.
+
+### Updating
+
+Unity does not auto-update Git-sourced packages. To update:
+- Open **Package Manager**, find **BMS Audio Manager**, and click **Update** if a new commit is available, or
+- Edit `Packages/manifest.json` in your project and change the tag on the end of the URL to the new version tag.
+
+---
+
 ## Key Features
 
 - **3-Source Audio System** — Seamless crossfading with no audio gaps
