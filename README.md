@@ -14,33 +14,16 @@ Full documentation is in [`Assets/Extensions/BMS AudioManager/ReadMe.md`](Assets
 
 ## Installation
 
-### Via Unity Package Manager (Git URL) — Recommended
+1. Go to the [Releases](../../releases) page and download the latest `BMS-AudioManager(v2.2.0).unitypackage`
+2. Open your Unity project
+3. Double-click the downloaded file, or drag it into the Unity Editor
+4. In the Import dialog, make sure everything is ticked and click **Import**
 
-1. Open **Window → Package Manager**
-2. Click **+** → **Add package from git URL**
-3. Paste:
-
-```
-https://github.com/bigmeaningsmall/BMS-AudioManager.git?path=Assets/Extensions/BMS AudioManager
-```
-
-> The `?path=` suffix tells Unity where the `package.json` lives inside the repo.
-
-### Pinning to a specific version
-
-To lock to a release tag rather than always pulling the latest:
-
-```
-https://github.com/bigmeaningsmall/BMS-AudioManager.git?path=Assets/Extensions/BMS AudioManager#BMS-AudioManager(v2.2.0)
-```
-
-Change `BMS-AudioManager(v2.2.0)` to whichever release tag you want. Tags are listed on the [GitHub Releases](../../releases) page.
+The package will install into `Assets/Extensions/BMS AudioManager/` — keep it there and separate from your game logic.
 
 ### Updating
 
-Unity does not auto-update Git-sourced packages. To update:
-- Open **Package Manager**, find **BMS Audio Manager**, and click **Update** if a new commit is available, or
-- Edit `Packages/manifest.json` in your project and change the tag at the end of the URL to the new release tag, e.g. `#BMS-AudioManager(v2.3.0)`
+Download the new `.unitypackage` from the Releases page and import it into the same project. Unity will overwrite the existing files in place.
 
 ---
 
