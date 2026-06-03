@@ -1,6 +1,6 @@
-# BMS Audio Manager — Inspector & Editor Usage
+# BMS Audio Manager - Inspector & Editor Usage
 
-How to trigger audio entirely from the Unity Editor — no code required.
+How to trigger audio entirely from the Unity Editor - no code required.
 
 ---
 
@@ -21,7 +21,7 @@ The **filename without extension** is the name you type into the inspector field
 
 ---
 
-## AudioEventSender — Play a Track from a GameObject
+## AudioEventSender - Play a Track from a GameObject
 
 Use this to play, stop, or pause a BGM / Ambient / Dialogue track when a player enters a zone, or when any GameObject activates.
 
@@ -39,7 +39,7 @@ Use this to play, stop, or pause a BGM / Ambient / Dialogue track when a player 
 | **Spatial Blend** | 0 = 2D stereo, 1 = full 3D positional |
 | **Loop** | Keep looping until stopped |
 | **Play On Enabled** | Auto-play when the GameObject is enabled/activated |
-| **Fade Type** | `FadeInOut` — fade out old then fade in new; `Crossfade` — overlap simultaneously |
+| **Fade Type** | `FadeInOut` - fade out old then fade in new; `Crossfade` - overlap simultaneously |
 | **Fade Duration** | Seconds for the fade to complete |
 | **Fade Target** | `FadeVolume`, `FadePitch`, `FadeBoth`, or `Ignore` (instant) |
 | **Attach To This Transform** | Audio source moves with this GameObject (good for 3D ambient zones) |
@@ -53,8 +53,8 @@ Use this to play, stop, or pause a BGM / Ambient / Dialogue track when a player 
 |---|---|
 | **Collision Type** | `Trigger` (OnTriggerEnter) or `Collision` (OnCollisionEnter), or `Null` to disable |
 | **Target Tag** | Only respond to objects with this tag (e.g. `Player`) |
-| **On Enter Action** | What happens when the target enters — `Play`, `Stop`, `Pause`, `AdjustParameters`, or `None` |
-| **On Exit Action** | What happens when the target exits — same options as above |
+| **On Enter Action** | What happens when the target enters - `Play`, `Stop`, `Pause`, `AdjustParameters`, or `None` |
+| **On Exit Action** | What happens when the target exits - same options as above |
 
 > The GameObject also needs a **Collider** set as a Trigger (or a solid collider if using Collision mode).
 
@@ -92,7 +92,7 @@ With the component selected in the Inspector during Play mode:
 
 ---
 
-## AudioEventSenderSFX — Play a Sound Effect from a GameObject
+## AudioEventSenderSFX - Play a Sound Effect from a GameObject
 
 Use this for footsteps, pickups, ambient bird chirps, buttons, or any one-shot / looped SFX.
 
@@ -102,7 +102,7 @@ Use this for footsteps, pickups, ambient bird chirps, buttons, or any one-shot /
 
 | Field | What it does |
 |---|---|
-| **SFX Name** (array) | One or more clip filenames — one is picked at random each play |
+| **SFX Name** (array) | One or more clip filenames - one is picked at random each play |
 | **Play On Enabled** | Auto-play when the GameObject activates |
 | **Volume** | 0–1 |
 | **Pitch** | 1 = normal |
@@ -110,7 +110,7 @@ Use this for footsteps, pickups, ambient bird chirps, buttons, or any one-shot /
 | **Pitch Range** | How much to vary pitch when Randomise Pitch is on |
 | **Spatial Blend** | 0 = 2D, 1 = full 3D |
 | **Loop** | Keep looping |
-| **Percentage Chance To Play** | 0–100 — e.g. 40 means it only plays 40% of the time |
+| **Percentage Chance To Play** | 0–100 - e.g. 40 means it only plays 40% of the time |
 | **Randomise Delay** | Randomise the wait before playing |
 | **Event Delay** | Fixed delay in seconds (used if Randomise Delay is off) |
 | **Attach Sound To This Transform** | SFX follows this GameObject's position |
@@ -123,7 +123,7 @@ Use this for footsteps, pickups, ambient bird chirps, buttons, or any one-shot /
 
 ### Collision / Trigger Zone Setup
 
-Same as AudioEventSender above — set **Collision Type**, **Target Tag**.
+Same as AudioEventSender above - set **Collision Type**, **Target Tag**.
 
 ### Public Methods (for buttons / UnityEvents)
 
@@ -143,7 +143,7 @@ Same as AudioEventSender above — set **Collision Type**, **Target Tag**.
 
 ---
 
-## AudioTrackParameterDisplay — Monitor Track States
+## AudioTrackParameterDisplay - Monitor Track States
 
 Attach to any GameObject to see live BGM, Ambient, and Dialogue track states in the Inspector while the game runs.
 
@@ -155,7 +155,7 @@ Shows for each track: current state, clip name, volume, pitch, spatial blend, lo
 
 ---
 
-## SFXDebugDisplay — Monitor Active SFX
+## SFXDebugDisplay - Monitor Active SFX
 
 Attach to any GameObject to see what SFX are currently playing.
 
@@ -197,7 +197,7 @@ Select the **AudioManager** in the Hierarchy to:
 
 ### Mixer Groups
 
-The **Mixer Groups** section has one slot per track type plus one for SFX. Drag your mixer groups from the Audio Mixer window into each slot. Each `AudioSource` created at runtime will have its `outputAudioMixerGroup` assigned automatically — the shared prefab's baked-in output is overridden.
+The **Mixer Groups** section has one slot per track type plus one for SFX. Drag your mixer groups from the Audio Mixer window into each slot. Each `AudioSource` created at runtime will have its `outputAudioMixerGroup` assigned automatically - the shared prefab's baked-in output is overridden.
 
 | Slot | Routes to |
 |---|---|
@@ -228,7 +228,7 @@ Slots left empty will fall back to the prefab's default output.
 10. Tick **Stop On Exit**
 11. Optionally tick **Attach To This Transform** if you want the ambient to be positionally 3D
 
-Done — no code written.
+Done - no code written.
 
 ---
 
