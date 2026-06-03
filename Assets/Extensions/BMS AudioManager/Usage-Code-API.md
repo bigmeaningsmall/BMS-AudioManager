@@ -1,4 +1,4 @@
-# BMS Audio Manager — Code API Reference
+# BMS Audio Manager - Code API Reference
 
 Audio clips are loaded by name from `Resources/Audio/<Type>/`. The filename without extension is the string you pass.
 
