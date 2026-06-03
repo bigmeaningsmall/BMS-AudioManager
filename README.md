@@ -32,13 +32,13 @@ Download the new `.unitypackage` from the Releases page and import it into the s
 - **3-Source Audio System** — Seamless crossfading with no audio gaps
 - **5 Independent Tracks** — BGM, Ambient, Dialogue, Aux1, Aux2 with separate state machines
 - **Full Fade Control** — FadeInOut and Crossfade types; target volume, pitch, or both
-- **SFX System** — Dynamic instantiation, looping, 3D positioning, pitch randomization, probability-based playback
+- **SFX System** — Dynamic instantiation, looping, 3D positioning, pitch randomisation, probability-based playback
 - **Audio Mixer Routing** — Per-track and SFX mixer group assignment in the AudioManager Inspector
 - **Event-Driven Architecture** — Three API tiers from one-liner helpers to full event control
 - **Assignable Zone Actions** — Enter/exit trigger actions (Play, Stop, Pause, Adjust) set in the Inspector
-- **Spline Audio** — Audio sources that follow Unity Spline paths with sleep optimization
+- **Spline Audio** — Audio sources that follow Unity Spline paths with sleep optimisation
 - **Real-Time Parameter Control** — Adjust volume, pitch, and spatial blend during playback
-- **Editor Tooling** — Custom inspector with live waveform, 3-source state visualization, scene gizmos
+- **Editor Tooling** — Custom inspector with live waveform, 3-source state visualisation, scene gizmos
 
 ---
 
