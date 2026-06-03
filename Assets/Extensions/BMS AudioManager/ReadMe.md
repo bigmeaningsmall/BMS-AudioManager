@@ -19,14 +19,14 @@ A Unity audio management system featuring 3-source crossfading, an event-driven 
 - **3-Source Audio System** — Seamless crossfading and fade transitions with no audio gaps
 - **5 Independent Tracks** — BGM, Ambient, Dialogue, Aux1, and Aux2 with separate state machines
 - **Full Fade Control** — FadeInOut and Crossfade types; target volume, pitch, or both
-- **SFX System** — Dynamic instantiation, looping, 3D positioning, pitch randomization, probability-based playback
+- **SFX System** — Dynamic instantiation, looping, 3D positioning, pitch randomiation, probability-based playback
 - **Spatial Audio** — Full 3D audio with transform attachment, distance attenuation, and world-position playback
 - **Audio Mixer Routing** — Each track and SFX route to their own mixer group automatically
 - **Event-Driven Architecture** — Three API tiers from one-liner helpers to full event control
 - **Assignable Zone Actions** — Per-zone enter/exit actions (Play, Stop, Pause, Adjust) configurable in the Inspector
-- **Spline Audio** — Audio sources that follow Unity Spline paths with sleep optimization
+- **Spline Audio** — Audio sources that follow Unity Spline paths with sleep optimisation
 - **Real-Time Parameter Control** — Adjust volume, pitch, and spatial blend during playback
-- **Editor Tooling** — Custom inspector with live waveform, 3-source state visualization, scene gizmos
+- **Editor Tooling** — Custom inspector with live waveform, 3-source state visualisation, scene gizmos
 
 ---
 
@@ -37,7 +37,7 @@ A Unity audio management system featuring 3-source crossfading, an event-driven 
 1. Import the BMS Audio Manager package into your Unity project
 2. Place the **AudioManager prefab** in your scene (must be present for any audio to work)
 
-### 2. Organize Audio Files
+### 2. Organise Audio Files
 
 Audio clips are loaded from the Resources folder by name:
 
@@ -118,7 +118,7 @@ AudioEvent.PlaySFX("Explosion", 0.8f);
 AudioEvent.PlaySFX(new string[] { "Footstep1", "Footstep2", "Footstep3" });
 
 // With pitch variation
-AudioEvent.PlaySFX("Hit", 0.9f, true);                                           // randomize pitch
+AudioEvent.PlaySFX("Hit", 0.9f, true);                                           // randomise pitch
 
 // 3D positioned
 AudioEvent.PlaySFX("MagicSpell", 0.8f, playerTransform);                         // attached to transform
@@ -167,7 +167,7 @@ AudioEventManager.PlaySFX?.Invoke(
     new string[] { "Explosion1", "Explosion2" }, // Array — one selected at random
     0.8f,                     // Volume
     1f,                       // Pitch
-    true,                     // Randomize pitch
+    true,                     // Randomise pitch
     0.3f,                     // Pitch variation range
     1f,                       // Spatial blend
     false,                    // Loop
@@ -511,7 +511,7 @@ FMODBridge.cs (subscriber)
 FMOD Studio Runtime
 ```
 
-The bridge maps BMS track/clip names to middleware event paths via a serialized dictionary in the Inspector.
+The bridge maps BMS track/clip names to middleware event paths via a serialised dictionary in the Inspector.
 
 ### What Maps Cleanly
 
@@ -536,7 +536,7 @@ The bridge maps BMS track/clip names to middleware event paths via a serialized 
 - Avoid playing large numbers of simultaneous SFX — monitor count with `SFXDebugDisplay`
 - Use the SplineFollower's `sleepThreshold` to disable distant spline followers
 
-### Audio Organization
+### Audio Organisation
 - Use compressed formats (OGG Vorbis) for ambient and BGM tracks
 - Keep individual SFX clips short and uncompressed (or ADPCM) for low-latency playback
 - Name clips descriptively — they are referenced by string at runtime
