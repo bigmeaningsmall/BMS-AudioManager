@@ -4,14 +4,14 @@ Audio clips are loaded by name from `Resources/Audio/<Type>/`. The filename with
 
 ---
 
-## AudioEvent — Quick Helper Methods
+## AudioEvent - Quick Helper Methods
 
-The easiest way to call audio. Import nothing — just call `AudioEvent.*` from any script.
+The easiest way to call audio. Import nothing - just call `AudioEvent.*` from any script.
 
 ### Play Track
 
 ```csharp
-// Minimal — plays at volume 1, loops, 0.5s fade in
+// Minimal - plays at volume 1, loops, 0.5s fade in
 AudioEvent.PlayTrack(AudioTrackType.BGM, "MainTheme");
 
 // With volume (0–1)
@@ -61,7 +61,7 @@ AudioEvent.StopTrack(AudioTrackType.BGM, 2f, FadeTarget.FadeVolume);
 
 ### Pause / Resume Track
 
-Pause is a **toggle** — call it again to resume.
+Pause is a **toggle** - call it again to resume.
 
 ```csharp
 // Instant pause/resume
@@ -76,16 +76,16 @@ AudioEvent.PauseTrack(AudioTrackType.BGM, 1f);
 Use these to duck, swell, or pitch-shift a playing track without restarting it.
 
 ```csharp
-// Volume only — instant
+// Volume only - instant
 AudioEvent.AdjustTrackVolume(AudioTrackType.BGM, 0.3f);
 
-// Volume only — with fade
+// Volume only - with fade
 AudioEvent.AdjustTrackVolume(AudioTrackType.BGM, 0.3f, 1.5f);
 
-// Volume + pitch — instant
+// Volume + pitch - instant
 AudioEvent.AdjustTrack(AudioTrackType.BGM, 0.5f, 1.2f);
 
-// Volume + pitch — with fade
+// Volume + pitch - with fade
 AudioEvent.AdjustTrack(AudioTrackType.BGM, 0.5f, 1.2f, 2f);
 ```
 
@@ -106,22 +106,22 @@ AudioEvent.PlaySFX(new string[] { "Footstep1", "Footstep2", "Footstep3" });
 // With random pitch variation (±0.1 default)
 AudioEvent.PlaySFX("DoorCreak", 0.7f, true);
 
-// 3D — attached to a transform (follows the object)
+// 3D - attached to a transform (follows the object)
 AudioEvent.PlaySFX("MagicSpell", 0.8f, playerTransform);
 
-// 3D — at a world position
+// 3D - at a world position
 AudioEvent.PlaySFX("Explosion", 1f, new Vector3(10f, 0f, 5f));
 
-// 3D — explicit pitch range (x = min, y = max)
+// 3D - explicit pitch range (x = min, y = max)
 AudioEvent.PlaySFX("HitSound", 0.9f, new Vector2(0.9f, 1.2f), enemyTransform);
 
-// 3D — with random pitch toggle + transform
+// 3D - with random pitch toggle + transform
 AudioEvent.PlaySFX("Footstep", 0.8f, true, playerTransform);
 
-// 3D — with custom min/max distances
+// 3D - with custom min/max distances
 AudioEvent.PlaySFX3D("DistantThunder", 0.6f, thunderTransform, 5f, 100f);
 
-// Looped (returns nothing — stop via StopAllLoopedSFX or StopAllSFX)
+// Looped (returns nothing - stop via StopAllLoopedSFX or StopAllSFX)
 AudioEvent.PlayLoopedSFX("EngineHum", 0.7f, carTransform);
 AudioEvent.PlayLoopedSFX("Ambience", 0.5f);   // 2D looped (no transform)
 
@@ -132,7 +132,7 @@ AudioEvent.PlayRandomSFX(new string[] { "Bird1", "Bird2" }, 0.4f, 30f, 2f);
 
 ---
 
-## AudioEventManager — Full Parameter Control
+## AudioEventManager - Full Parameter Control
 
 Use this when you need parameters that `AudioEvent` doesn't expose (spatial blend, loop toggle, delay, event name).
 
@@ -201,7 +201,7 @@ AudioEventManager.AdjustTrack(
 
 ```csharp
 AudioEventManager.PlaySFX(
-    new string[] { "Hit1", "Hit2" },  // array — one picked at random
+    new string[] { "Hit1", "Hit2" },  // array - one picked at random
     0.8f,                             // volume
     1f,                               // pitch
     true,                             // randomise pitch
@@ -220,7 +220,7 @@ AudioEventManager.PlaySFX(
 
 ---
 
-## AudioManager.Instance — Global SFX Controls
+## AudioManager.Instance - Global SFX Controls
 
 ```csharp
 // Stop everything
@@ -235,7 +235,7 @@ AudioManager.Instance.PauseAllSFX(false);  // explicit resume
 // Cancel queued (delayed) SFX
 AudioManager.Instance.CancelAllDelayedSFX();
 
-// Global volume multiplier — scales all SFX output (0–1)
+// Global volume multiplier - scales all SFX output (0–1)
 AudioManager.Instance.GlobalSFXAttenuation = 0.5f;
 
 // Query active SFX
@@ -261,7 +261,7 @@ AudioTrackType.Aux2     // general purpose auxiliary track
 
 // How to transition when playing a new track over an existing one
 FadeType.FadeInOut    // fade out current first, then fade in new (sequential)
-FadeType.Crossfade    // both overlap — old fades out while new fades in
+FadeType.Crossfade    // both overlap - old fades out while new fades in
 
 // What an AudioEventSender zone does on enter or exit (Inspector only)
 TriggerAction.Play
