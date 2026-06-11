@@ -9,24 +9,24 @@ A Unity audio management system featuring 3-source crossfading, an event-driven 
 
 ## Documentation
 
-- [Code API Reference](Usage-Code-API.md) — how to call audio from scripts
-- [Inspector & Editor Usage](Usage-Editor-Inspector.md) — how to set up audio zones and components without code
+- [Code API Reference](Usage-Code-API.md) - how to call audio from scripts
+- [Inspector & Editor Usage](Usage-Editor-Inspector.md) - how to set up audio zones and components without code
 
 ---
 
 ## Key Features
 
-- **3-Source Audio System** — Seamless crossfading and fade transitions with no audio gaps
-- **5 Independent Tracks** — BGM, Ambient, Dialogue, Aux1, and Aux2 with separate state machines
-- **Full Fade Control** — FadeInOut and Crossfade types; target volume, pitch, or both
-- **SFX System** — Dynamic instantiation, looping, 3D positioning, pitch randomization, probability-based playback
-- **Spatial Audio** — Full 3D audio with transform attachment, distance attenuation, and world-position playback
-- **Audio Mixer Routing** — Each track and SFX route to their own mixer group automatically
-- **Event-Driven Architecture** — Three API tiers from one-liner helpers to full event control
-- **Assignable Zone Actions** — Per-zone enter/exit actions (Play, Stop, Pause, Adjust) configurable in the Inspector
-- **Spline Audio** — Audio sources that follow Unity Spline paths with sleep optimization
-- **Real-Time Parameter Control** — Adjust volume, pitch, and spatial blend during playback
-- **Editor Tooling** — Custom inspector with live waveform, 3-source state visualization, scene gizmos
+- **3-Source Audio System** - Seamless crossfading and fade transitions with no audio gaps
+- **5 Independent Tracks** - BGM, Ambient, Dialogue, Aux1, and Aux2 with separate state machines
+- **Full Fade Control** - FadeInOut and Crossfade types; target volume, pitch, or both
+- **SFX System** - Dynamic instantiation, looping, 3D positioning, pitch randomiation, probability-based playback
+- **Spatial Audio** - Full 3D audio with transform attachment, distance attenuation, and world-position playback
+- **Audio Mixer Routing** - Each track and SFX route to their own mixer group automatically
+- **Event-Driven Architecture** - Three API tiers from one-liner helpers to full event control
+- **Assignable Zone Actions** - Per-zone enter/exit actions (Play, Stop, Pause, Adjust) configurable in the Inspector
+- **Spline Audio** - Audio sources that follow Unity Spline paths with sleep optimisation
+- **Real-Time Parameter Control** - Adjust volume, pitch, and spatial blend during playback
+- **Editor Tooling** - Custom inspector with live waveform, 3-source state visualisation, scene gizmos
 
 ---
 
@@ -37,7 +37,7 @@ A Unity audio management system featuring 3-source crossfading, an event-driven 
 1. Import the BMS Audio Manager package into your Unity project
 2. Place the **AudioManager prefab** in your scene (must be present for any audio to work)
 
-### 2. Organize Audio Files
+### 2. Organise Audio Files
 
 Audio clips are loaded from the Resources folder by name:
 
@@ -76,7 +76,7 @@ AudioEvent.PlayTrack(AudioTrackType.Ambient, "ForestAmbient", 0.7f, 2f, forestTr
 
 ## API Reference
 
-The system provides three tiers — use whichever fits your needs.
+The system provides three tiers - use whichever fits your needs.
 
 ### Method 1: AudioEvent Helper Class (Recommended)
 
@@ -118,7 +118,7 @@ AudioEvent.PlaySFX("Explosion", 0.8f);
 AudioEvent.PlaySFX(new string[] { "Footstep1", "Footstep2", "Footstep3" });
 
 // With pitch variation
-AudioEvent.PlaySFX("Hit", 0.9f, true);                                           // randomize pitch
+AudioEvent.PlaySFX("Hit", 0.9f, true);                                           // randomise pitch
 
 // 3D positioned
 AudioEvent.PlaySFX("MagicSpell", 0.8f, playerTransform);                         // attached to transform
@@ -164,10 +164,10 @@ AudioEventManager.PlayTrack?.Invoke(
 
 ```csharp
 AudioEventManager.PlaySFX?.Invoke(
-    new string[] { "Explosion1", "Explosion2" }, // Array — one selected at random
+    new string[] { "Explosion1", "Explosion2" }, // Array - one selected at random
     0.8f,                     // Volume
     1f,                       // Pitch
-    true,                     // Randomize pitch
+    true,                     // Randomise pitch
     0.3f,                     // Pitch variation range
     1f,                       // Spatial blend
     false,                    // Loop
@@ -185,7 +185,7 @@ AudioEventManager.PlaySFX?.Invoke(
 
 ### Method 3: Inspector Components (No Code Required)
 
-#### AudioEventSender — Track control via trigger/collision zones
+#### AudioEventSender - Track control via trigger/collision zones
 
 Attach to any GameObject to play, stop, or pause a track when the player enters an area.
 
@@ -201,8 +201,8 @@ Attach to any GameObject to play, stop, or pause a track when the player enters 
 | Loop | Loop the track |
 | Collision Type | Trigger or Collision |
 | Target Tag | Only react to objects with this tag |
-| On Enter Action | What to do when the target enters — `Play`, `Stop`, `Pause`, `AdjustParameters`, or `None` |
-| On Exit Action | What to do when the target exits — same options as above |
+| On Enter Action | What to do when the target enters - `Play`, `Stop`, `Pause`, `AdjustParameters`, or `None` |
+| On Exit Action | What to do when the target exits - same options as above |
 | Event Delay | Seconds to wait before playing |
 | Attach To This Transform | Audio follows this zone object |
 
@@ -218,11 +218,11 @@ audioEventSender.AdjustParameters();
 
 ---
 
-#### AudioEventSenderSFX — SFX control via trigger/collision zones
+#### AudioEventSenderSFX - SFX control via trigger/collision zones
 
 | Inspector Field | Description |
 |---|---|
-| SFX Name (array) | One or more clip names — selected randomly |
+| SFX Name (array) | One or more clip names - selected randomly |
 | Play On Enabled | Auto-play on activate |
 | Volume / Pitch | Playback parameters |
 | Randomise Pitch / Pitch Range | Pitch variation |
@@ -255,8 +255,8 @@ sfxEventSender.Pause();  // Toggles pause for all SFX
 | `AudioTrackType.BGM` | Background music, combat themes, menus |
 | `AudioTrackType.Ambient` | Environmental beds, room tone, weather |
 | `AudioTrackType.Dialogue` | NPC speech, narration, cutscene audio |
-| `AudioTrackType.Aux1` | General purpose auxiliary — stingers, secondary music layers, UI music |
-| `AudioTrackType.Aux2` | General purpose auxiliary — additional concurrent track |
+| `AudioTrackType.Aux1` | General purpose auxiliary - stingers, secondary music layers, UI music |
+| `AudioTrackType.Aux2` | General purpose auxiliary - additional concurrent track |
 
 Each type is an independent track with its own state machine and 3-source system. All five can play simultaneously.
 
@@ -281,7 +281,7 @@ Each track moves through these states automatically:
 | Fade Type | Behaviour |
 |---|---|
 | `FadeType.FadeInOut` | Fade out current audio first, then fade in the new audio (sequential) |
-| `FadeType.Crossfade` | Old and new audio overlap — old fades out while new fades in simultaneously |
+| `FadeType.Crossfade` | Old and new audio overlap - old fades out while new fades in simultaneously |
 
 ### Fade Targets
 
@@ -290,13 +290,13 @@ Each track moves through these states automatically:
 | `FadeTarget.FadeVolume` | Only volume transitions; pitch snaps immediately |
 | `FadeTarget.FadePitch` | Only pitch transitions; volume snaps immediately |
 | `FadeTarget.FadeBoth` | Both volume and pitch transition together |
-| `FadeTarget.Ignore` | Instant change — no fading |
+| `FadeTarget.Ignore` | Instant change - no fading |
 
 ---
 
 ## Audio Mixer Routing
 
-The AudioManager has a **Mixer Groups** section in the Inspector with one slot per track type plus one for SFX. Assign your mixer groups there — each instantiated `AudioSource` automatically has its `outputAudioMixerGroup` set at runtime, regardless of what is baked into the shared prefab.
+The AudioManager has a **Mixer Groups** section in the Inspector with one slot per track type plus one for SFX. Assign your mixer groups there - each instantiated `AudioSource` automatically has its `outputAudioMixerGroup` set at runtime, regardless of what is baked into the shared prefab.
 
 | Inspector Slot | Routes |
 |---|---|
@@ -307,7 +307,7 @@ The AudioManager has a **Mixer Groups** section in the Inspector with one slot p
 | Aux2 Mixer Group | All Aux2 track sources |
 | SFX Mixer Group | All instantiated SFX sources |
 
-Slots can be left empty — unassigned tracks route to the prefab's default output.
+Slots can be left empty - unassigned tracks route to the prefab's default output.
 
 ---
 
@@ -342,10 +342,10 @@ Requires the `com.unity.splines` package to be installed.
 `SplineFollower` moves an AudioSource along a Unity Spline path tracking the closest point to a target Transform. Useful for river sounds, road traffic, or any audio source that should hug a path rather than emit from a fixed point.
 
 **Key settings:**
-- `proximityThreshold` — how close the target must be to activate
-- `movementSpeed` — how fast the follower tracks along the spline
-- `smoothing` — smoothing factor (0–1) for position transitions
-- `sleepThreshold` / `sleepCheckInterval` — distance at which the follower enters sleep mode to save performance
+- `proximityThreshold` - how close the target must be to activate
+- `movementSpeed` - how fast the follower tracks along the spline
+- `smoothing` - smoothing factor (0–1) for position transitions
+- `sleepThreshold` / `sleepCheckInterval` - distance at which the follower enters sleep mode to save performance
 
 `SimplifiedSplineFollower` is a lightweight version for simpler cases where proximity detection and inside/outside zone logic are not needed.
 
@@ -464,15 +464,15 @@ public void OnFire()
 
 ---
 
-## Audio Loading — Current Approach & Potential Improvements
+## Audio Loading - Current Approach & Potential Improvements
 
 ### Current: Resources-Based Loading
 
 Clips are loaded at runtime from `Resources/Audio/<type>/<name>` using `Resources.Load<AudioClip>()`. Loaded clips are cached in per-type dictionaries for subsequent calls.
 
 **Limitations:**
-- All clips in the `Resources` folder are included in the build regardless of whether they are played — this increases build size
-- No async loading — first play of a clip can cause a brief hitch if the file is large
+- All clips in the `Resources` folder are included in the build regardless of whether they are played - this increases build size
+- No async loading - first play of a clip can cause a brief hitch if the file is large
 - Memory is held until explicitly unloaded
 
 ### Potential Improvement: Addressables
@@ -481,7 +481,7 @@ Unity's Addressables system loads assets on demand with full async support and c
 
 **Benefits over Resources:**
 - Only content that is actually used gets bundled
-- Async loading prevents hitches — clips load in the background before playback
+- Async loading prevents hitches - clips load in the background before playback
 - Fine-grained memory control: load per-scene, unload on scene exit
 - Supports DLC and remote content delivery
 
@@ -489,7 +489,7 @@ Unity's Addressables system loads assets on demand with full async support and c
 
 ### Simpler Near-Term Alternative: AudioLibrary ScriptableObjects
 
-Create `[CreateAssetMenu]` ScriptableObjects that hold explicit `AudioClip[]` references per category. This removes the Resources dependency entirely — clips become direct Inspector references, build stripping works normally, and there is no magic string lookup. A good fit for projects that don't need async loading or remote content.
+Create `[CreateAssetMenu]` ScriptableObjects that hold explicit `AudioClip[]` references per category. This removes the Resources dependency entirely - clips become direct Inspector references, build stripping works normally, and there is no magic string lookup. A good fit for projects that don't need async loading or remote content.
 
 ---
 
@@ -499,7 +499,7 @@ The event-driven architecture makes BMS Audio Manager well-positioned as a game-
 
 ### Architecture Approach
 
-The game never calls FMOD or Wwise directly — it continues to call `AudioEvent.*` or raise `AudioEventManager` events. A bridge MonoBehaviour subscribes to those events and translates them to middleware calls:
+The game never calls FMOD or Wwise directly - it continues to call `AudioEvent.*` or raise `AudioEventManager` events. A bridge MonoBehaviour subscribes to those events and translates them to middleware calls:
 
 ```
 Game Code
@@ -511,7 +511,7 @@ FMODBridge.cs (subscriber)
 FMOD Studio Runtime
 ```
 
-The bridge maps BMS track/clip names to middleware event paths via a serialized dictionary in the Inspector.
+The bridge maps BMS track/clip names to middleware event paths via a serialised dictionary in the Inspector.
 
 ### What Maps Cleanly
 
@@ -523,7 +523,7 @@ The bridge maps BMS track/clip names to middleware event paths via a serialized 
 
 ### What Needs Rethinking
 
-`FadeType` and `FadeTarget` are BMS concepts — both FMOD and Wwise handle transitions internally through their own snapshot and transition systems. The bridge would pass fade duration as a hint, but the actual crossfade behaviour would be governed by middleware settings rather than BMS coroutines.
+`FadeType` and `FadeTarget` are BMS concepts - both FMOD and Wwise handle transitions internally through their own snapshot and transition systems. The bridge would pass fade duration as a hint, but the actual crossfade behaviour would be governed by middleware settings rather than BMS coroutines.
 
 **Effort estimate:** A basic functional bridge is 2–3 days. Full parity (parameter mapping, RTPC integration, snapshot-based ducking) is closer to a week depending on the middleware setup.
 
@@ -533,13 +533,13 @@ The bridge maps BMS track/clip names to middleware event paths via a serialized 
 
 ### Performance
 - Use streaming load type for long ambient tracks (set in the AudioClip import settings)
-- Avoid playing large numbers of simultaneous SFX — monitor count with `SFXDebugDisplay`
+- Avoid playing large numbers of simultaneous SFX - monitor count with `SFXDebugDisplay`
 - Use the SplineFollower's `sleepThreshold` to disable distant spline followers
 
-### Audio Organization
+### Audio Organisation
 - Use compressed formats (OGG Vorbis) for ambient and BGM tracks
 - Keep individual SFX clips short and uncompressed (or ADPCM) for low-latency playback
-- Name clips descriptively — they are referenced by string at runtime
+- Name clips descriptively - they are referenced by string at runtime
 
 ### Fade Configuration
 - Crossfade for musical transitions between similar-energy tracks
@@ -551,10 +551,10 @@ The bridge maps BMS track/clip names to middleware event paths via a serialized 
 
 ## Known Limitations
 
-- Only one clip per track type can play at a time (BGM, Ambient, Dialogue, Aux1, Aux2 — by design; use SFX for additional concurrent sounds)
+- Only one clip per track type can play at a time (BGM, Ambient, Dialogue, Aux1, Aux2 - by design; use SFX for additional concurrent sounds)
 - SFX clips are loaded synchronously on first play; consider pre-warming critical sounds
-- `SplineFollower` requires `com.unity.splines` — the project will not compile if the package is absent and these scripts are included
-- Mixer group slots on the AudioManager are optional — if left unassigned, audio sources route to whatever is set on the shared prefab
+- `SplineFollower` requires `com.unity.splines` - the project will not compile if the package is absent and these scripts are included
+- Mixer group slots on the AudioManager are optional - if left unassigned, audio sources route to whatever is set on the shared prefab
 
 ---
 
@@ -564,8 +564,8 @@ This project is licensed under **CC BY-ND 4.0**.
 
 Free to use in any project, including commercial. You may not redistribute modified versions of the package itself.
 
-© 2026 Niall Mc Shane — [creativecommons.org/licenses/by-nd/4.0](https://creativecommons.org/licenses/by-nd/4.0/)
+© 2026 Niall Mc Shane - [creativecommons.org/licenses/by-nd/4.0](https://creativecommons.org/licenses/by-nd/4.0/)
 
 ---
 
-*BMS Audio Manager v2.2.0 — Unity 6*
+*BMS Audio Manager v2.2.0 - Unity 6*
