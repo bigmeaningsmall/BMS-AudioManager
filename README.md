@@ -1,5 +1,7 @@
 # BMS Audio Manager v2.2.0
 
+note: use the package (v2.2.0) to install - repo is ahead of the package (v2.3.0) with some experimental features being tested (Scriptables, asset loading etc...)
+
 A Unity audio management system featuring 3-source crossfading, an event-driven architecture, spatial audio, and inspector-driven audio zones. Designed for small-to-medium projects requiring clean audio transitions and flexible sound management.
 
 **Unity Version:** 6000.4.8f1+
