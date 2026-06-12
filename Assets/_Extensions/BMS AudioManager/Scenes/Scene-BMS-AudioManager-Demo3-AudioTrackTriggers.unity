@@ -297,7 +297,7 @@ PrefabInstance:
     - target: {fileID: 5355574976095253072, guid: 89621415efb6a794087214f779dcb9f2,
         type: 3}
       propertyPath: trackName
-      value: Synthpop1
+      value: 
       objectReference: {fileID: 0}
     - target: {fileID: 5355574976095253072, guid: 89621415efb6a794087214f779dcb9f2,
         type: 3}
@@ -456,7 +456,7 @@ PrefabInstance:
     - target: {fileID: 5355574976095253072, guid: 89621415efb6a794087214f779dcb9f2,
         type: 3}
       propertyPath: trackName
-      value: Ambient Vol4 Granular Intensity 2
+      value: 
       objectReference: {fileID: 0}
     - target: {fileID: 5355574976095253072, guid: 89621415efb6a794087214f779dcb9f2,
         type: 3}
@@ -485,6 +485,12 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5355574976095253072, guid: 89621415efb6a794087214f779dcb9f2,
         type: 3}
+      propertyPath: soundDefinition
+      value: 
+      objectReference: {fileID: 11400000, guid: 4534493b79302634b9ba1f08a5c0a868,
+        type: 2}
+    - target: {fileID: 5355574976095253072, guid: 89621415efb6a794087214f779dcb9f2,
+        type: 3}
       propertyPath: ambientTrackNumber
       value: 0
       objectReference: {fileID: 0}
@@ -506,6 +512,11 @@ PrefabInstance:
     - target: {fileID: 5355574976095253072, guid: 89621415efb6a794087214f779dcb9f2,
         type: 3}
       propertyPath: triggerActiveColor.r
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5355574976095253072, guid: 89621415efb6a794087214f779dcb9f2,
+        type: 3}
+      propertyPath: useDefinitionDefaults
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6014174656882223073, guid: 89621415efb6a794087214f779dcb9f2,
@@ -614,7 +625,7 @@ PrefabInstance:
     - target: {fileID: 5355574976095253072, guid: 89621415efb6a794087214f779dcb9f2,
         type: 3}
       propertyPath: trackName
-      value: Synthpop2
+      value: 
       objectReference: {fileID: 0}
     - target: {fileID: 5355574976095253072, guid: 89621415efb6a794087214f779dcb9f2,
         type: 3}
@@ -812,6 +823,12 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5355574976095253072, guid: 89621415efb6a794087214f779dcb9f2,
         type: 3}
+      propertyPath: soundDefinition
+      value: 
+      objectReference: {fileID: 11400000, guid: 95be049d4e7d7fd48ba18e4c11d71518,
+        type: 2}
+    - target: {fileID: 5355574976095253072, guid: 89621415efb6a794087214f779dcb9f2,
+        type: 3}
       propertyPath: ambientTrackNumber
       value: 0
       objectReference: {fileID: 0}
@@ -834,6 +851,11 @@ PrefabInstance:
         type: 3}
       propertyPath: triggerActiveColor.r
       value: 0.8
+      objectReference: {fileID: 0}
+    - target: {fileID: 5355574976095253072, guid: 89621415efb6a794087214f779dcb9f2,
+        type: 3}
+      propertyPath: useDefinitionDefaults
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6014174656882223073, guid: 89621415efb6a794087214f779dcb9f2,
         type: 3}
@@ -936,7 +958,7 @@ PrefabInstance:
     - target: {fileID: 5355574976095253072, guid: 89621415efb6a794087214f779dcb9f2,
         type: 3}
       propertyPath: trackName
-      value: Ambient Vol4 Granular Intensity 1
+      value: 
       objectReference: {fileID: 0}
     - target: {fileID: 5355574976095253072, guid: 89621415efb6a794087214f779dcb9f2,
         type: 3}
@@ -965,6 +987,12 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5355574976095253072, guid: 89621415efb6a794087214f779dcb9f2,
         type: 3}
+      propertyPath: soundDefinition
+      value: 
+      objectReference: {fileID: 11400000, guid: 8b3cfa2a53f638843921fe0228b4ffdc,
+        type: 2}
+    - target: {fileID: 5355574976095253072, guid: 89621415efb6a794087214f779dcb9f2,
+        type: 3}
       propertyPath: ambientTrackNumber
       value: 0
       objectReference: {fileID: 0}
@@ -986,6 +1014,11 @@ PrefabInstance:
     - target: {fileID: 5355574976095253072, guid: 89621415efb6a794087214f779dcb9f2,
         type: 3}
       propertyPath: triggerActiveColor.r
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5355574976095253072, guid: 89621415efb6a794087214f779dcb9f2,
+        type: 3}
+      propertyPath: useDefinitionDefaults
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6014174656882223073, guid: 89621415efb6a794087214f779dcb9f2,
@@ -1427,6 +1460,11 @@ PrefabInstance:
       propertyPath: triggerActiveColor.r
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 5355574976095253072, guid: 89621415efb6a794087214f779dcb9f2,
+        type: 3}
+      propertyPath: useDefinitionDefaults
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 6014174656882223073, guid: 89621415efb6a794087214f779dcb9f2,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -1639,6 +1677,12 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5355574976095253072, guid: 89621415efb6a794087214f779dcb9f2,
         type: 3}
+      propertyPath: soundDefinition
+      value: 
+      objectReference: {fileID: 11400000, guid: 218a37dac6845ff43beba4c7a6879835,
+        type: 2}
+    - target: {fileID: 5355574976095253072, guid: 89621415efb6a794087214f779dcb9f2,
+        type: 3}
       propertyPath: ambientTrackNumber
       value: 0
       objectReference: {fileID: 0}
@@ -1660,6 +1704,11 @@ PrefabInstance:
     - target: {fileID: 5355574976095253072, guid: 89621415efb6a794087214f779dcb9f2,
         type: 3}
       propertyPath: triggerActiveColor.r
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5355574976095253072, guid: 89621415efb6a794087214f779dcb9f2,
+        type: 3}
+      propertyPath: useDefinitionDefaults
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6014174656882223073, guid: 89621415efb6a794087214f779dcb9f2,
@@ -1828,6 +1877,11 @@ PrefabInstance:
     - target: {fileID: 5355574976095253072, guid: 89621415efb6a794087214f779dcb9f2,
         type: 3}
       propertyPath: triggerActiveColor.r
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5355574976095253072, guid: 89621415efb6a794087214f779dcb9f2,
+        type: 3}
+      propertyPath: useDefinitionDefaults
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6014174656882223073, guid: 89621415efb6a794087214f779dcb9f2,
@@ -2002,6 +2056,11 @@ PrefabInstance:
         type: 3}
       propertyPath: triggerActiveColor.r
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5355574976095253072, guid: 89621415efb6a794087214f779dcb9f2,
+        type: 3}
+      propertyPath: useDefinitionDefaults
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6014174656882223073, guid: 89621415efb6a794087214f779dcb9f2,
         type: 3}
@@ -2381,7 +2440,7 @@ PrefabInstance:
     - target: {fileID: 5355574976095253072, guid: 89621415efb6a794087214f779dcb9f2,
         type: 3}
       propertyPath: trackName
-      value: MainTheme
+      value: 
       objectReference: {fileID: 0}
     - target: {fileID: 5355574976095253072, guid: 89621415efb6a794087214f779dcb9f2,
         type: 3}
