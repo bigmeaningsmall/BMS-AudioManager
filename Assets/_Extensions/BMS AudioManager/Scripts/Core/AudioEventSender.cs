@@ -15,6 +15,13 @@ public class AudioEventSender : MonoBehaviour
     public bool attachToThisTransform;
     public Transform transformToAttachTo;
     [Space(10)]
+    [Header("Sound Definition (preferred)")]
+    [Tooltip("Asset-safe reference to a clip + its defaults. When set, this is used instead of Track Name / Track Number.")]
+    public SoundDefinition soundDefinition;
+    [Tooltip("When a Sound Definition is assigned, pull volume/pitch/loop/spatialBlend/fade from it. Untick to keep using the inspector values below.")]
+    public bool useDefinitionDefaults = true;
+
+    [Space(10)]
     [Header("Audio Tack - Event Parameters")]
     [Space(20)]
     [Tooltip("The track number of the audio clip to play - used if no name is given -1 to ignore")]
@@ -170,7 +177,7 @@ public class AudioEventSender : MonoBehaviour
     private void PlayTrack()
     {
         Transform targetTransform = null;
-    
+
         if (attachToThisTransform)
         {
             targetTransform = this.transform;
@@ -180,7 +187,32 @@ public class AudioEventSender : MonoBehaviour
             targetTransform = transformToAttachTo;
         }
 
-        AudioEventManager.PlayTrack(audioTrackType, trackNumber, trackName, volume, pitch, spatialBlend, fadeType, fadeDuration, fadeTarget, loop, eventDelay, targetTransform, eventName);
+        // Resolve playback values - a SoundDefinition (if assigned) supplies the clip directly
+        // and optionally its default parameters; otherwise fall back to the inspector fields
+        // and the string/index lookup.
+        AudioClip directClip = null;
+        float useVolume = volume, usePitch = pitch, useSpatialBlend = spatialBlend, useFadeDuration = fadeDuration;
+        bool useLoop = loop;
+        FadeType useFadeType = fadeType;
+        FadeTarget useFadeTarget = fadeTarget;
+
+        if (soundDefinition != null)
+        {
+            directClip = soundDefinition.GetClip();
+
+            if (useDefinitionDefaults)
+            {
+                useVolume = soundDefinition.volume;
+                usePitch = soundDefinition.pitch;
+                useSpatialBlend = soundDefinition.spatialBlend;
+                useLoop = soundDefinition.loop;
+                useFadeType = soundDefinition.fadeType;
+                useFadeDuration = soundDefinition.fadeDuration;
+                useFadeTarget = soundDefinition.fadeTarget;
+            }
+        }
+
+        AudioEventManager.PlayTrack(audioTrackType, trackNumber, trackName, useVolume, usePitch, useSpatialBlend, useFadeType, useFadeDuration, useFadeTarget, useLoop, eventDelay, targetTransform, eventName, directClip);
 
     }
 

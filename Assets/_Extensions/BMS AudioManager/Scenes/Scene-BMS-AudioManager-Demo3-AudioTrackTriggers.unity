@@ -326,6 +326,12 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5355574976095253072, guid: 89621415efb6a794087214f779dcb9f2,
         type: 3}
+      propertyPath: soundDefinition
+      value: 
+      objectReference: {fileID: 11400000, guid: ff92365cfd5df4b418f1881ba7c2370f,
+        type: 2}
+    - target: {fileID: 5355574976095253072, guid: 89621415efb6a794087214f779dcb9f2,
+        type: 3}
       propertyPath: ambientTrackNumber
       value: 0
       objectReference: {fileID: 0}
@@ -342,6 +348,11 @@ PrefabInstance:
     - target: {fileID: 5355574976095253072, guid: 89621415efb6a794087214f779dcb9f2,
         type: 3}
       propertyPath: triggerActiveColor.r
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5355574976095253072, guid: 89621415efb6a794087214f779dcb9f2,
+        type: 3}
+      propertyPath: useDefinitionDefaults
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6014174656882223073, guid: 89621415efb6a794087214f779dcb9f2,
@@ -632,6 +643,12 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5355574976095253072, guid: 89621415efb6a794087214f779dcb9f2,
         type: 3}
+      propertyPath: soundDefinition
+      value: 
+      objectReference: {fileID: 11400000, guid: dcc5af0c66ca7d741a701decd8c0e1dc,
+        type: 2}
+    - target: {fileID: 5355574976095253072, guid: 89621415efb6a794087214f779dcb9f2,
+        type: 3}
       propertyPath: ambientTrackNumber
       value: 0
       objectReference: {fileID: 0}
@@ -648,6 +665,11 @@ PrefabInstance:
     - target: {fileID: 5355574976095253072, guid: 89621415efb6a794087214f779dcb9f2,
         type: 3}
       propertyPath: triggerActiveColor.r
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5355574976095253072, guid: 89621415efb6a794087214f779dcb9f2,
+        type: 3}
+      propertyPath: useDefinitionDefaults
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6014174656882223073, guid: 89621415efb6a794087214f779dcb9f2,
@@ -1054,6 +1076,12 @@ PrefabInstance:
       propertyPath: spatialBlend
       value: 0.75
       objectReference: {fileID: 0}
+    - target: {fileID: 1798408813154171869, guid: 061e1c5bd8269d545a6d42f763eea41c,
+        type: 3}
+      propertyPath: soundDefinition
+      value: 
+      objectReference: {fileID: 11400000, guid: c9344565010d6d24a8a3ff37cfe029d4,
+        type: 2}
     - target: {fileID: 1798408813154171869, guid: 061e1c5bd8269d545a6d42f763eea41c,
         type: 3}
       propertyPath: sfxName.Array.size
@@ -2065,6 +2093,12 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1798408813154171869, guid: 061e1c5bd8269d545a6d42f763eea41c,
         type: 3}
+      propertyPath: soundDefinition
+      value: 
+      objectReference: {fileID: 11400000, guid: f230412001ee9244c8717d46dece2725,
+        type: 2}
+    - target: {fileID: 1798408813154171869, guid: 061e1c5bd8269d545a6d42f763eea41c,
+        type: 3}
       propertyPath: useCustom3DSettings
       value: 1
       objectReference: {fileID: 0}
@@ -2376,6 +2410,12 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5355574976095253072, guid: 89621415efb6a794087214f779dcb9f2,
         type: 3}
+      propertyPath: soundDefinition
+      value: 
+      objectReference: {fileID: 11400000, guid: a96ffd8c4ac8d0544a0b77da1ef78b4f,
+        type: 2}
+    - target: {fileID: 5355574976095253072, guid: 89621415efb6a794087214f779dcb9f2,
+        type: 3}
       propertyPath: ambientTrackNumber
       value: 0
       objectReference: {fileID: 0}
@@ -2392,6 +2432,11 @@ PrefabInstance:
     - target: {fileID: 5355574976095253072, guid: 89621415efb6a794087214f779dcb9f2,
         type: 3}
       propertyPath: triggerActiveColor.r
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5355574976095253072, guid: 89621415efb6a794087214f779dcb9f2,
+        type: 3}
+      propertyPath: useDefinitionDefaults
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6014174656882223073, guid: 89621415efb6a794087214f779dcb9f2,

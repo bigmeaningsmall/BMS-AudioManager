@@ -103,19 +103,19 @@ public class AudioTrack : MonoBehaviour
      /// <summary>
     /// Play method with 3-source safety system - STATE BASED -
     /// </summary>
-    public void Play(int trackNumber, string trackName, float volume, float pitch, float spatialBlend, 
-                     FadeType fadeType, float fadeDuration, FadeTarget fadeTarget, bool loop, Transform attachTo)
+    public void Play(int trackNumber, string trackName, float volume, float pitch, float spatialBlend,
+                     FadeType fadeType, float fadeDuration, FadeTarget fadeTarget, bool loop, Transform attachTo, AudioClip directClip = null)
     {
         AudioDebug.Log($"[Track] Play called - Current State: {currentState}, FadeType: {fadeType}");
-        
+
         // Store target settings
         targetVolume = volume;
         targetPitch = pitch;
         currentSpatialBlend = spatialBlend;
         isLooping = loop;
-        
+
         // Get the audio clip
-        AudioClip clip = ResolveAudioClip(trackNumber, trackName);
+        AudioClip clip = ResolveAudioClip(trackNumber, trackName, directClip);
         if (clip == null)
         {
             AudioDebug.LogError($"AudioTrack: Could not find clip for track {trackNumber}/{trackName}");
@@ -1232,15 +1232,18 @@ public class AudioTrack : MonoBehaviour
     // ==================== HELPER METHODS ====================
     #region HELPER METHODS
 
-    // Resolve audio clip by track number or name
-    private AudioClip ResolveAudioClip(int trackNumber, string trackName)
+    // Resolve audio clip by direct reference, then track name, then track number
+    private AudioClip ResolveAudioClip(int trackNumber, string trackName, AudioClip directClip = null)
     {
+        // Direct asset reference (from a SoundDefinition) wins - asset-safe, no string lookup
+        if (directClip != null) return directClip;
+
         if (audioManager == null)
         {
             AudioDebug.LogError($"[AudioTrack] AudioManager is null!");
             return null;
         }
-    
+
         // Try by name first if provided AND NOT EMPTY
         if (!string.IsNullOrEmpty(trackName))
         {

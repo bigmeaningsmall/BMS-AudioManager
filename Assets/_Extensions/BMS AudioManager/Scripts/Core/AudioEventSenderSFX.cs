@@ -18,7 +18,12 @@ public class AudioEventSenderSFX : MonoBehaviour, IAudioEventSender
     // Loop through the AudioEventSender_SFX scripts on the object and send the event with the matching eventName
     public string eventName = "Custom SFX Event Name"; //for future use //todo - add a custom event name to the AudioEventManager class
     
-    [Space(10)] 
+    [Space(10)]
+    [Header("Sound Definition (preferred)")]
+    [Tooltip("Asset-safe reference whose clip + variations form the random SFX pool. When set, this is used instead of the SFX Name strings.")]
+    public SoundDefinition soundDefinition;
+
+    [Space(10)]
     [Header("Sound FX Event Parameters (SFX)")] [Space(5)]
     [Space(20)]
     public string[] sfxName = new string[1]; // The name of the sound effects to play - can be multiple sounds to play randomly
@@ -203,8 +208,11 @@ public class AudioEventSenderSFX : MonoBehaviour, IAudioEventSender
             delay = Random.Range(0, eventDelay);
         }
         
+        // A SoundDefinition (if assigned) supplies the clip pool directly - asset-safe, no string lookup
+        AudioClip[] directClips = (soundDefinition != null) ? soundDefinition.GetClipPool() : null;
+
         // Send the PlaySFX Event
-        AudioEventManager.PlaySFX(sfxName, volume, pitch, randomisePitch, pitchRange, spatialBlend, loop, delay, percentageChanceToPlay, attachTo, position, minDist, maxDist, eventName);
+        AudioEventManager.PlaySFX(sfxName, volume, pitch, randomisePitch, pitchRange, spatialBlend, loop, delay, percentageChanceToPlay, attachTo, position, minDist, maxDist, eventName, directClips);
     }
     
     // Interface methods to call SFX management functions:

@@ -448,22 +448,23 @@ public class AudioManager : MonoBehaviour
         FadeType fadeType = FadeType.FadeInOut, 
         float fadeDuration = 0.5f, 
         FadeTarget fadeTarget = FadeTarget.FadeVolume, 
-        bool loop = true, 
-        float delay = 0f, 
-        Transform attachTo = null, 
-        string eventName = "")
+        bool loop = true,
+        float delay = 0f,
+        Transform attachTo = null,
+        string eventName = "",
+        AudioClip directClip = null)
     {
         // Cancel any existing delayed coroutine for this track type
         CancelDelayedTrack(trackType);
-    
+
         if (delay <= 0f)
         {
-            PlayTrackImmediate(trackType, attachTo, trackNumber, trackName, volume, pitch, spatialBlend, fadeType, fadeDuration, fadeTarget, loop, eventName);
+            PlayTrackImmediate(trackType, attachTo, trackNumber, trackName, volume, pitch, spatialBlend, fadeType, fadeDuration, fadeTarget, loop, eventName, directClip);
         }
         else
         {
             // Store the coroutine reference so we can cancel it later
-            Coroutine delayedCoroutine = StartCoroutine(PlayTrackDelayed(delay, trackType, attachTo, trackNumber, trackName, volume, pitch, spatialBlend, fadeType, fadeDuration, fadeTarget, loop, eventName));
+            Coroutine delayedCoroutine = StartCoroutine(PlayTrackDelayed(delay, trackType, attachTo, trackNumber, trackName, volume, pitch, spatialBlend, fadeType, fadeDuration, fadeTarget, loop, eventName, directClip));
             delayedCoroutines[trackType] = delayedCoroutine;
         }
     }
@@ -484,7 +485,7 @@ public class AudioManager : MonoBehaviour
             AudioDebug.Log($"[AudioManager] No delayed {trackType} event to cancel"); // Add this line too
         }
     }
-    private void PlayTrackImmediate(AudioTrackType trackType, Transform attachTo, int trackNumber, string trackName, float volume, float pitch, float spatialBlend, FadeType fadeType, float fadeDuration, FadeTarget fadeTarget, bool loop, string eventName)
+    private void PlayTrackImmediate(AudioTrackType trackType, Transform attachTo, int trackNumber, string trackName, float volume, float pitch, float spatialBlend, FadeType fadeType, float fadeDuration, FadeTarget fadeTarget, bool loop, string eventName, AudioClip directClip = null)
     {
         AudioTrack targetTrack = GetTrackByType(trackType);
         if (targetTrack == null)
@@ -492,26 +493,26 @@ public class AudioManager : MonoBehaviour
             AudioDebug.LogError($"{trackType}Track reference is null!");
             return;
         }
-        
+
         // CALL THE TRACK METHOD
         // This will handle the actual playing of the track
-        targetTrack.Play(trackNumber, trackName, volume, pitch, spatialBlend, fadeType, fadeDuration, fadeTarget, loop, attachTo);
+        targetTrack.Play(trackNumber, trackName, volume, pitch, spatialBlend, fadeType, fadeDuration, fadeTarget, loop, attachTo, directClip);
         
         // Set parameters for the track -- parameters are updated in LateUpdate when fading 
         AudioTrackParamters newParams = new AudioTrackParamters(targetTrack.currentState, attachTo, trackNumber, trackName, volume, pitch, spatialBlend, loop, 0f, 0f, 0f, eventName);
         SetTrackParameters(trackType, newParams);
     }
     
-    private IEnumerator PlayTrackDelayed(float delay, AudioTrackType trackType, Transform attachTo, int trackNumber, string trackName, float volume, float pitch, float spatialBlend, FadeType fadeType, float fadeDuration, FadeTarget fadeTarget, bool loop, string eventName)
+    private IEnumerator PlayTrackDelayed(float delay, AudioTrackType trackType, Transform attachTo, int trackNumber, string trackName, float volume, float pitch, float spatialBlend, FadeType fadeType, float fadeDuration, FadeTarget fadeTarget, bool loop, string eventName, AudioClip directClip = null)
     {
         AudioDebug.Log($"[AudioManager] Delaying {trackType} track for {delay}s");
         yield return new WaitForSeconds(delay);
-    
+
         // Clean up the coroutine reference since it's completing
         delayedCoroutines.Remove(trackType);
-    
+
         AudioDebug.Log($"[AudioManager] Executing delayed {trackType} track");
-        PlayTrackImmediate(trackType, attachTo, trackNumber, trackName, volume, pitch, spatialBlend, fadeType, fadeDuration, fadeTarget, loop, eventName);
+        PlayTrackImmediate(trackType, attachTo, trackNumber, trackName, volume, pitch, spatialBlend, fadeType, fadeDuration, fadeTarget, loop, eventName, directClip);
     }
 
 
@@ -757,11 +758,12 @@ public class AudioManager : MonoBehaviour
         bool loop = false, 
         float delay = 0f, 
         float percentChanceToPlay = 100f, 
-        Transform attachTo = null, 
-        Vector3 position = default(Vector3), 
-        float minDist = 1f, 
-        float maxDist = 500f, 
-        string eventName = "")
+        Transform attachTo = null,
+        Vector3 position = default(Vector3),
+        float minDist = 1f,
+        float maxDist = 500f,
+        string eventName = "",
+        AudioClip[] directClips = null)
     {
         // Check if the sound should play based on the percentage chance
         if (percentChanceToPlay < 100f)
@@ -769,21 +771,46 @@ public class AudioManager : MonoBehaviour
             int random = Random.Range(0, 100);
             if (random > percentChanceToPlay)
             {
-                AudioDebug.Log($"[AudioManager] SFX '{string.Join(", ", soundNames)}' skipped due to chance ({random} > {percentChanceToPlay})");
+                string skipLabel = (directClips != null && directClips.Length > 0)
+                    ? "SoundDefinition" : string.Join(", ", soundNames ?? new string[0]);
+                AudioDebug.Log($"[AudioManager] SFX '{skipLabel}' skipped due to chance ({random} > {percentChanceToPlay})");
                 return;
             }
         }
-        
+
+        // Direct asset references (from a SoundDefinition) take priority over the string lookup
+        if (directClips != null && directClips.Length > 0)
+        {
+            AudioClip selectedClip = directClips[Random.Range(0, directClips.Length)];
+            if (selectedClip == null)
+            {
+                AudioDebug.LogError("[AudioManager] SoundDefinition provided a null clip for SFX!");
+                return;
+            }
+            AudioDebug.Log($"[AudioManager] Selected SFX clip (direct): '{selectedClip.name}' from {directClips.Length} options");
+
+            if (delay <= 0f)
+            {
+                PlaySoundEffectImmediate(selectedClip.name, volume, pitch, randomizePitch, pitchRange, spatialBlend, loop, attachTo, position, minDist, maxDist, eventName, selectedClip);
+            }
+            else
+            {
+                Coroutine dc = StartCoroutine(PlaySoundEffectDelayed(delay, selectedClip.name, volume, pitch, randomizePitch, pitchRange, spatialBlend, loop, attachTo, position, minDist, maxDist, eventName, selectedClip));
+                delayedSFXCoroutines.Add(dc);
+            }
+            return;
+        }
+
         // Select a random sound effect name from the array
         if (soundNames == null || soundNames.Length == 0)
         {
             AudioDebug.LogError("[AudioManager] No sound names provided for SFX!");
             return;
         }
-        
+
         string selectedSoundName = soundNames[Random.Range(0, soundNames.Length)];
         AudioDebug.Log($"[AudioManager] Selected SFX: '{selectedSoundName}' from {soundNames.Length} options");
-        
+
         if (delay <= 0f)
         {
             PlaySoundEffectImmediate(selectedSoundName, volume, pitch, randomizePitch, pitchRange, spatialBlend, loop, attachTo, position, minDist, maxDist, eventName);
@@ -795,16 +822,18 @@ public class AudioManager : MonoBehaviour
         }
     }
 
-    private void PlaySoundEffectImmediate(string soundName, float volume, float pitch, bool randomizePitch, float pitchRange, float spatialBlend, bool loop, Transform attachTo, Vector3 position, float minDist, float maxDist, string eventName)
+    private void PlaySoundEffectImmediate(string soundName, float volume, float pitch, bool randomizePitch, float pitchRange, float spatialBlend, bool loop, Transform attachTo, Vector3 position, float minDist, float maxDist, string eventName, AudioClip directClip = null)
     {
         AudioDebug.Log($"Playing sound effect '{soundName}' with volume {volume}, pitch {pitch}, spatial blend {spatialBlend}, loop {loop}");
-        
-        if (!soundEffects.TryGetValue(soundName, out AudioClip clip))
+
+        // Use the direct clip when supplied (SoundDefinition), else fall back to the Resources dict
+        AudioClip clip = directClip;
+        if (clip == null && !soundEffects.TryGetValue(soundName, out clip))
         {
             AudioDebug.LogWarning($"Sound '{soundName}' not found in Resources/Audio/SFX!");
             return;
         }
-        
+
         // Determine position and parent transform
         Vector3 spawnPosition;
         Transform parentTransform;
@@ -901,16 +930,16 @@ public class AudioManager : MonoBehaviour
         AudioDebug.Log($"[AudioManager] SFX '{soundName}' playing at {spawnPosition} - spatialBlend={sfxSource.spatialBlend}, minDist={sfxSource.minDistance}, maxDist={sfxSource.maxDistance}");
     }
 
-    private IEnumerator PlaySoundEffectDelayed(float delay, string soundName, float volume, float pitch, bool randomizePitch, float pitchRange, float spatialBlend, bool loop, Transform attachTo, Vector3 position, float minDist, float maxDist, string eventName)
+    private IEnumerator PlaySoundEffectDelayed(float delay, string soundName, float volume, float pitch, bool randomizePitch, float pitchRange, float spatialBlend, bool loop, Transform attachTo, Vector3 position, float minDist, float maxDist, string eventName, AudioClip directClip = null)
     {
         AudioDebug.Log($"[AudioManager] Delaying SFX '{soundName}' for {delay}s");
         yield return new WaitForSeconds(delay);
-        
+
         // Remove this coroutine from tracking list
         delayedSFXCoroutines.RemoveAll(c => c == null);
-        
+
         AudioDebug.Log($"[AudioManager] Executing delayed SFX '{soundName}'");
-        PlaySoundEffectImmediate(soundName, volume, pitch, randomizePitch, pitchRange, spatialBlend, loop, attachTo, position, minDist, maxDist, eventName);
+        PlaySoundEffectImmediate(soundName, volume, pitch, randomizePitch, pitchRange, spatialBlend, loop, attachTo, position, minDist, maxDist, eventName, directClip);
     }
 
     
