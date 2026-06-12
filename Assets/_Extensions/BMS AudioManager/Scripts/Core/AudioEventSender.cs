@@ -15,19 +15,14 @@ public class AudioEventSender : MonoBehaviour
     public bool attachToThisTransform;
     public Transform transformToAttachTo;
     [Space(10)]
-    [Header("Sound Definition (preferred)")]
-    [Tooltip("Asset-safe reference to a clip + its defaults. When set, this is used instead of Track Name / Track Number.")]
+    [Header("Sound Definition (required)")]
+    [Tooltip("Asset-safe reference to the clip + its defaults. Required - this sender plays nothing without it.")]
     public SoundDefinition soundDefinition;
-    [Tooltip("When a Sound Definition is assigned, pull volume/pitch/loop/spatialBlend/fade from it. Untick to keep using the inspector values below.")]
-    public bool useDefinitionDefaults = true;
+    [Tooltip("Pull volume/pitch/loop/spatialBlend/fade from the Sound Definition. Untick to override with the inspector values below.")]
+    public bool useDefinitionDefaults = false;
 
     [Space(10)]
-    [Header("Audio Tack - Event Parameters")]
-    [Space(20)]
-    [Tooltip("The track number of the audio clip to play - used if no name is given -1 to ignore")]
-    public int trackNumber = 0; // WILL USE THE TRACK NUMBER IF NO NAME IS GIVEN
-    public string trackName = "TRACK NAME HERE"; //IF NO NAME IS GIVEN, THE TRACK NUMBER WILL BE USED
-
+    [Header("Audio Track - Event Parameters")]
     [Space(20)]
     public bool playOnEnabled = true;
     public bool loop = true;
@@ -176,6 +171,12 @@ public class AudioEventSender : MonoBehaviour
 
     private void PlayTrack()
     {
+        if (soundDefinition == null)
+        {
+            AudioDebug.LogWarning($"[AudioEventSender] '{name}' has no Sound Definition assigned - nothing to play.");
+            return;
+        }
+
         Transform targetTransform = null;
 
         if (attachToThisTransform)
@@ -187,32 +188,27 @@ public class AudioEventSender : MonoBehaviour
             targetTransform = transformToAttachTo;
         }
 
-        // Resolve playback values - a SoundDefinition (if assigned) supplies the clip directly
-        // and optionally its default parameters; otherwise fall back to the inspector fields
-        // and the string/index lookup.
-        AudioClip directClip = null;
+        // The SoundDefinition supplies the clip directly (asset-safe). Playback params come from
+        // the definition's defaults unless the user opts to override with the inspector values.
+        AudioClip directClip = soundDefinition.GetClip();
+
         float useVolume = volume, usePitch = pitch, useSpatialBlend = spatialBlend, useFadeDuration = fadeDuration;
         bool useLoop = loop;
         FadeType useFadeType = fadeType;
         FadeTarget useFadeTarget = fadeTarget;
 
-        if (soundDefinition != null)
+        if (useDefinitionDefaults)
         {
-            directClip = soundDefinition.GetClip();
-
-            if (useDefinitionDefaults)
-            {
-                useVolume = soundDefinition.volume;
-                usePitch = soundDefinition.pitch;
-                useSpatialBlend = soundDefinition.spatialBlend;
-                useLoop = soundDefinition.loop;
-                useFadeType = soundDefinition.fadeType;
-                useFadeDuration = soundDefinition.fadeDuration;
-                useFadeTarget = soundDefinition.fadeTarget;
-            }
+            useVolume = soundDefinition.volume;
+            usePitch = soundDefinition.pitch;
+            useSpatialBlend = soundDefinition.spatialBlend;
+            useLoop = soundDefinition.loop;
+            useFadeType = soundDefinition.fadeType;
+            useFadeDuration = soundDefinition.fadeDuration;
+            useFadeTarget = soundDefinition.fadeTarget;
         }
 
-        AudioEventManager.PlayTrack(audioTrackType, trackNumber, trackName, useVolume, usePitch, useSpatialBlend, useFadeType, useFadeDuration, useFadeTarget, useLoop, eventDelay, targetTransform, eventName, directClip);
+        AudioEventManager.PlayTrack(audioTrackType, -1, "", useVolume, usePitch, useSpatialBlend, useFadeType, useFadeDuration, useFadeTarget, useLoop, eventDelay, targetTransform, eventName, directClip);
 
     }
 
@@ -324,9 +320,10 @@ public class AudioEventSender : MonoBehaviour
         // Get track type specific info
         string trackTypeLabel = GetTrackTypeLabel();
         
-        UnityEditor.Handles.Label(labelPos, 
-            $"{trackTypeLabel}: {eventName}\n" + 
-            $"Track Name: {trackName}\n" +
+        string soundLabel = soundDefinition != null ? soundDefinition.name : "<none>";
+        UnityEditor.Handles.Label(labelPos,
+            $"{trackTypeLabel}: {eventName}\n" +
+            $"Sound: {soundLabel}\n" +
             $"Shape: {shapeInfo}\n" +
             $"Type: {collisionType}\n" +
             $"Tag: {targetTag}\n" +

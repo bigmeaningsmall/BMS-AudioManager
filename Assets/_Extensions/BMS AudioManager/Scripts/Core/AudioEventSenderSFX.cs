@@ -19,15 +19,12 @@ public class AudioEventSenderSFX : MonoBehaviour, IAudioEventSender
     public string eventName = "Custom SFX Event Name"; //for future use //todo - add a custom event name to the AudioEventManager class
     
     [Space(10)]
-    [Header("Sound Definition (preferred)")]
-    [Tooltip("Asset-safe reference whose clip + variations form the random SFX pool. When set, this is used instead of the SFX Name strings.")]
+    [Header("Sound Definition (required)")]
+    [Tooltip("Asset-safe reference whose clip + variations form the random SFX pool. Required - this sender plays nothing without it.")]
     public SoundDefinition soundDefinition;
 
     [Space(10)]
     [Header("Sound FX Event Parameters (SFX)")] [Space(5)]
-    [Space(20)]
-    public string[] sfxName = new string[1]; // The name of the sound effects to play - can be multiple sounds to play randomly
-    
     [Space(20)]
     public bool playOnEnabled = true;
     public bool attachSoundToThisTransform = false;
@@ -172,6 +169,12 @@ public class AudioEventSenderSFX : MonoBehaviour, IAudioEventSender
     // Play SFX with parameters from the inspector
     private void PlaySFX()
     {
+        if (soundDefinition == null)
+        {
+            AudioDebug.LogWarning($"[AudioEventSenderSFX] '{name}' has no Sound Definition assigned - nothing to play.");
+            return;
+        }
+
         // Transform attachment logic: 
         // 1. This transform (if enabled)
         // 2. Custom transform (if provided) 
@@ -208,11 +211,11 @@ public class AudioEventSenderSFX : MonoBehaviour, IAudioEventSender
             delay = Random.Range(0, eventDelay);
         }
         
-        // A SoundDefinition (if assigned) supplies the clip pool directly - asset-safe, no string lookup
-        AudioClip[] directClips = (soundDefinition != null) ? soundDefinition.GetClipPool() : null;
+        // The SoundDefinition supplies the clip pool directly - asset-safe, no string lookup
+        AudioClip[] directClips = soundDefinition.GetClipPool();
 
-        // Send the PlaySFX Event
-        AudioEventManager.PlaySFX(sfxName, volume, pitch, randomisePitch, pitchRange, spatialBlend, loop, delay, percentageChanceToPlay, attachTo, position, minDist, maxDist, eventName, directClips);
+        // Send the PlaySFX Event (soundName is null - clips are provided directly)
+        AudioEventManager.PlaySFX(null, volume, pitch, randomisePitch, pitchRange, spatialBlend, loop, delay, percentageChanceToPlay, attachTo, position, minDist, maxDist, eventName, directClips);
     }
     
     // Interface methods to call SFX management functions:
