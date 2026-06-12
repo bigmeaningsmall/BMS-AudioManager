@@ -23,6 +23,29 @@ public class SoundDefinition : ScriptableObject
     [Tooltip("Category this sound belongs to. Set automatically by the generator from the source folder.")]
     public AudioType audioType = AudioType.BGM;
 
+    /// <summary>
+    /// The track channel this definition routes to when played via AudioEvent.PlayTrack(def).
+    /// AudioType includes SFX/Null which are not valid track channels - those fall back to Aux1
+    /// with a warning (an SFX definition should be played via PlaySFX, not PlayTrack).
+    /// </summary>
+    public AudioTrackType TrackType
+    {
+        get
+        {
+            switch (audioType)
+            {
+                case AudioType.BGM:      return AudioTrackType.BGM;
+                case AudioType.Ambient:  return AudioTrackType.Ambient;
+                case AudioType.Dialogue: return AudioTrackType.Dialogue;
+                case AudioType.Aux1:     return AudioTrackType.Aux1;
+                case AudioType.Aux2:     return AudioTrackType.Aux2;
+                default:
+                    AudioDebug.LogWarning($"[SoundDefinition] '{name}' has audioType {audioType}, which is not a track channel. Falling back to Aux1. Use PlaySFX for SFX definitions.");
+                    return AudioTrackType.Aux1;
+            }
+        }
+    }
+
     [Header("Default Playback Parameters")]
     [Range(0f, 1f)] public float volume = 1f;
     [Range(0f, 2f)] public float pitch = 1f;

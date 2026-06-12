@@ -1,4 +1,6 @@
+using System;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 /// <summary>
 /// CORRECTED usage examples showing the right way to use AudioManager
@@ -14,7 +16,33 @@ public class AudioManagerUsageExample : MonoBehaviour
     {
         StartCoroutine(WaitAndRunExamples());
     }
-    
+
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            print("play sfx");
+            // DirectEventExamples();
+            // PLAY SFX - ALL parameters must be provided
+            AudioEventManager.PlaySFX(
+                new string[] { "Buff" }, // soundName array
+                1f,                             // volume
+                1f,                             // pitch
+                false,                          // randomisePitch
+                0.1f,                           // pitchRange
+                0f,                             // spatialBlend
+                false,                          // loop
+                0f,                             // delay
+                100f,                           // percentChanceToPlay
+                null,                           // attachTo
+                Vector3.zero,                   // position
+                1f,                             // minDist
+                500f,                           // maxDist
+                ""                              // eventName
+            );
+        }
+    }
+
     private System.Collections.IEnumerator WaitAndRunExamples()
     {
         yield return null; // Wait one frame

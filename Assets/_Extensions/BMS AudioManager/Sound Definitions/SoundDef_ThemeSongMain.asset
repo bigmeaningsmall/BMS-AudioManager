@@ -20,5 +20,5 @@ MonoBehaviour:
   loop: 1
   spatialBlend: 0
   fadeType: 0
-  fadeDuration: 4
-  fadeTarget: 2
+  fadeDuration: 0.5
+  fadeTarget: 1

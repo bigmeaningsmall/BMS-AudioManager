@@ -66,6 +66,72 @@ public static class AudioEvent
         AudioEventManager.PlayTrack(trackType, -1, trackName, volume, pitch, spatialBlend, fadeType, fadeDuration, fadeTarget, loop, delay, attachTo, eventName);
     }
     
+    // ==================== PLAY TRACK (SoundDefinition) OVERLOADS ====================
+    // Asset-safe alternative to the string overloads above. The definition supplies the clip,
+    // the channel (def.TrackType) and all default params; override args replace individual values.
+
+    /// <summary>
+    /// Play a SoundDefinition on its own channel using all of its default parameters.
+    /// </summary>
+    public static void PlayTrack(SoundDefinition def)
+    {
+        if (def == null) { AudioDebug.LogWarning("[AudioEvent] PlayTrack called with null SoundDefinition."); return; }
+        AudioEventManager.PlayTrack(def.TrackType, -1, "", def.volume, def.pitch, def.spatialBlend,
+            def.fadeType, def.fadeDuration, def.fadeTarget, def.loop, 0f, null, "", def.GetClip());
+    }
+
+    /// <summary>
+    /// Play a SoundDefinition with a volume override (other params from the definition).
+    /// </summary>
+    public static void PlayTrack(SoundDefinition def, float volume)
+    {
+        if (def == null) { AudioDebug.LogWarning("[AudioEvent] PlayTrack called with null SoundDefinition."); return; }
+        AudioEventManager.PlayTrack(def.TrackType, -1, "", volume, def.pitch, def.spatialBlend,
+            def.fadeType, def.fadeDuration, def.fadeTarget, def.loop, 0f, null, "", def.GetClip());
+    }
+
+    /// <summary>
+    /// Play a SoundDefinition with volume and fade-duration overrides.
+    /// </summary>
+    public static void PlayTrack(SoundDefinition def, float volume, float fadeDuration)
+    {
+        if (def == null) { AudioDebug.LogWarning("[AudioEvent] PlayTrack called with null SoundDefinition."); return; }
+        AudioEventManager.PlayTrack(def.TrackType, -1, "", volume, def.pitch, def.spatialBlend,
+            def.fadeType, fadeDuration, def.fadeTarget, def.loop, 0f, null, "", def.GetClip());
+    }
+
+    /// <summary>
+    /// Play a SoundDefinition attached to a transform (auto-spatialised when attachTo is set).
+    /// </summary>
+    public static void PlayTrack(SoundDefinition def, Transform attachTo)
+    {
+        if (def == null) { AudioDebug.LogWarning("[AudioEvent] PlayTrack called with null SoundDefinition."); return; }
+        float spatialBlend = attachTo != null ? 1f : def.spatialBlend;
+        AudioEventManager.PlayTrack(def.TrackType, -1, "", def.volume, def.pitch, spatialBlend,
+            def.fadeType, def.fadeDuration, def.fadeTarget, def.loop, 0f, attachTo, "", def.GetClip());
+    }
+
+    /// <summary>
+    /// Play a SoundDefinition on an explicit channel (override the definition's own type).
+    /// </summary>
+    public static void PlayTrack(AudioTrackType trackType, SoundDefinition def)
+    {
+        if (def == null) { AudioDebug.LogWarning("[AudioEvent] PlayTrack called with null SoundDefinition."); return; }
+        AudioEventManager.PlayTrack(trackType, -1, "", def.volume, def.pitch, def.spatialBlend,
+            def.fadeType, def.fadeDuration, def.fadeTarget, def.loop, 0f, null, "", def.GetClip());
+    }
+
+    /// <summary>
+    /// Play a SoundDefinition - full control passthrough (every param explicit).
+    /// </summary>
+    public static void PlayTrackFull(SoundDefinition def, float volume, float pitch, float spatialBlend,
+        FadeType fadeType, float fadeDuration, FadeTarget fadeTarget, bool loop, float delay, Transform attachTo, string eventName)
+    {
+        if (def == null) { AudioDebug.LogWarning("[AudioEvent] PlayTrackFull called with null SoundDefinition."); return; }
+        AudioEventManager.PlayTrack(def.TrackType, -1, "", volume, pitch, spatialBlend,
+            fadeType, fadeDuration, fadeTarget, loop, delay, attachTo, eventName, def.GetClip());
+    }
+
     // ==================== STOP TRACK OVERLOADS ====================
     
     /// <summary>
@@ -90,6 +156,26 @@ public static class AudioEvent
     public static void StopTrack(AudioTrackType trackType, float fadeDuration, FadeTarget fadeTarget)
     {
         AudioEventManager.StopTrack(trackType, fadeDuration, fadeTarget, 0f, "");
+    }
+
+    /// <summary>
+    /// Stop the channel a SoundDefinition plays on, using the definition's own fade duration and
+    /// fade target - so stop is symmetric with PlayTrack(def). Stop is still channel-based: this
+    /// stops whatever is currently on def.TrackType, not a specific clip.
+    /// </summary>
+    public static void StopTrack(SoundDefinition def)
+    {
+        if (def == null) { AudioDebug.LogWarning("[AudioEvent] StopTrack called with null SoundDefinition."); return; }
+        AudioEventManager.StopTrack(def.TrackType, def.fadeDuration, def.fadeTarget, 0f, "");
+    }
+
+    /// <summary>
+    /// Stop the channel a SoundDefinition plays on with a duration override (fade target from the definition).
+    /// </summary>
+    public static void StopTrack(SoundDefinition def, float fadeDuration)
+    {
+        if (def == null) { AudioDebug.LogWarning("[AudioEvent] StopTrack called with null SoundDefinition."); return; }
+        AudioEventManager.StopTrack(def.TrackType, fadeDuration, def.fadeTarget, 0f, "");
     }
     
     // ==================== PAUSE TRACK OVERLOADS ====================
@@ -239,5 +325,65 @@ public static class AudioEvent
     public static void PlayRandomSFX(string[] soundNames, float volume, float percentChance, float delay = 0f)
     {
         AudioEventManager.PlaySFX(soundNames, volume, 1f, true, 0.2f, 0f, false, delay, percentChance, null, Vector3.zero, 1f, 500f, "");
+    }
+
+    // ==================== SFX (SoundDefinition) OVERLOADS ====================
+    // The definition's clip + variations form the random pool (def.GetClipPool());
+    // defaults come from the definition, override args replace individual values.
+
+    /// <summary>
+    /// Play a SoundDefinition as a one-shot SFX using its default parameters.
+    /// </summary>
+    public static void PlaySFX(SoundDefinition def)
+    {
+        if (def == null) { AudioDebug.LogWarning("[AudioEvent] PlaySFX called with null SoundDefinition."); return; }
+        AudioEventManager.PlaySFX(null, def.volume, def.pitch, false, 0.1f, def.spatialBlend, def.loop, 0f, 100f, null, Vector3.zero, 1f, 500f, "", def.GetClipPool());
+    }
+
+    /// <summary>
+    /// Play a SoundDefinition SFX with a volume override.
+    /// </summary>
+    public static void PlaySFX(SoundDefinition def, float volume)
+    {
+        if (def == null) { AudioDebug.LogWarning("[AudioEvent] PlaySFX called with null SoundDefinition."); return; }
+        AudioEventManager.PlaySFX(null, volume, def.pitch, false, 0.1f, def.spatialBlend, def.loop, 0f, 100f, null, Vector3.zero, 1f, 500f, "", def.GetClipPool());
+    }
+
+    /// <summary>
+    /// Play a SoundDefinition SFX attached to a transform (3D, auto-spatialised).
+    /// </summary>
+    public static void PlaySFX(SoundDefinition def, Transform attachTo)
+    {
+        if (def == null) { AudioDebug.LogWarning("[AudioEvent] PlaySFX called with null SoundDefinition."); return; }
+        float spatialBlend = attachTo != null ? 1f : def.spatialBlend;
+        AudioEventManager.PlaySFX(null, def.volume, def.pitch, false, 0.1f, spatialBlend, def.loop, 0f, 100f, attachTo, Vector3.zero, 1f, 500f, "", def.GetClipPool());
+    }
+
+    /// <summary>
+    /// Play a SoundDefinition SFX at a world position (3D).
+    /// </summary>
+    public static void PlaySFX(SoundDefinition def, Vector3 position)
+    {
+        if (def == null) { AudioDebug.LogWarning("[AudioEvent] PlaySFX called with null SoundDefinition."); return; }
+        AudioEventManager.PlaySFX(null, def.volume, def.pitch, false, 0.1f, 1f, def.loop, 0f, 100f, null, position, 1f, 500f, "", def.GetClipPool());
+    }
+
+    /// <summary>
+    /// Play a SoundDefinition SFX with explicit 3D distance settings.
+    /// </summary>
+    public static void PlaySFX3D(SoundDefinition def, Transform attachTo, float minDist, float maxDist)
+    {
+        if (def == null) { AudioDebug.LogWarning("[AudioEvent] PlaySFX3D called with null SoundDefinition."); return; }
+        AudioEventManager.PlaySFX(null, def.volume, def.pitch, false, 0.1f, 1f, def.loop, 0f, 100f, attachTo, Vector3.zero, minDist, maxDist, "", def.GetClipPool());
+    }
+
+    /// <summary>
+    /// Play a looped SoundDefinition SFX (e.g. an engine or fire loop).
+    /// </summary>
+    public static void PlayLoopedSFX(SoundDefinition def, Transform attachTo = null)
+    {
+        if (def == null) { AudioDebug.LogWarning("[AudioEvent] PlayLoopedSFX called with null SoundDefinition."); return; }
+        float spatialBlend = attachTo != null ? 1f : def.spatialBlend;
+        AudioEventManager.PlaySFX(null, def.volume, def.pitch, false, 0.1f, spatialBlend, true, 0f, 100f, attachTo, Vector3.zero, 1f, 500f, "", def.GetClipPool());
     }
 }
