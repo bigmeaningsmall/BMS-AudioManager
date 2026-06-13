@@ -18,6 +18,9 @@ public static class SoundDefinitionGenerator
     // Where the generated SoundDefinition assets are written (parallel tree, NOT under Resources).
     private const string OutputRoot = "Assets/_Extensions/BMS AudioManager/SoundDefinitions";
 
+    // Where generated SoundBank assets are written.
+    private const string BanksRoot = "Assets/_Extensions/BMS AudioManager/SoundBanks";
+
     // Maps a source category folder name to its AudioType + a sensible default loop value.
     private struct CategoryInfo
     {
@@ -47,10 +50,15 @@ public static class SoundDefinitionGenerator
         }
 
         EnsureFolder(OutputRoot);
+        EnsureFolder(BanksRoot);
 
         int created = 0;
         int updated = 0;
         int skipped = 0;
+
+        // Accumulate definitions per category (+ a master list) so we can (re)build banks afterward.
+        var byCategory = new Dictionary<string, List<SoundDefinition>>();
+        var allDefs = new List<SoundDefinition>();
 
         try
         {
@@ -70,6 +78,12 @@ public static class SoundDefinitionGenerator
 
                 string outputFolder = $"{OutputRoot}/{category}";
                 EnsureFolder(outputFolder);
+
+                if (!byCategory.TryGetValue(category, out var categoryDefs))
+                {
+                    categoryDefs = new List<SoundDefinition>();
+                    byCategory[category] = categoryDefs;
+                }
 
                 // FindAssets recurses into subfolders (e.g. Ambient/Gentle Music), matching
                 // the runtime's Resources.LoadAll behaviour.
@@ -113,8 +127,19 @@ public static class SoundDefinitionGenerator
                             skipped++;
                         }
                     }
+
+                    // Record for bank generation (both new and existing defs)
+                    categoryDefs.Add(def);
+                    allDefs.Add(def);
                 }
             }
+
+            // (Re)build one bank per category plus a master bank of everything.
+            foreach (var pair in byCategory)
+            {
+                WriteBank($"{BanksRoot}/{pair.Key}.asset", pair.Key, pair.Value);
+            }
+            WriteBank($"{BanksRoot}/MasterBank.asset", "Master", allDefs);
         }
         finally
         {
@@ -123,7 +148,32 @@ public static class SoundDefinitionGenerator
             AssetDatabase.Refresh();
         }
 
-        AudioDebug.Log($"[SoundDefinitionGenerator] Done. Created: {created}, Updated: {updated}, Unchanged: {skipped}. Output: {OutputRoot}");
+        // Use Debug.Log directly (not AudioDebug) - this runs in edit mode where there's no
+        // AudioManager.Instance to gate logging, so AudioDebug would be silently suppressed.
+        Debug.Log($"[SoundDefinitionGenerator] Done. Created: {created}, Updated: {updated}, Unchanged: {skipped}. " +
+                  $"Banks: {byCategory.Count} category + 1 master ({allDefs.Count} defs). Output: {OutputRoot}, {BanksRoot}");
+    }
+
+    /// <summary>
+    /// Creates or updates a SoundBank asset at the given path, replacing its contents with the
+    /// supplied definitions. Idempotent: existing bank assets are reused (keeps references intact).
+    /// </summary>
+    private static void WriteBank(string assetPath, string bankId, List<SoundDefinition> defs)
+    {
+        SoundBank bank = AssetDatabase.LoadAssetAtPath<SoundBank>(assetPath);
+        if (bank == null)
+        {
+            bank = ScriptableObject.CreateInstance<SoundBank>();
+            bank.bankId = bankId;
+            bank.sounds = new List<SoundDefinition>(defs);
+            AssetDatabase.CreateAsset(bank, assetPath);
+        }
+        else
+        {
+            bank.bankId = bankId;
+            bank.sounds = new List<SoundDefinition>(defs);
+            EditorUtility.SetDirty(bank);
+        }
     }
 
     /// <summary>

@@ -54,6 +54,14 @@ public class AudioManager : MonoBehaviour
     private Dictionary<int, AudioClip> aux2AudioTracks = new Dictionary<int, AudioClip>();
     private Dictionary<string, AudioClip> soundEffects = new Dictionary<string, AudioClip>();
 
+    // Sound Banks (SoundDefinition-based loading - Stage 1/2)
+    [Header("Startup Sound Banks")]
+    [Tooltip("Banks loaded into the registry on Awake - always-available sounds (e.g. UI, music). Scene-specific banks are loaded via SceneAudioBank components instead.")]
+    [SerializeField] private List<SoundBank> startupBanks = new List<SoundBank>();
+
+    // Runtime catalogue of currently-loaded SoundDefinitions (ref-counted bank loading).
+    public AudioRegistry Registry { get; } = new AudioRegistry();
+
     // Prefab References (KEEP - tracks will use these)
     [Header("Audio Prefabs")]
     [SerializeField] private GameObject audioTrackPrefab; // Generic prefab for audio tracks
@@ -134,12 +142,35 @@ public class AudioManager : MonoBehaviour
             // Initialize track types BEFORE loading resources
             InitializeTrackTypes();
             LoadAudioResources();
+            LoadStartupBanks();
         }
         else
         {
             Destroy(gameObject);
         }
     }
+
+    // ---- Sound Bank loading (Stage 1/2) ----------------------------------------------------
+
+    private void LoadStartupBanks()
+    {
+        if (startupBanks == null || startupBanks.Count == 0)
+        {
+            AudioDebug.Log("[AudioManager] No startup banks assigned.");
+            return;
+        }
+
+        foreach (var bank in startupBanks)
+            Registry.LoadBank(bank);
+
+        AudioDebug.Log($"[AudioManager] Loaded {startupBanks.Count} startup bank(s). Registry holds {Registry.Count} definitions.");
+    }
+
+    /// <summary>Load a bank's SoundDefinitions into the registry (ref-counted). Called by SceneAudioBank.</summary>
+    public void LoadBank(SoundBank bank) => Registry.LoadBank(bank);
+
+    /// <summary>Unload a bank's SoundDefinitions from the registry (ref-counted). Called by SceneAudioBank.</summary>
+    public void UnloadBank(SoundBank bank) => Registry.UnloadBank(bank);
 
     private void InitializeTrackTypes()
     {
