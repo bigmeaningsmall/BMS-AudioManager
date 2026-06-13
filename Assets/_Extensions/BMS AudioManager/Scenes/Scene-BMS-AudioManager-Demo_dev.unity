@@ -1166,7 +1166,7 @@ PrefabInstance:
         type: 3}
       propertyPath: 'startupBanks.Array.data[0]'
       value: 
-      objectReference: {fileID: 11400000, guid: 47d7857ab5a915545851f198637375b1,
+      objectReference: {fileID: 11400000, guid: 10cff59e48e13174a9ef531c344a3b3c,
         type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -1257,8 +1257,8 @@ MonoBehaviour:
   dialogueLine: 49
   sfxOneShot: 25
   loopingSfx: 2
-  trackDef: {fileID: 0}
-  sfxDef: {fileID: 0}
+  trackDef: {fileID: 11400000, guid: 95be049d4e7d7fd48ba18e4c11d71518, type: 2}
+  sfxDef: {fileID: 11400000, guid: f230412001ee9244c8717d46dece2725, type: 2}
   quickTestId: 0
   attachPoint: {fileID: 0}
 --- !u!4 &1214705722
