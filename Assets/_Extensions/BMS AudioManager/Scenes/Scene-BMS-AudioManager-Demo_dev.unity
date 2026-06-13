@@ -1233,7 +1233,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1214705722}
   - component: {fileID: 1214705721}
-  - component: {fileID: 1214705723}
   m_Layer: 0
   m_Name: Example Usage
   m_TagString: Untagged
@@ -1248,20 +1247,20 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1214705720}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 4487e1fdcf311e14faa98da012b1153a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  playerTransform: {fileID: 2146425261}
-  ambientLocationTransform: {fileID: 961739753}
-  musicTrack: 0
-  combatTrack: 0
-  ambientTrack: 0
-  buttonClickSfx: 0
-  explosionSfx: 0
-  engineLoopSfx: 0
-  footstepDefinition: {fileID: 0}
+  musicTrack: 37
+  ambientTrack: 4
+  dialogueLine: 49
+  sfxOneShot: 25
+  loopingSfx: 2
+  trackDef: {fileID: 0}
+  sfxDef: {fileID: 0}
+  quickTestId: 0
+  attachPoint: {fileID: 0}
 --- !u!4 &1214705722
 Transform:
   m_ObjectHideFlags: 0
@@ -1277,23 +1276,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1214705723
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1214705720}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f9b13df1ed2cd9e48b3d0ae4c3c3e04c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::SoundDefinitionScriptingTest
-  musicTrack: {fileID: 11400000, guid: a96ffd8c4ac8d0544a0b77da1ef78b4f, type: 2}
-  sfx: {fileID: 11400000, guid: f230412001ee9244c8717d46dece2725, type: 2}
-  loopingSfx: {fileID: 11400000, guid: c9344565010d6d24a8a3ff37cfe029d4, type: 2}
-  testSoundId: 20
-  sfxAttachPoint: {fileID: 1214705722}
 --- !u!1 &1308476517 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 8972554719354881190, guid: d3011a8d9e8e2cb47ad213dfabb34e15,
