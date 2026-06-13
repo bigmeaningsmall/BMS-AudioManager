@@ -21,7 +21,7 @@ public class SoundDefinition : ScriptableObject
     [Tooltip("Primary audio clip for this sound.")]
     public AudioClip clip;
 
-    [Tooltip("Optional extra clips. When present, GetRandomClip() picks randomly across clip + variations (used for SFX).")]
+    [Tooltip("Optional extra clips. When present, one is picked at random per play across clip + variations - for SFX one-shots AND track playback (e.g. a random intro/ambient bed). Empty = always the primary clip.")]
     public AudioClip[] variations;
 
     [Tooltip("Category this sound belongs to. Set automatically by the generator from the source folder.")]
@@ -97,7 +97,8 @@ public class SoundDefinition : ScriptableObject
 
     /// <summary>
     /// Returns a random clip from the pool of (clip + variations). Falls back to the primary
-    /// clip when no variations are set. Used by the SFX sender for one-shot variety.
+    /// clip when no variations are set. Used for both SFX one-shot variety and track playback
+    /// (picked once per Play - a looping track repeats the chosen clip, it doesn't reshuffle mid-loop).
     /// </summary>
     public AudioClip GetRandomClip()
     {

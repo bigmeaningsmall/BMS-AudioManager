@@ -49,6 +49,10 @@ AudioEvent.PlayTrack(forestDef, 0.6f, 2f);   // volume + fade-duration overrides
 AudioEvent.PlayTrackFull(forestDef, 0.8f, 1f, 0f, FadeType.Crossfade, 2f, FadeTarget.FadeBoth, true, 0f, null, "MyEvent");
 ```
 
+> If a track definition has **variations**, one is picked at random per `PlayTrack` call (e.g. a
+> random intro stinger or ambient bed). Single-clip defs always play the primary clip. The choice is
+> made once per play - a looping track repeats the chosen clip, it doesn't reshuffle each loop.
+
 ### Stop Track
 
 ```csharp

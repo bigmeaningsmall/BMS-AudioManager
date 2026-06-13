@@ -20,7 +20,7 @@ public static class AudioEvent
     {
         if (def == null) { AudioDebug.LogWarning("[AudioEvent] PlayTrack called with null SoundDefinition."); return; }
         AudioEventManager.PlayTrack(def.TrackType, -1, "", def.volume, def.pitch, def.spatialBlend,
-            def.fadeType, def.fadeDuration, def.fadeTarget, def.loop, 0f, null, "", def.GetClip(), def.minDistance, def.maxDistance);
+            def.fadeType, def.fadeDuration, def.fadeTarget, def.loop, 0f, null, "", def.GetRandomClip(), def.minDistance, def.maxDistance);
     }
 
     /// <summary>
@@ -30,7 +30,7 @@ public static class AudioEvent
     {
         if (def == null) { AudioDebug.LogWarning("[AudioEvent] PlayTrack called with null SoundDefinition."); return; }
         AudioEventManager.PlayTrack(def.TrackType, -1, "", volume, def.pitch, def.spatialBlend,
-            def.fadeType, def.fadeDuration, def.fadeTarget, def.loop, 0f, null, "", def.GetClip(), def.minDistance, def.maxDistance);
+            def.fadeType, def.fadeDuration, def.fadeTarget, def.loop, 0f, null, "", def.GetRandomClip(), def.minDistance, def.maxDistance);
     }
 
     /// <summary>
@@ -40,7 +40,7 @@ public static class AudioEvent
     {
         if (def == null) { AudioDebug.LogWarning("[AudioEvent] PlayTrack called with null SoundDefinition."); return; }
         AudioEventManager.PlayTrack(def.TrackType, -1, "", volume, def.pitch, def.spatialBlend,
-            def.fadeType, fadeDuration, def.fadeTarget, def.loop, 0f, null, "", def.GetClip(), def.minDistance, def.maxDistance);
+            def.fadeType, fadeDuration, def.fadeTarget, def.loop, 0f, null, "", def.GetRandomClip(), def.minDistance, def.maxDistance);
     }
 
     /// <summary>
@@ -51,7 +51,7 @@ public static class AudioEvent
         if (def == null) { AudioDebug.LogWarning("[AudioEvent] PlayTrack called with null SoundDefinition."); return; }
         float spatialBlend = attachTo != null ? 1f : def.spatialBlend;
         AudioEventManager.PlayTrack(def.TrackType, -1, "", def.volume, def.pitch, spatialBlend,
-            def.fadeType, def.fadeDuration, def.fadeTarget, def.loop, 0f, attachTo, "", def.GetClip(), def.minDistance, def.maxDistance);
+            def.fadeType, def.fadeDuration, def.fadeTarget, def.loop, 0f, attachTo, "", def.GetRandomClip(), def.minDistance, def.maxDistance);
     }
 
     /// <summary>
@@ -61,7 +61,7 @@ public static class AudioEvent
     {
         if (def == null) { AudioDebug.LogWarning("[AudioEvent] PlayTrack called with null SoundDefinition."); return; }
         AudioEventManager.PlayTrack(trackType, -1, "", def.volume, def.pitch, def.spatialBlend,
-            def.fadeType, def.fadeDuration, def.fadeTarget, def.loop, 0f, null, "", def.GetClip(), def.minDistance, def.maxDistance);
+            def.fadeType, def.fadeDuration, def.fadeTarget, def.loop, 0f, null, "", def.GetRandomClip(), def.minDistance, def.maxDistance);
     }
 
     /// <summary>
@@ -72,7 +72,7 @@ public static class AudioEvent
     {
         if (def == null) { AudioDebug.LogWarning("[AudioEvent] PlayTrackFull called with null SoundDefinition."); return; }
         AudioEventManager.PlayTrack(def.TrackType, -1, "", volume, pitch, spatialBlend,
-            fadeType, fadeDuration, fadeTarget, loop, delay, attachTo, eventName, def.GetClip(), def.minDistance, def.maxDistance);
+            fadeType, fadeDuration, fadeTarget, loop, delay, attachTo, eventName, def.GetRandomClip(), def.minDistance, def.maxDistance);
     }
 
     // ==================== STOP TRACK OVERLOADS ====================

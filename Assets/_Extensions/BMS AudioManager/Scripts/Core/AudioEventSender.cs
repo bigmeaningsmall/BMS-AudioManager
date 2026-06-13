@@ -190,7 +190,9 @@ public class AudioEventSender : MonoBehaviour
 
         // The SoundDefinition supplies the clip directly (asset-safe). Playback params come from
         // the definition's defaults unless the user opts to override with the inspector values.
-        AudioClip directClip = soundDefinition.GetClip();
+        // GetRandomClip() picks from clip + variations (per play); no-ops to the primary clip
+        // when there are no variations, so single-clip track defs are unaffected.
+        AudioClip directClip = soundDefinition.GetRandomClip();
 
         float useVolume = volume, usePitch = pitch, useSpatialBlend = spatialBlend, useFadeDuration = fadeDuration;
         bool useLoop = loop;
