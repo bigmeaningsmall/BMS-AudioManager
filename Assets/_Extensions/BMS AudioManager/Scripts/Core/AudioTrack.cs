@@ -1232,48 +1232,15 @@ public class AudioTrack : MonoBehaviour
     // ==================== HELPER METHODS ====================
     #region HELPER METHODS
 
-    // Resolve audio clip by direct reference, then track name, then track number
+    // Resolve the audio clip. Clips now come exclusively from SoundDefinitions (directClip);
+    // the legacy name/index lookup into Resources has been removed. trackNumber/trackName remain
+    // in the signature only for delegate-chain compatibility and are no longer used to find clips.
     private AudioClip ResolveAudioClip(int trackNumber, string trackName, AudioClip directClip = null)
     {
-        // Direct asset reference (from a SoundDefinition) wins - asset-safe, no string lookup
         if (directClip != null) return directClip;
 
-        if (audioManager == null)
-        {
-            AudioDebug.LogError($"[AudioTrack] AudioManager is null!");
-            return null;
-        }
-
-        // Try by name first if provided AND NOT EMPTY
-        if (!string.IsNullOrEmpty(trackName))
-        {
-            AudioClip clip = trackType switch
-            {
-                AudioTrackType.BGM => audioManager.GetBGMClip(trackName),
-                AudioTrackType.Ambient => audioManager.GetAmbientClip(trackName),
-                AudioTrackType.Dialogue => audioManager.GetDialogueClip(trackName),
-                AudioTrackType.Aux1 => audioManager.GetAux1Clip(trackName),
-                AudioTrackType.Aux2 => audioManager.GetAux2Clip(trackName),
-                _ => null
-            };
-
-            if (clip != null) return clip;
-        }
-
-        // ONLY use track number if trackNumber >= 0 (your original logic)
-        if (trackNumber >= 0)
-        {
-            return trackType switch
-            {
-                AudioTrackType.BGM => audioManager.GetBGMClip(trackNumber),
-                AudioTrackType.Ambient => audioManager.GetAmbientClip(trackNumber),
-                AudioTrackType.Dialogue => audioManager.GetDialogueClip(trackNumber),
-                AudioTrackType.Aux1 => audioManager.GetAux1Clip(trackNumber),
-                AudioTrackType.Aux2 => audioManager.GetAux2Clip(trackNumber),
-                _ => null
-            };
-        }
-    
+        AudioDebug.LogError("[AudioTrack] No clip supplied. Play tracks via a SoundDefinition or SoundId " +
+                            "(string/index lookup was removed in the bank-only workflow).");
         return null;
     }
     

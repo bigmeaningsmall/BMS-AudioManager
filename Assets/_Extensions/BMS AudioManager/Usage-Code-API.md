@@ -1,6 +1,17 @@
 # BMS Audio Manager - Code API Reference
 
-Audio clips are loaded by name from `Resources/Audio/<Type>/`. The filename without extension is the string you pass.
+> **Bank-only workflow.** Audio is no longer loaded from `Resources` by string name. Clips live in
+> **SoundDefinition** assets, grouped into **SoundBank**s that you load into the registry
+> (`AudioManager.startupBanks` or a `SceneAudioBank` component). Run **BMS AudioManager → Generate
+> Sound Definitions** to (re)build the definitions, banks, and the typed **`SoundId`** enum.
+>
+> You address audio two string-free ways:
+> - **`SoundId`** — a generated typed key (inspector dropdown), resolved from the loaded registry.
+> - **`SoundDefinition`** — a direct asset reference that carries its own default params.
+>
+> The old string/index overloads (`PlayTrack(type, "name")`, `PlaySFX("name")`, `PlayTrack(type, 0)`)
+> have been **removed**. Stop/Pause/Adjust still take an `AudioTrackType` because they act on a
+> channel, not a specific clip.
 
 ---
 
@@ -10,40 +21,32 @@ The easiest way to call audio. Import nothing - just call `AudioEvent.*` from an
 
 ### Play Track
 
+A track's channel and default params come from its SoundDefinition, so calls are short. Reference a
+sound by `SoundId` (typed key) or by a `SoundDefinition` field.
+
 ```csharp
-// Minimal - plays at volume 1, loops, 0.5s fade in
-AudioEvent.PlayTrack(AudioTrackType.BGM, "MainTheme");
+[SerializeField] private SoundId mainTheme;          // dropdown of generated ids
+[SerializeField] private SoundDefinition forestDef;  // or a direct asset reference
 
-// With volume (0–1)
-AudioEvent.PlayTrack(AudioTrackType.BGM, "MainTheme", 0.8f);
+// Minimal - routes to the definition's own channel, uses its default volume/pitch/loop/fade
+AudioEvent.PlayTrack(mainTheme);
 
-// With volume + fade duration (seconds)
-AudioEvent.PlayTrack(AudioTrackType.BGM, "MainTheme", 0.8f, 2f);
+// Volume override (rest from the definition)
+AudioEvent.PlayTrack(mainTheme, 0.8f);
 
-// With volume + fade + spatial attachment (auto-sets 3D)
-AudioEvent.PlayTrack(AudioTrackType.Ambient, "ForestAmbient", 0.6f, 2f, someTransform);
+// Attached to a transform (auto-spatialised 3D)
+AudioEvent.PlayTrack(mainTheme, someTransform);
 
-// By index instead of name
-AudioEvent.PlayTrack(AudioTrackType.BGM, 0);
+// Smart dispatch - plays as a track or SFX depending on the definition's category
+AudioEvent.Play(mainTheme);
 
-// With volume, pitch, fade duration, and fade type
-AudioEvent.PlayTrack(AudioTrackType.BGM, "MainTheme", 0.8f, 1f, 2f, FadeType.Crossfade);
+// SoundDefinition reference instead of a SoundId
+AudioEvent.PlayTrack(forestDef);
+AudioEvent.PlayTrack(forestDef, 0.6f, 2f);   // volume + fade-duration overrides
 
-// Full control (all common parameters)
-AudioEvent.PlayTrackFull(
-    AudioTrackType.BGM,        // track type
-    "MainTheme",               // clip name
-    0.8f,                      // volume
-    1f,                        // pitch
-    0f,                        // spatial blend (0 = 2D, 1 = 3D)
-    FadeType.FadeInOut,        // fade type
-    2f,                        // fade duration
-    FadeTarget.FadeBoth,       // what to fade
-    true,                      // loop
-    0f,                        // delay before playing
-    null,                      // attach to transform
-    "MyEvent"                  // event name (for debug)
-);
+// Crossfade vs fade-in-out and the fade duration are set ON the SoundDefinition asset.
+// For a full ad-hoc override use the SoundDefinition passthrough:
+AudioEvent.PlayTrackFull(forestDef, 0.8f, 1f, 0f, FadeType.Crossfade, 2f, FadeTarget.FadeBoth, true, 0f, null, "MyEvent");
 ```
 
 ### Stop Track
@@ -93,56 +96,56 @@ AudioEvent.AdjustTrack(AudioTrackType.BGM, 0.5f, 1.2f, 2f);
 
 ### Play SFX
 
+A SoundDefinition's `clip` + `variations` form the random pool, so "pick one of several" is built
+into the definition - no array needed at the call site.
+
 ```csharp
-// Minimal
-AudioEvent.PlaySFX("ButtonClick");
+[SerializeField] private SoundId explosion;     // SFX-category id
+[SerializeField] private SoundDefinition footsteps; // a def with variations for random selection
 
-// With volume
-AudioEvent.PlaySFX("Explosion", 0.8f);
+// Minimal (2D, definition defaults)
+AudioEvent.PlaySFX(explosion);
 
-// Random pick from array
-AudioEvent.PlaySFX(new string[] { "Footstep1", "Footstep2", "Footstep3" });
-
-// With random pitch variation (±0.1 default)
-AudioEvent.PlaySFX("DoorCreak", 0.7f, true);
+// Volume override
+AudioEvent.PlaySFX(explosion, 0.8f);
 
 // 3D - attached to a transform (follows the object)
-AudioEvent.PlaySFX("MagicSpell", 0.8f, playerTransform);
+AudioEvent.PlaySFX(explosion, playerTransform);
 
 // 3D - at a world position
-AudioEvent.PlaySFX("Explosion", 1f, new Vector3(10f, 0f, 5f));
+AudioEvent.PlaySFX(explosion, new Vector3(10f, 0f, 5f));
 
-// 3D - explicit pitch range (x = min, y = max)
-AudioEvent.PlaySFX("HitSound", 0.9f, new Vector2(0.9f, 1.2f), enemyTransform);
+// 3D - explicit min/max distances
+AudioEvent.PlaySFX3D(explosion, thunderTransform, 5f, 100f);
 
-// 3D - with random pitch toggle + transform
-AudioEvent.PlaySFX("Footstep", 0.8f, true, playerTransform);
+// Looped (stop via AudioManager.StopAllLoopedSFX / StopAllSFX)
+AudioEvent.PlayLoopedSFX(explosion, carTransform);
 
-// 3D - with custom min/max distances
-AudioEvent.PlaySFX3D("DistantThunder", 0.6f, thunderTransform, 5f, 100f);
+// SoundDefinition reference - random variation picked automatically from the def's pool
+AudioEvent.PlaySFX(footsteps, playerTransform);
 
-// Looped (returns nothing - stop via StopAllLoopedSFX or StopAllSFX)
-AudioEvent.PlayLoopedSFX("EngineHum", 0.7f, carTransform);
-AudioEvent.PlayLoopedSFX("Ambience", 0.5f);   // 2D looped (no transform)
-
-// Random pick + chance to play + delay
-AudioEvent.PlayRandomSFX(new string[] { "Bird1", "Bird2" }, 0.4f, 30f, 2f);
-//                                                           ^vol   ^%   ^delay(s)
+// Smart dispatch also works for SFX-category sounds
+AudioEvent.Play(explosion);
 ```
 
 ---
 
 ## AudioEventManager - Full Parameter Control
 
-Use this when you need parameters that `AudioEvent` doesn't expose (spatial blend, loop toggle, delay, event name).
+Use this when you need parameters that `AudioEvent` doesn't expose (spatial blend, loop toggle, delay,
+event name). The clip is supplied via the trailing **`directClip` / `directClips`** argument (from a
+SoundDefinition). The `trackName` / `trackNumber` / `soundNames` parameters are **vestigial - ignored**
+at runtime; pass `-1` / `""` / `null`.
 
 ### Play Track
 
 ```csharp
+[SerializeField] private SoundDefinition combatDef;
+
 AudioEventManager.PlayTrack(
-    AudioTrackType.BGM,        // track type: BGM | Ambient | Dialogue
-    -1,                        // track index (-1 = use name instead)
-    "CombatTheme",             // clip name
+    combatDef.TrackType,       // track type (channel)
+    -1,                        // track index - ignored
+    "",                        // track name - ignored
     0.9f,                      // volume (0–1)
     1f,                        // pitch (0.5–2 typical)
     0f,                        // spatial blend (0 = 2D, 1 = full 3D)
@@ -152,7 +155,8 @@ AudioEventManager.PlayTrack(
     true,                      // loop
     0f,                        // delay before playing (seconds)
     null,                      // attach to Transform (or null)
-    "Combat Start"             // event name for debug (can be "")
+    "Combat Start",            // event name for debug (can be "")
+    combatDef.GetClip()        // directClip - REQUIRED (the actual clip)
 );
 ```
 
@@ -200,8 +204,10 @@ AudioEventManager.AdjustTrack(
 ### Play SFX
 
 ```csharp
+[SerializeField] private SoundDefinition hitDef; // clip + variations = random pool
+
 AudioEventManager.PlaySFX(
-    new string[] { "Hit1", "Hit2" },  // array - one picked at random
+    null,                             // soundNames - ignored
     0.8f,                             // volume
     1f,                               // pitch
     true,                             // randomise pitch
@@ -214,7 +220,8 @@ AudioEventManager.PlaySFX(
     Vector3.zero,                     // world position (used if transform is null)
     1f,                               // min distance
     30f,                              // max distance
-    "HitEffect"                       // event name
+    "HitEffect",                      // event name
+    hitDef.GetClipPool()              // directClips - REQUIRED (the clip pool)
 );
 ```
 
@@ -284,10 +291,12 @@ FadeTarget.Ignore      // instant change, no fading
 ### Duck BGM for Dialogue
 
 ```csharp
-void StartDialogue(string clip)
+[SerializeField] private SoundId dialogueLine;
+
+void StartDialogue()
 {
     AudioEvent.AdjustTrackVolume(AudioTrackType.BGM, 0.15f, 0.5f);
-    AudioEvent.PlayTrack(AudioTrackType.Dialogue, clip, 1f, 0.3f);
+    AudioEvent.PlayTrack(dialogueLine);
 }
 
 void EndDialogue()
@@ -300,31 +309,31 @@ void EndDialogue()
 ### Combat Music Crossfade
 
 ```csharp
-void EnterCombat()
-{
-    AudioEventManager.PlayTrack(AudioTrackType.BGM, -1, "CombatTheme",
-        0.9f, 1f, 0f, FadeType.Crossfade, 2f, FadeTarget.FadeBoth, true, 0f, null, "");
-}
+[SerializeField] private SoundId combatTheme;
+
+// Set the combat definition's fadeType to Crossfade and its fadeDuration on the asset;
+// then the transition style/timing is intrinsic to the sound.
+void EnterCombat() => AudioEvent.PlayTrack(combatTheme);
 ```
 
 ### Randomised Footsteps
 
 ```csharp
-private string[] steps = { "Step1", "Step2", "Step3", "Step4" };
+// Put the step variations in ONE SoundDefinition (clip + variations); the pool is picked from automatically.
+[SerializeField] private SoundId footsteps;
 
-void OnStep()
-{
-    AudioEvent.PlaySFX(steps, 0.7f, new Vector2(0.9f, 1.1f), playerTransform);
-}
+void OnStep() => AudioEvent.PlaySFX(footsteps, playerTransform);
 ```
 
 ### Zone Ambient (code version)
 
 ```csharp
+[SerializeField] private SoundId caveAmbient;
+
 void OnTriggerEnter(Collider other)
 {
     if (other.CompareTag("Player"))
-        AudioEvent.PlayTrack(AudioTrackType.Ambient, "CaveAmbient", 0.6f, 3f, transform);
+        AudioEvent.PlayTrack(caveAmbient, transform);
 }
 
 void OnTriggerExit(Collider other)
