@@ -14,18 +14,15 @@ using UnityEngine;
 /// </summary>
 public static class SoundDefinitionGenerator
 {
-    // Where the source clips live (project-level Resources folder).
-    private const string AudioRoot = "Assets/Resources/Audio";
+    // Default location for the auto-created settings asset.
+    private const string SettingsPath = "Assets/_Extensions/BMS AudioManager/SoundGeneratorSettings.asset";
 
-    // Where the generated SoundDefinition assets are written (parallel tree, NOT under Resources).
-    private const string OutputRoot = "Assets/_Extensions/BMS AudioManager/SoundDefinitions";
-
-    // Where generated SoundBank assets are written.
-    private const string BanksRoot = "Assets/_Extensions/BMS AudioManager/SoundBanks";
-
-    // Where the generated SoundId enum (typed, string-free keys) is written. Runtime code, not editor.
-    private const string GeneratedScriptsRoot = "Assets/_Extensions/BMS AudioManager/Scripts/Generated";
-    private const string SoundIdPath = GeneratedScriptsRoot + "/SoundId.cs";
+    // Resolved paths for this run - populated from SoundGeneratorSettings at the top of Generate().
+    private static string s_audioRoot;
+    private static string s_outputRoot;
+    private static string s_banksRoot;
+    private static string s_generatedScriptsRoot;
+    private static string SoundIdPath => $"{s_generatedScriptsRoot}/SoundId.cs";
 
     // Maps a source category folder name to its AudioType + a sensible default loop value.
     private struct CategoryInfo
@@ -49,14 +46,22 @@ public static class SoundDefinitionGenerator
     [MenuItem("BMS AudioManager/Generate Sound Definitions")]
     public static void Generate()
     {
-        if (!AssetDatabase.IsValidFolder(AudioRoot))
+        // Paths come from the settings asset (auto-created with defaults on first run).
+        SoundGeneratorSettings settings = GetOrCreateSettings();
+        s_audioRoot = settings.audioSourceRoot;
+        s_outputRoot = settings.soundDefinitionsRoot;
+        s_banksRoot = settings.soundBanksRoot;
+        s_generatedScriptsRoot = settings.generatedScriptsRoot;
+
+        if (!AssetDatabase.IsValidFolder(s_audioRoot))
         {
-            AudioDebug.LogError($"[SoundDefinitionGenerator] Audio root not found: {AudioRoot}");
+            Debug.LogError($"[SoundDefinitionGenerator] Audio source folder not found: '{s_audioRoot}'. " +
+                           $"Set it on the SoundGeneratorSettings asset ({SettingsPath}) - it must contain the category subfolders.");
             return;
         }
 
-        EnsureFolder(OutputRoot);
-        EnsureFolder(BanksRoot);
+        EnsureFolder(s_outputRoot);
+        EnsureFolder(s_banksRoot);
 
         int created = 0;
         int updated = 0;
@@ -84,7 +89,7 @@ public static class SoundDefinitionGenerator
             {
                 string category = kvp.Key;
                 CategoryInfo info = kvp.Value;
-                string sourceFolder = $"{AudioRoot}/{category}";
+                string sourceFolder = $"{s_audioRoot}/{category}";
 
                 if (!AssetDatabase.IsValidFolder(sourceFolder))
                 {
@@ -92,7 +97,7 @@ public static class SoundDefinitionGenerator
                     continue;
                 }
 
-                string outputFolder = $"{OutputRoot}/{category}";
+                string outputFolder = $"{s_outputRoot}/{category}";
                 EnsureFolder(outputFolder);
 
                 if (!byCategory.TryGetValue(category, out var categoryDefs))
@@ -169,9 +174,9 @@ public static class SoundDefinitionGenerator
             // (Re)build one bank per category plus a master bank of everything.
             foreach (var pair in byCategory)
             {
-                WriteBank($"{BanksRoot}/{pair.Key}.asset", pair.Key, pair.Value);
+                WriteBank($"{s_banksRoot}/{pair.Key}.asset", pair.Key, pair.Value);
             }
-            WriteBank($"{BanksRoot}/MasterBank.asset", "Master", allDefs);
+            WriteBank($"{s_banksRoot}/MasterBank.asset", "Master", allDefs);
 
             // Stage 3: assign stable ids and (re)generate the SoundId enum.
             // Use the in-memory allDefs list (every definition touched this run) rather than
@@ -190,7 +195,28 @@ public static class SoundDefinitionGenerator
         // Use Debug.Log directly (not AudioDebug) - this runs in edit mode where there's no
         // AudioManager.Instance to gate logging, so AudioDebug would be silently suppressed.
         Debug.Log($"[SoundDefinitionGenerator] Done. Created: {created}, Updated: {updated}, Unchanged: {skipped}. " +
-                  $"Banks: {byCategory.Count} category + 1 master ({allDefs.Count} defs). Output: {OutputRoot}, {BanksRoot}");
+                  $"Banks: {byCategory.Count} category + 1 master ({allDefs.Count} defs). Source: {s_audioRoot}. Output: {s_outputRoot}, {s_banksRoot}");
+    }
+
+    /// <summary>
+    /// Loads the SoundGeneratorSettings asset, creating one with defaults if none exists yet.
+    /// </summary>
+    private static SoundGeneratorSettings GetOrCreateSettings()
+    {
+        string[] guids = AssetDatabase.FindAssets("t:SoundGeneratorSettings");
+        if (guids.Length > 0)
+        {
+            var existing = AssetDatabase.LoadAssetAtPath<SoundGeneratorSettings>(AssetDatabase.GUIDToAssetPath(guids[0]));
+            if (existing != null) return existing;
+        }
+
+        var settings = ScriptableObject.CreateInstance<SoundGeneratorSettings>();
+        EnsureFolder("Assets/_Extensions/BMS AudioManager");
+        AssetDatabase.CreateAsset(settings, SettingsPath);
+        AssetDatabase.SaveAssets();
+        Debug.Log($"[SoundDefinitionGenerator] Created default settings at {SettingsPath}. " +
+                  "Edit it to point at a different audio source folder or output locations.");
+        return settings;
     }
 
     /// <summary>
@@ -200,7 +226,7 @@ public static class SoundDefinitionGenerator
     private static Dictionary<string, SoundDefinition> BuildClipGuidIndex()
     {
         var index = new Dictionary<string, SoundDefinition>();
-        string[] guids = AssetDatabase.FindAssets("t:SoundDefinition", new[] { OutputRoot });
+        string[] guids = AssetDatabase.FindAssets("t:SoundDefinition", new[] { s_outputRoot });
         foreach (string guid in guids)
         {
             string path = AssetDatabase.GUIDToAssetPath(guid);
@@ -277,7 +303,7 @@ public static class SoundDefinitionGenerator
         sb.AppendLine("}");
 
         // Working directory is the Unity project root, so the project-relative path is valid on disk.
-        Directory.CreateDirectory(GeneratedScriptsRoot);
+        Directory.CreateDirectory(s_generatedScriptsRoot);
         File.WriteAllText(SoundIdPath, sb.ToString());
         AssetDatabase.ImportAsset(SoundIdPath);
     }

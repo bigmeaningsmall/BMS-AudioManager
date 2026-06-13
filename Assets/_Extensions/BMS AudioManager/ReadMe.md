@@ -39,25 +39,32 @@ A Unity audio management system featuring 3-source crossfading, an event-driven 
 
 ### 2. Organise Audio Files
 
-Audio clips are loaded from the Resources folder by name:
+Put your clips in a folder with one subfolder per category (the subfolder name sets the category).
+The generator scans this folder; **it does NOT need to be under `Resources`** — and shouldn't be,
+since runtime loads via SoundDefinitions, not `Resources` (anything in a `Resources` folder is bundled
+into every build, defeating dependency stripping). The default scan path is `Assets/Resources/Audio`
+for backward compatibility; change it on the **SoundGeneratorSettings** asset (auto-created on first
+generate) — e.g. point it at `Assets/_Extensions/BMS AudioManager/Audio`.
 
 ```
-Assets/
-└── Resources/
-    └── Audio/
-        ├── BGM/
-        │   └── MainTheme.wav
-        ├── Ambient/
-        │   └── ForestAmbient.wav
-        ├── Dialogue/
-        │   └── NPCDialogue.wav
-        ├── Aux1/
-        │   └── StingerHit.wav
-        ├── Aux2/
-        │   └── UIMusic.wav
-        └── SFX/
-            └── ButtonClick.wav
+<your audio root - configurable>/
+├── BGM/
+│   └── MainTheme.wav
+├── Ambient/
+│   └── ForestAmbient.wav
+├── Dialogue/
+│   └── NPCDialogue.wav
+├── Aux1/
+│   └── StingerHit.wav
+├── Aux2/
+│   └── UIMusic.wav
+├── Ambience-Environment/
+└── SFX/
+    └── ButtonClick.wav
 ```
+
+> **Source clips are edit-time only.** They're consumed by the generator to build SoundDefinitions
+> (which reference the clips by GUID). Keep them anywhere under `Assets/` outside `Resources`.
 
 ### 3. Play Audio
 
