@@ -14,6 +14,7 @@ A Unity audio management system featuring 3-source crossfading, an event-driven 
 - [Code API Reference](Usage-Code-API.md) - how to call audio from scripts
 - [Inspector & Editor Usage](Usage-Editor-Inspector.md) - how to set up audio zones and components without code
 - [Changelog](CHANGELOG.md) - version history and migration notes
+- **Live reference:** add the `AudioManagerUsageExample` component (`Scripts/Examples/`) to a GameObject, assign its SoundId/SoundDefinition fields, and press Play — an on-screen panel (and right-click ContextMenu entries) runs every API snippet. The script itself is an annotated copy-paste cheat sheet.
 
 ---
 
