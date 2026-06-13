@@ -1,9 +1,11 @@
-# BMS Audio Manager v2.2.0
+# BMS Audio Manager v3.0.0
 
-A Unity audio management system featuring 3-source crossfading, an event-driven architecture, spatial audio, and inspector-driven audio zones. Designed for small-to-medium projects requiring clean audio transitions and flexible sound management.
+A Unity audio management system featuring 3-source crossfading, an event-driven architecture, spatial audio, and inspector-driven audio zones. Audio is organised through **asset-based SoundDefinitions** grouped into loadable **SoundBanks**, and addressed in code by a generated, compile-safe **`SoundId`** enum — no magic strings, no `Resources` dependency. Designed for small-to-medium projects requiring clean audio transitions and flexible sound management.
 
 **Unity Version:** 6000.4.8f1+
 **Optional Dependency:** `com.unity.splines` (required only for SplineFollower components)
+
+> **v3.0.0 is a major, breaking release.** Clip loading moved off `Resources` strings onto SoundDefinition assets + a typed `SoundId` API. See [CHANGELOG](CHANGELOG.md) for the migration summary.
 
 ---
 
@@ -11,22 +13,43 @@ A Unity audio management system featuring 3-source crossfading, an event-driven 
 
 - [Code API Reference](Usage-Code-API.md) - how to call audio from scripts
 - [Inspector & Editor Usage](Usage-Editor-Inspector.md) - how to set up audio zones and components without code
+- [Changelog](CHANGELOG.md) - version history and migration notes
 
 ---
 
 ## Key Features
 
+- **Asset-Based Sound Library** - `SoundDefinition` assets wrap each clip with its default volume/pitch/fade/3D/variation settings; one configured definition plays from a single call
+- **Typed, String-Free API** - a generated `SoundId` enum gives compile-safe, autocompleting sound keys; no magic strings, no `Resources` folder dependency
+- **Loadable Sound Banks** - group definitions into `SoundBank` assets, loaded globally at startup or per-scene (ref-counted) for availability control
+- **One-Click Generation** - the editor generator mirrors a (configurable) audio folder into definitions, banks, and the `SoundId` enum; idempotent and rename-safe (GUID-matched)
 - **3-Source Audio System** - Seamless crossfading and fade transitions with no audio gaps
 - **5 Independent Tracks** - BGM, Ambient, Dialogue, Aux1, and Aux2 with separate state machines
 - **Full Fade Control** - FadeInOut and Crossfade types; target volume, pitch, or both
-- **SFX System** - Dynamic instantiation, looping, 3D positioning, pitch randomiation, probability-based playback
-- **Spatial Audio** - Full 3D audio with transform attachment, distance attenuation, and world-position playback
+- **SFX System** - Dynamic instantiation, looping, 3D positioning, pitch/volume randomisation, probability-based playback - all driven by the definition
+- **Spatial Audio** - Full 3D audio with transform attachment, distance attenuation, and world-position playback (tracks and SFX)
 - **Audio Mixer Routing** - Each track and SFX route to their own mixer group automatically
 - **Event-Driven Architecture** - Three API tiers from one-liner helpers to full event control
 - **Assignable Zone Actions** - Per-zone enter/exit actions (Play, Stop, Pause, Adjust) configurable in the Inspector
 - **Spline Audio** - Audio sources that follow Unity Spline paths with sleep optimisation
 - **Real-Time Parameter Control** - Adjust volume, pitch, and spatial blend during playback
 - **Editor Tooling** - Custom inspector with live waveform, 3-source state visualisation, scene gizmos
+
+---
+
+## Core Concepts
+
+The system is built from five pieces. Understanding them is enough to use everything else.
+
+| Concept | What it is |
+|---|---|
+| **SoundDefinition** | A ScriptableObject "sound asset" — wraps an `AudioClip` (+ optional `variations`) and its default playback parameters (volume, pitch, loop, spatial blend, fade, SFX pitch/volume jitter, chance, delay, 3D distances). The single source of truth for *how a sound plays*. |
+| **SoundBank** | A named list of SoundDefinitions and the **unit of loading**. The generator emits one bank per category plus a `MasterBank` of everything. |
+| **AudioRegistry** | The runtime catalogue of *currently loaded* definitions. Banks are loaded/unloaded into it with **ref-counting**, so a definition shared by two loaded banks survives until the last one unloads. |
+| **SoundId** | A generated `enum` (one member per definition, stable id values) — the **string-free key** you use in code and inspector dropdowns. Resolved through the registry, so a sound only plays when its bank is loaded. |
+| **Senders / AudioEvent** | Two ways to trigger sounds: inspector **sender components** (trigger/collision zones) and the static **`AudioEvent`** code API. Both raise the same events that the `AudioManager` routes to the track/SFX system. |
+
+**The flow:** author clips → **Generate Sound Definitions** (builds definitions + banks + `SoundId`) → load a bank (startup or per-scene) → play by `SoundId` / `SoundDefinition` from code or a sender.
 
 ---
 
@@ -42,9 +65,9 @@ A Unity audio management system featuring 3-source crossfading, an event-driven 
 Put your clips in a folder with one subfolder per category (the subfolder name sets the category).
 The generator scans this folder; **it does NOT need to be under `Resources`** — and shouldn't be,
 since runtime loads via SoundDefinitions, not `Resources` (anything in a `Resources` folder is bundled
-into every build, defeating dependency stripping). The default scan path is `Assets/Resources/Audio`
-for backward compatibility; change it on the **SoundGeneratorSettings** asset (auto-created on first
-generate) — e.g. point it at `Assets/_Extensions/BMS AudioManager/Audio`.
+into every build, defeating dependency stripping). The scan path is set on the **SoundGeneratorSettings**
+asset (auto-created in the package root on first generate); its `audioSourceRoot` defaults to
+`Assets/Audio`. Point it wherever your clips live.
 
 ```
 <your audio root - configurable>/
@@ -221,11 +244,12 @@ Attach to any GameObject to play, stop, or pause a track when the player enters 
 
 | Inspector Field | Description |
 |---|---|
-| Audio Track Type | BGM / Ambient / Dialogue |
-| Track Name | Clip filename (without extension) |
+| Audio Track Type | BGM / Ambient / Dialogue / Aux1 / Aux2 |
+| Sound Definition | **Required** - the sound asset to play |
+| Use Definition Defaults | Pull volume/pitch/loop/spatial/fade from the definition (untick to use the fields below) |
 | Fade Type | FadeInOut or Crossfade |
 | Fade Duration / Target | Duration in seconds; what to fade |
-| Volume / Pitch | Playback parameters |
+| Volume / Pitch | Playback parameters (used when *Use Definition Defaults* is off) |
 | Spatial Blend | 0 = 2D, 1 = full 3D |
 | Play On Enabled | Auto-play when the GameObject activates |
 | Loop | Loop the track |
@@ -252,9 +276,10 @@ audioEventSender.AdjustParameters();
 
 | Inspector Field | Description |
 |---|---|
-| SFX Name (array) | One or more clip names - selected randomly |
+| Sound Definition | **Required** - its `clip` + `variations` form the random pool |
+| Use Definition Defaults | Pull volume/pitch/jitter/chance/loop/3D/delay from the definition (untick to use the fields below) |
 | Play On Enabled | Auto-play on activate |
-| Volume / Pitch | Playback parameters |
+| Volume / Pitch | Playback parameters (used when *Use Definition Defaults* is off) |
 | Randomise Pitch / Pitch Range | Pitch variation |
 | Spatial Blend | 0 = 2D, 1 = full 3D |
 | Loop | Looped playback |
@@ -264,6 +289,10 @@ audioEventSender.AdjustParameters();
 | Use Custom Position | Play at a fixed world position |
 | Collision Type / Target Tag | Trigger or Collision zone setup |
 | Attach Sound To This Transform | Sound follows zone object |
+
+> Most SFX fields are now better set **on the SoundDefinition asset** (so every sender/call reuses
+> them). Leave *Use Definition Defaults* on and configure the definition; untick only for a one-off
+> per-placement override.
 
 **Public methods:**
 ```csharp
@@ -343,7 +372,7 @@ Slots can be left empty - unassigned tracks route to the prefab's default output
 
 ## SFX System
 
-SFX clips are loaded from `Resources/Audio/SFX/` by name. Each `PlaySFX` call instantiates a temporary GameObject with an `AudioSource`, which auto-destroys when the clip finishes.
+SFX play from a `SoundDefinition` (by `SoundId` or direct reference) whose bank is loaded. Each `PlaySFX` call instantiates a temporary GameObject with an `AudioSource`, which auto-destroys when the clip finishes. The definition's `clip` + `variations` form the random pool, and its **SFX Variation & 3D** fields (pitch/volume jitter, percent-chance, delay, min/max distance) are applied automatically — so a configured definition needs only `PlaySFX(def)`.
 
 ### Global SFX Controls
 
@@ -493,7 +522,7 @@ public void OnFire() => AudioEvent.PlaySFX(gunShots, transform);
 
 Clips are no longer loaded from `Resources`. Instead:
 
-1. **SoundDefinition** assets wrap each clip (+ optional variations) and its default playback params. Generated by **BMS AudioManager → Generate Sound Definitions**, which mirrors your `Resources/Audio/<type>` tree into asset-safe definitions, groups them into **SoundBank**s (one per category + a `MasterBank`), and emits the typed **`SoundId`** enum.
+1. **SoundDefinition** assets wrap each clip (+ optional variations) and its default playback params. Generated by **BMS AudioManager → Generate Sound Definitions**, which mirrors your configured audio folder (`SoundGeneratorSettings.audioSourceRoot`) into asset-safe definitions, groups them into **SoundBank**s (one per category + a `MasterBank`), and emits the typed **`SoundId`** enum.
 2. **SoundBanks** are loaded into the **AudioRegistry** at runtime - globally via `AudioManager.startupBanks`, or per-scene via a `SceneAudioBank` component (ref-counted, so banks shared across scenes aren't unloaded early).
 3. Code addresses sounds by **`SoundId`** (typed dropdown key, resolved from the registry) or by a direct **`SoundDefinition`** reference. No strings, no index, compile-safe.
 
@@ -575,7 +604,9 @@ The bridge maps BMS track/clip names to middleware event paths via a serialised 
 ## Known Limitations
 
 - Only one clip per track type can play at a time (BGM, Ambient, Dialogue, Aux1, Aux2 - by design; use SFX for additional concurrent sounds)
-- SFX clips are loaded synchronously on first play; consider pre-warming critical sounds
+- A sound only plays when its bank is loaded into the registry (assign **MasterBank** to `startupBanks` for "everything available")
+- `AudioRegistry.UnloadBank` controls **availability**, not memory - clips stay resident until an Addressables provider is added (see Audio Loading)
+- Clips referenced by definitions load with their owning scene/assets (synchronous); async/streaming needs the deferred Addressables provider
 - `SplineFollower` requires `com.unity.splines` - the project will not compile if the package is absent and these scripts are included
 - Mixer group slots on the AudioManager are optional - if left unassigned, audio sources route to whatever is set on the shared prefab
 
@@ -591,4 +622,4 @@ Free to use in any project, including commercial. You may not redistribute modif
 
 ---
 
-*BMS Audio Manager v2.2.0 - Unity 6*
+*BMS Audio Manager v3.0.0 - Unity 6*

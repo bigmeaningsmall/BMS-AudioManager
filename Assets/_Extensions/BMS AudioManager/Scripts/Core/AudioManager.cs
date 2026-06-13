@@ -23,8 +23,6 @@ public enum AudioTrackType
 
 public class AudioManager : MonoBehaviour
 {
-    [Header("VERSION")]
-    [SerializeField] private string version = "v2.2.0";
 
     [Header("DEBUG SETTINGS")]
     [SerializeField] private bool enableDebugLogging = true;
