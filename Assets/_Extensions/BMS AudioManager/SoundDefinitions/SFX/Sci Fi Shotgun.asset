@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ee9a1cb6078a55c42a2b364279de8e50, type: 3}
   m_Name: Sci Fi Shotgun
   m_EditorClassIdentifier: Assembly-CSharp::SoundDefinition
+  id: 43
   clip: {fileID: 8300000, guid: 88e67aac3faaf624d89680fa15653e85, type: 3}
   variations: []
   audioType: 6

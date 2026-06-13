@@ -25,6 +25,10 @@ public class SoundDefinitionScriptingTest : MonoBehaviour
     [Tooltip("A looping SFX definition (e.g. an engine/fire loop).")]
     public SoundDefinition loopingSfx;
 
+    [Header("Typed SoundId (string-free) test")]
+    [Tooltip("Pick any generated sound from the dropdown. Press T to play it - Play() auto-routes to track or SFX by the definition's category. Requires the sound's bank to be loaded.")]
+    public SoundId testSoundId = SoundId.None;
+
     [Header("Options")]
     [Tooltip("When playing the 3D SFX, attach it to this transform (defaults to this object).")]
     public Transform sfxAttachPoint;
@@ -82,6 +86,14 @@ public class SoundDefinitionScriptingTest : MonoBehaviour
             if (AudioManager.Instance != null)
                 AudioManager.Instance.StopAllSFX();
         }
+
+        // ---- Typed SoundId (string-free) ----
+        if (Input.GetKeyDown(KeyCode.T))
+        {
+            // One call, no strings, no references - resolved from the registry by id and
+            // auto-routed to a track or SFX by the definition's category.
+            AudioEvent.Play(testSoundId);
+        }
     }
 
     private void OnGUI()
@@ -95,6 +107,7 @@ public class SoundDefinitionScriptingTest : MonoBehaviour
         GUILayout.Label("W - SFX 3D at attach point");
         GUILayout.Label("E - Looping SFX");
         GUILayout.Label("R - Stop all SFX");
+        GUILayout.Label($"T - Play SoundId.{testSoundId} (typed)");
         GUILayout.EndArea();
     }
 }

@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ee9a1cb6078a55c42a2b364279de8e50, type: 3}
   m_Name: Explosion Thump
   m_EditorClassIdentifier: Assembly-CSharp::SoundDefinition
+  id: 27
   clip: {fileID: 8300000, guid: d048598b8ec45ad408f82b79fe5b604b, type: 3}
   variations: []
   audioType: 6

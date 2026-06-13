@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ee9a1cb6078a55c42a2b364279de8e50, type: 3}
   m_Name: Explosion Flesh
   m_EditorClassIdentifier: Assembly-CSharp::SoundDefinition
+  id: 24
   clip: {fileID: 8300000, guid: c3155d931ef8a6442b8dd7c139c59b24, type: 3}
   variations: []
   audioType: 6

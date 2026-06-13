@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ee9a1cb6078a55c42a2b364279de8e50, type: 3}
   m_Name: Assault Rifle Shot
   m_EditorClassIdentifier: Assembly-CSharp::SoundDefinition
+  id: 7
   clip: {fileID: 8300000, guid: bcc49f2c9548ce4439727cebac85772c, type: 3}
   variations: []
   audioType: 6

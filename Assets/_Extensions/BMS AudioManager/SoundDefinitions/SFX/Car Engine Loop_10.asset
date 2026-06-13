@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ee9a1cb6078a55c42a2b364279de8e50, type: 3}
   m_Name: Car Engine Loop_10
   m_EditorClassIdentifier: Assembly-CSharp::SoundDefinition
+  id: 10
   clip: {fileID: 8300000, guid: 2665368537c2bec4f8f6599240957737, type: 3}
   variations: []
   audioType: 6

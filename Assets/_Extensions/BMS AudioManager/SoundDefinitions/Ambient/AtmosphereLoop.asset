@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ee9a1cb6078a55c42a2b364279de8e50, type: 3}
   m_Name: AtmosphereLoop
   m_EditorClassIdentifier: Assembly-CSharp::SoundDefinition
+  id: 8
   clip: {fileID: 8300000, guid: d0eecfc58a51633468c44a94d7f7e0fb, type: 3}
   variations: []
   audioType: 2

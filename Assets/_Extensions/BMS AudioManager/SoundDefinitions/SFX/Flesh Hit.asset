@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ee9a1cb6078a55c42a2b364279de8e50, type: 3}
   m_Name: Flesh Hit
   m_EditorClassIdentifier: Assembly-CSharp::SoundDefinition
+  id: 29
   clip: {fileID: 8300000, guid: c0675d8a6cf82344a9b47dd0fc6f5be6, type: 3}
   variations: []
   audioType: 6

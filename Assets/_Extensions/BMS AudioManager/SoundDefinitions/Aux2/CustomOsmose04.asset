@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ee9a1cb6078a55c42a2b364279de8e50, type: 3}
   m_Name: CustomOsmose04
   m_EditorClassIdentifier: Assembly-CSharp::SoundDefinition
+  id: 20
   clip: {fileID: 8300000, guid: 7eafdfd9342529543b702176c1826c92, type: 3}
   variations: []
   audioType: 5
@@ -19,6 +20,6 @@ MonoBehaviour:
   pitch: 1
   loop: 1
   spatialBlend: 0
-  fadeType: 0
+  fadeType: 1
   fadeDuration: 0.5
-  fadeTarget: 3
+  fadeTarget: 1

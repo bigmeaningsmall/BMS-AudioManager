@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ee9a1cb6078a55c42a2b364279de8e50, type: 3}
   m_Name: Synthpop2
   m_EditorClassIdentifier: Assembly-CSharp::SoundDefinition
+  id: 47
   clip: {fileID: 8300000, guid: fc8794d82890fad42a309c3ca38c8445, type: 3}
   variations: []
   audioType: 1

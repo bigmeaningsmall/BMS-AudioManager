@@ -21,6 +21,7 @@ public class AudioRegistry
 
     private readonly Dictionary<SoundDefinition, Entry> entries = new Dictionary<SoundDefinition, Entry>();
     private readonly Dictionary<string, SoundDefinition> byName = new Dictionary<string, SoundDefinition>();
+    private readonly Dictionary<int, SoundDefinition> byId = new Dictionary<int, SoundDefinition>();
 
     /// <summary>Number of distinct SoundDefinitions currently loaded.</summary>
     public int Count => entries.Count;
@@ -47,6 +48,13 @@ public class AudioRegistry
             {
                 entries[def] = new Entry { def = def, refCount = 1 };
                 byName[def.name] = def; // last-wins if two defs share a name
+
+                // Id index powers the SoundId typed API. id 0 = not yet generated.
+                if (def.id != 0)
+                    byId[def.id] = def;
+                else
+                    AudioDebug.LogWarning($"[AudioRegistry] '{def.name}' has id 0 (not generated) - it won't be reachable via SoundId. Run 'Generate Sound Definitions'.");
+
                 added++;
             }
         }
@@ -77,6 +85,9 @@ public class AudioRegistry
                     // Only clear the name index if it still points at THIS def
                     if (byName.TryGetValue(def.name, out SoundDefinition mapped) && mapped == def)
                         byName.Remove(def.name);
+                    // Same for the id index
+                    if (def.id != 0 && byId.TryGetValue(def.id, out SoundDefinition mappedById) && mappedById == def)
+                        byId.Remove(def.id);
                     removed++;
                 }
             }
@@ -95,6 +106,13 @@ public class AudioRegistry
         return byName.TryGetValue(name, out SoundDefinition def) ? def : null;
     }
 
+    /// <summary>Look up a loaded definition by its stable id (the SoundId enum value).</summary>
+    public SoundDefinition Get(int id)
+    {
+        if (id == 0) return null;
+        return byId.TryGetValue(id, out SoundDefinition def) ? def : null;
+    }
+
     /// <summary>All currently loaded definitions (e.g. for debug listings).</summary>
     public IEnumerable<SoundDefinition> All => entries.Keys;
 
@@ -103,5 +121,6 @@ public class AudioRegistry
     {
         entries.Clear();
         byName.Clear();
+        byId.Clear();
     }
 }

@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ee9a1cb6078a55c42a2b364279de8e50, type: 3}
   m_Name: UI Beep
   m_EditorClassIdentifier: Assembly-CSharp::SoundDefinition
+  id: 48
   clip: {fileID: 8300000, guid: 2f42a0029e3262648b44c582623630ff, type: 3}
   variations: []
   audioType: 6

@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ee9a1cb6078a55c42a2b364279de8e50, type: 3}
   m_Name: Horror Vol4 Imulsion Intensity 1
   m_EditorClassIdentifier: Assembly-CSharp::SoundDefinition
+  id: 35
   clip: {fileID: 8300000, guid: 082d6fa173448f2429341dbe36deb954, type: 3}
   variations: []
   audioType: 2

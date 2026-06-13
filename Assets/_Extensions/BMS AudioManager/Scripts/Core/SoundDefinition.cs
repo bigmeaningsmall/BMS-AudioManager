@@ -13,6 +13,10 @@ using Random = UnityEngine.Random;
 [CreateAssetMenu(fileName = "SoundDef", menuName = "BMS AudioManager/Sound Definition")]
 public class SoundDefinition : ScriptableObject
 {
+    [Header("Identity")]
+    [Tooltip("Stable unique id - assigned by the generator and used as the SoundId enum value. Do not edit. 0 = unassigned (run Generate Sound Definitions).")]
+    public int id;
+
     [Header("Clip")]
     [Tooltip("Primary audio clip for this sound.")]
     public AudioClip clip;

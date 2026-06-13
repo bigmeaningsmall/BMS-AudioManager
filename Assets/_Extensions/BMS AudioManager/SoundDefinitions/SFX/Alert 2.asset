@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ee9a1cb6078a55c42a2b364279de8e50, type: 3}
   m_Name: Alert 2
   m_EditorClassIdentifier: Assembly-CSharp::SoundDefinition
+  id: 2
   clip: {fileID: 8300000, guid: c928b0ebc5e0b7940a62c0319b35c800, type: 3}
   variations: []
   audioType: 6

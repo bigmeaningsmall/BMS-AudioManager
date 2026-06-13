@@ -386,4 +386,98 @@ public static class AudioEvent
         float spatialBlend = attachTo != null ? 1f : def.spatialBlend;
         AudioEventManager.PlaySFX(null, def.volume, def.pitch, false, 0.1f, spatialBlend, true, 0f, 100f, attachTo, Vector3.zero, 1f, 500f, "", def.GetClipPool());
     }
+
+    // ==================== SoundId (typed, string-free) OVERLOADS ====================
+    // These resolve a SoundId to its SoundDefinition via the runtime registry, then reuse the
+    // SoundDefinition overloads above. A SoundId only resolves if its bank is currently loaded.
+
+    /// <summary>
+    /// Resolves a SoundId to its loaded SoundDefinition. Returns null (with a warning) if the
+    /// id is None, the AudioManager isn't ready, or the sound's bank isn't currently loaded.
+    /// </summary>
+    private static SoundDefinition Resolve(SoundId id, string caller)
+    {
+        if (id == SoundId.None)
+        {
+            AudioDebug.LogWarning($"[AudioEvent] {caller} called with SoundId.None.");
+            return null;
+        }
+        if (AudioManager.Instance == null)
+        {
+            AudioDebug.LogWarning($"[AudioEvent] {caller}({id}) - no AudioManager in scene yet.");
+            return null;
+        }
+
+        SoundDefinition def = AudioManager.Instance.Registry.Get((int)id);
+        if (def == null)
+            AudioDebug.LogWarning($"[AudioEvent] {caller}({id}) - not loaded. Is its bank loaded (startupBanks / SceneAudioBank)?");
+        return def;
+    }
+
+    // ---- Smart dispatch: routes to track or SFX based on the definition's audioType ----
+
+    /// <summary>Play a sound by id - automatically routed to a track or SFX by its category.</summary>
+    public static void Play(SoundId id)
+    {
+        SoundDefinition def = Resolve(id, "Play");
+        if (def == null) return;
+        if (def.audioType == AudioType.SFX) PlaySFX(def);
+        else PlayTrack(def);
+    }
+
+    /// <summary>Play a sound by id attached to a transform - routed to a track or SFX by its category.</summary>
+    public static void Play(SoundId id, Transform attachTo)
+    {
+        SoundDefinition def = Resolve(id, "Play");
+        if (def == null) return;
+        if (def.audioType == AudioType.SFX) PlaySFX(def, attachTo);
+        else PlayTrack(def, attachTo);
+    }
+
+    // ---- Explicit track ----
+
+    public static void PlayTrack(SoundId id)
+    {
+        SoundDefinition def = Resolve(id, "PlayTrack");
+        if (def != null) PlayTrack(def);
+    }
+
+    public static void PlayTrack(SoundId id, float volume)
+    {
+        SoundDefinition def = Resolve(id, "PlayTrack");
+        if (def != null) PlayTrack(def, volume);
+    }
+
+    public static void PlayTrack(SoundId id, Transform attachTo)
+    {
+        SoundDefinition def = Resolve(id, "PlayTrack");
+        if (def != null) PlayTrack(def, attachTo);
+    }
+
+    /// <summary>Stop the channel this sound plays on, using the definition's own fade settings.</summary>
+    public static void StopTrack(SoundId id)
+    {
+        SoundDefinition def = Resolve(id, "StopTrack");
+        if (def != null) StopTrack(def);
+    }
+
+    // ---- Explicit SFX ----
+
+    public static void PlaySFX(SoundId id)
+    {
+        SoundDefinition def = Resolve(id, "PlaySFX");
+        if (def != null) PlaySFX(def);
+    }
+
+    public static void PlaySFX(SoundId id, Transform attachTo)
+    {
+        SoundDefinition def = Resolve(id, "PlaySFX");
+        if (def != null) PlaySFX(def, attachTo);
+    }
+
+    public static void PlaySFX(SoundId id, Vector3 position)
+    {
+        SoundDefinition def = Resolve(id, "PlaySFX");
+        if (def != null) PlaySFX(def, position);
+    }
 }

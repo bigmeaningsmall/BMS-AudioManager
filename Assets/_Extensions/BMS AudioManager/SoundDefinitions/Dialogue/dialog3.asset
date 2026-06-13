@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ee9a1cb6078a55c42a2b364279de8e50, type: 3}
   m_Name: dialog3
   m_EditorClassIdentifier: Assembly-CSharp::SoundDefinition
+  id: 51
   clip: {fileID: 8300000, guid: 68e188f1c836fb441a6a4258c322a487, type: 3}
   variations: []
   audioType: 3

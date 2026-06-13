@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ee9a1cb6078a55c42a2b364279de8e50, type: 3}
   m_Name: Impact Generic
   m_EditorClassIdentifier: Assembly-CSharp::SoundDefinition
+  id: 36
   clip: {fileID: 8300000, guid: a83b912e4562fe344a3f944f7074b12f, type: 3}
   variations: []
   audioType: 6

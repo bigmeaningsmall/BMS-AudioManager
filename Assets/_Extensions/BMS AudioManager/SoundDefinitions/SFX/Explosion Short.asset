@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ee9a1cb6078a55c42a2b364279de8e50, type: 3}
   m_Name: Explosion Short
   m_EditorClassIdentifier: Assembly-CSharp::SoundDefinition
+  id: 25
   clip: {fileID: 8300000, guid: e7661c4b9951420468fcd6e4aa812d9c, type: 3}
   variations: []
   audioType: 6
