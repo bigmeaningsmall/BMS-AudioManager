@@ -20,7 +20,7 @@ public static class AudioEvent
     {
         if (def == null) { AudioDebug.LogWarning("[AudioEvent] PlayTrack called with null SoundDefinition."); return; }
         AudioEventManager.PlayTrack(def.TrackType, -1, "", def.volume, def.pitch, def.spatialBlend,
-            def.fadeType, def.fadeDuration, def.fadeTarget, def.loop, 0f, null, "", def.GetClip());
+            def.fadeType, def.fadeDuration, def.fadeTarget, def.loop, 0f, null, "", def.GetClip(), def.minDistance, def.maxDistance);
     }
 
     /// <summary>
@@ -30,7 +30,7 @@ public static class AudioEvent
     {
         if (def == null) { AudioDebug.LogWarning("[AudioEvent] PlayTrack called with null SoundDefinition."); return; }
         AudioEventManager.PlayTrack(def.TrackType, -1, "", volume, def.pitch, def.spatialBlend,
-            def.fadeType, def.fadeDuration, def.fadeTarget, def.loop, 0f, null, "", def.GetClip());
+            def.fadeType, def.fadeDuration, def.fadeTarget, def.loop, 0f, null, "", def.GetClip(), def.minDistance, def.maxDistance);
     }
 
     /// <summary>
@@ -40,7 +40,7 @@ public static class AudioEvent
     {
         if (def == null) { AudioDebug.LogWarning("[AudioEvent] PlayTrack called with null SoundDefinition."); return; }
         AudioEventManager.PlayTrack(def.TrackType, -1, "", volume, def.pitch, def.spatialBlend,
-            def.fadeType, fadeDuration, def.fadeTarget, def.loop, 0f, null, "", def.GetClip());
+            def.fadeType, fadeDuration, def.fadeTarget, def.loop, 0f, null, "", def.GetClip(), def.minDistance, def.maxDistance);
     }
 
     /// <summary>
@@ -51,7 +51,7 @@ public static class AudioEvent
         if (def == null) { AudioDebug.LogWarning("[AudioEvent] PlayTrack called with null SoundDefinition."); return; }
         float spatialBlend = attachTo != null ? 1f : def.spatialBlend;
         AudioEventManager.PlayTrack(def.TrackType, -1, "", def.volume, def.pitch, spatialBlend,
-            def.fadeType, def.fadeDuration, def.fadeTarget, def.loop, 0f, attachTo, "", def.GetClip());
+            def.fadeType, def.fadeDuration, def.fadeTarget, def.loop, 0f, attachTo, "", def.GetClip(), def.minDistance, def.maxDistance);
     }
 
     /// <summary>
@@ -61,7 +61,7 @@ public static class AudioEvent
     {
         if (def == null) { AudioDebug.LogWarning("[AudioEvent] PlayTrack called with null SoundDefinition."); return; }
         AudioEventManager.PlayTrack(trackType, -1, "", def.volume, def.pitch, def.spatialBlend,
-            def.fadeType, def.fadeDuration, def.fadeTarget, def.loop, 0f, null, "", def.GetClip());
+            def.fadeType, def.fadeDuration, def.fadeTarget, def.loop, 0f, null, "", def.GetClip(), def.minDistance, def.maxDistance);
     }
 
     /// <summary>
@@ -72,7 +72,7 @@ public static class AudioEvent
     {
         if (def == null) { AudioDebug.LogWarning("[AudioEvent] PlayTrackFull called with null SoundDefinition."); return; }
         AudioEventManager.PlayTrack(def.TrackType, -1, "", volume, pitch, spatialBlend,
-            fadeType, fadeDuration, fadeTarget, loop, delay, attachTo, eventName, def.GetClip());
+            fadeType, fadeDuration, fadeTarget, loop, delay, attachTo, eventName, def.GetClip(), def.minDistance, def.maxDistance);
     }
 
     // ==================== STOP TRACK OVERLOADS ====================
@@ -186,16 +186,16 @@ public static class AudioEvent
     public static void PlaySFX(SoundDefinition def)
     {
         if (def == null) { AudioDebug.LogWarning("[AudioEvent] PlaySFX called with null SoundDefinition."); return; }
-        AudioEventManager.PlaySFX(null, def.volume, def.pitch, false, 0.1f, def.spatialBlend, def.loop, 0f, 100f, null, Vector3.zero, 1f, 500f, "", def.GetClipPool());
+        AudioEventManager.PlaySFX(null, def.NextSfxVolume(), def.pitch, def.randomizePitch, def.pitchRange, def.spatialBlend, def.loop, def.NextSfxDelay(), def.percentChanceToPlay, null, Vector3.zero, def.minDistance, def.maxDistance, "", def.GetClipPool());
     }
 
     /// <summary>
-    /// Play a SoundDefinition SFX with a volume override.
+    /// Play a SoundDefinition SFX with a volume override (explicit volume - no jitter).
     /// </summary>
     public static void PlaySFX(SoundDefinition def, float volume)
     {
         if (def == null) { AudioDebug.LogWarning("[AudioEvent] PlaySFX called with null SoundDefinition."); return; }
-        AudioEventManager.PlaySFX(null, volume, def.pitch, false, 0.1f, def.spatialBlend, def.loop, 0f, 100f, null, Vector3.zero, 1f, 500f, "", def.GetClipPool());
+        AudioEventManager.PlaySFX(null, volume, def.pitch, def.randomizePitch, def.pitchRange, def.spatialBlend, def.loop, def.NextSfxDelay(), def.percentChanceToPlay, null, Vector3.zero, def.minDistance, def.maxDistance, "", def.GetClipPool());
     }
 
     /// <summary>
@@ -205,7 +205,7 @@ public static class AudioEvent
     {
         if (def == null) { AudioDebug.LogWarning("[AudioEvent] PlaySFX called with null SoundDefinition."); return; }
         float spatialBlend = attachTo != null ? 1f : def.spatialBlend;
-        AudioEventManager.PlaySFX(null, def.volume, def.pitch, false, 0.1f, spatialBlend, def.loop, 0f, 100f, attachTo, Vector3.zero, 1f, 500f, "", def.GetClipPool());
+        AudioEventManager.PlaySFX(null, def.NextSfxVolume(), def.pitch, def.randomizePitch, def.pitchRange, spatialBlend, def.loop, def.NextSfxDelay(), def.percentChanceToPlay, attachTo, Vector3.zero, def.minDistance, def.maxDistance, "", def.GetClipPool());
     }
 
     /// <summary>
@@ -214,26 +214,26 @@ public static class AudioEvent
     public static void PlaySFX(SoundDefinition def, Vector3 position)
     {
         if (def == null) { AudioDebug.LogWarning("[AudioEvent] PlaySFX called with null SoundDefinition."); return; }
-        AudioEventManager.PlaySFX(null, def.volume, def.pitch, false, 0.1f, 1f, def.loop, 0f, 100f, null, position, 1f, 500f, "", def.GetClipPool());
+        AudioEventManager.PlaySFX(null, def.NextSfxVolume(), def.pitch, def.randomizePitch, def.pitchRange, 1f, def.loop, def.NextSfxDelay(), def.percentChanceToPlay, null, position, def.minDistance, def.maxDistance, "", def.GetClipPool());
     }
 
     /// <summary>
-    /// Play a SoundDefinition SFX with explicit 3D distance settings.
+    /// Play a SoundDefinition SFX with explicit 3D distance settings (overrides the def's min/max).
     /// </summary>
     public static void PlaySFX3D(SoundDefinition def, Transform attachTo, float minDist, float maxDist)
     {
         if (def == null) { AudioDebug.LogWarning("[AudioEvent] PlaySFX3D called with null SoundDefinition."); return; }
-        AudioEventManager.PlaySFX(null, def.volume, def.pitch, false, 0.1f, 1f, def.loop, 0f, 100f, attachTo, Vector3.zero, minDist, maxDist, "", def.GetClipPool());
+        AudioEventManager.PlaySFX(null, def.NextSfxVolume(), def.pitch, def.randomizePitch, def.pitchRange, 1f, def.loop, def.NextSfxDelay(), def.percentChanceToPlay, attachTo, Vector3.zero, minDist, maxDist, "", def.GetClipPool());
     }
 
     /// <summary>
-    /// Play a looped SoundDefinition SFX (e.g. an engine or fire loop).
+    /// Play a looped SoundDefinition SFX (e.g. an engine or fire loop). Forces loop on.
     /// </summary>
     public static void PlayLoopedSFX(SoundDefinition def, Transform attachTo = null)
     {
         if (def == null) { AudioDebug.LogWarning("[AudioEvent] PlayLoopedSFX called with null SoundDefinition."); return; }
         float spatialBlend = attachTo != null ? 1f : def.spatialBlend;
-        AudioEventManager.PlaySFX(null, def.volume, def.pitch, false, 0.1f, spatialBlend, true, 0f, 100f, attachTo, Vector3.zero, 1f, 500f, "", def.GetClipPool());
+        AudioEventManager.PlaySFX(null, def.NextSfxVolume(), def.pitch, def.randomizePitch, def.pitchRange, spatialBlend, true, def.NextSfxDelay(), def.percentChanceToPlay, attachTo, Vector3.zero, def.minDistance, def.maxDistance, "", def.GetClipPool());
     }
 
     // ==================== SoundId (typed, string-free) OVERLOADS ====================

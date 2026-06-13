@@ -141,7 +141,10 @@ AudioEvent.PlaySFX3D(explosion, thunderLocation, 5f, 100f);
 // Looped SFX (stop via AudioManager.StopAllLoopedSFX / StopAllSFX)
 AudioEvent.PlayLoopedSFX(explosion, carTransform);
 
-// Random variation is automatic when the SoundDefinition has variations
+// Random variation is automatic when the SoundDefinition has variations.
+// Pitch/volume jitter, percent-chance, delay, and 3D distance also come from the
+// definition (SFX Variation & 3D section) - so a configured gun/footstep def plays
+// with full variety from just PlaySFX(def), no per-call parameters.
 AudioEvent.PlaySFX(footsteps, playerTransform);
 ```
 
@@ -489,10 +492,16 @@ Clips are no longer loaded from `Resources`. Instead:
 
 **Benefits over the old Resources approach:**
 - Asset-safe: renaming a clip never breaks a reference (matched by GUID; the `SoundId` value is stable).
-- Only what's in a loaded bank is in memory - load per-scene, unload on exit for memory control.
+- Only referenced banks are bundled in the build (no blanket `Resources` inclusion).
+- Per-scene **availability** control: a sound only plays when its bank is loaded.
 - No magic-string lookup; typos become compile errors.
 
 **Parity with the old "everything available":** assign **MasterBank** to `startupBanks`.
+
+> **Note on memory:** `AudioRegistry.UnloadBank` currently controls **availability only** — it removes
+> the sound from the registry but does **not** free the clip from RAM (the SoundDefinition still
+> references the clip). True per-bank memory release arrives only with an Addressables provider behind
+> `SoundDefinition.GetClip()` (see below). Don't rely on `UnloadBank` for memory management yet.
 
 ### Future: Addressables (async / remote)
 

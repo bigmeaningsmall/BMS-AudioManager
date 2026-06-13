@@ -196,6 +196,8 @@ public class AudioEventSender : MonoBehaviour
         bool useLoop = loop;
         FadeType useFadeType = fadeType;
         FadeTarget useFadeTarget = fadeTarget;
+        // 3D rolloff distances come from the definition (the sender has no distance fields).
+        float useMinDistance = 1f, useMaxDistance = 500f;
 
         if (useDefinitionDefaults)
         {
@@ -208,7 +210,11 @@ public class AudioEventSender : MonoBehaviour
             useFadeTarget = soundDefinition.fadeTarget;
         }
 
-        AudioEventManager.PlayTrack(audioTrackType, -1, "", useVolume, usePitch, useSpatialBlend, useFadeType, useFadeDuration, useFadeTarget, useLoop, eventDelay, targetTransform, eventName, directClip);
+        // Distances always come from the def when assigned (applies to spatialised tracks).
+        useMinDistance = soundDefinition.minDistance;
+        useMaxDistance = soundDefinition.maxDistance;
+
+        AudioEventManager.PlayTrack(audioTrackType, -1, "", useVolume, usePitch, useSpatialBlend, useFadeType, useFadeDuration, useFadeTarget, useLoop, eventDelay, targetTransform, eventName, directClip, useMinDistance, useMaxDistance);
 
     }
 

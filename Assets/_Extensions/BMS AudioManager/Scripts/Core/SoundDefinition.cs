@@ -61,6 +61,34 @@ public class SoundDefinition : ScriptableObject
     [Range(0f, 10f)] public float fadeDuration = 0.5f;
     public FadeTarget fadeTarget = FadeTarget.FadeBoth;
 
+    [Header("SFX Variation (one-shots only)")]
+    [Tooltip("These are applied by PlaySFX one-shots. Track playback ignores them.")]
+    public bool randomizePitch = false;
+    [Tooltip("Pitch is randomised within +/- this range around 'pitch'.")]
+    [Range(0f, 1f)] public float pitchRange = 0.1f;
+    [Tooltip("Volume is randomised within +/- this range around 'volume' (0 = no jitter).")]
+    [Range(0f, 1f)] public float volumeRange = 0f;
+    [Tooltip("Chance (0-100) that a PlaySFX call actually plays. 100 = always.")]
+    [Range(0f, 100f)] public float percentChanceToPlay = 100f;
+    [Tooltip("Randomise the delay between 0 and 'delay' on each play.")]
+    public bool randomizeDelay = false;
+    [Tooltip("Delay before the SFX starts (seconds). With 'randomizeDelay', this is the maximum.")]
+    [Range(0f, 5f)] public float delay = 0f;
+
+    [Header("3D Settings (spatialised tracks + SFX)")]
+    [Tooltip("Rolloff distances used whenever spatialBlend > 0 - applies to 3D-attached tracks AND SFX.")]
+    [Range(0f, 100f)] public float minDistance = 1f;
+    [Tooltip("3D rolloff far distance.")]
+    [Range(1f, 500f)] public float maxDistance = 500f;
+
+    /// <summary>Volume for this play - jittered within +/- volumeRange when set, else the base volume.</summary>
+    public float NextSfxVolume()
+        => volumeRange > 0f ? Mathf.Clamp01(Random.Range(volume - volumeRange, volume + volumeRange)) : volume;
+
+    /// <summary>Delay for this play - randomised in [0, delay] when randomizeDelay is set, else the fixed delay.</summary>
+    public float NextSfxDelay()
+        => randomizeDelay ? Random.Range(0f, delay) : delay;
+
     /// <summary>
     /// Returns the primary clip. The ONLY way callers should obtain the clip - keep it this
     /// way so the retrieval strategy (direct ref now, Addressables later) stays swappable here.

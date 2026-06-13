@@ -14,12 +14,23 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SoundDefinition
   id: 43
   clip: {fileID: 8300000, guid: 88e67aac3faaf624d89680fa15653e85, type: 3}
-  variations: []
+  variations:
+  - {fileID: 8300000, guid: bcc49f2c9548ce4439727cebac85772c, type: 3}
+  - {fileID: 8300000, guid: 36db2bb9ae87258428c5f5fe9a1fddcb, type: 3}
+  - {fileID: 8300000, guid: 88e67aac3faaf624d89680fa15653e85, type: 3}
   audioType: 6
   volume: 1
   pitch: 1
   loop: 0
-  spatialBlend: 0
-  fadeType: 0
-  fadeDuration: 0.5
-  fadeTarget: 3
+  spatialBlend: 1
+  fadeType: 1
+  fadeDuration: 0.85
+  fadeTarget: 1
+  randomizePitch: 0
+  pitchRange: 0.1
+  volumeRange: 0
+  percentChanceToPlay: 100
+  randomizeDelay: 0
+  delay: 0
+  minDistance: 6.7
+  maxDistance: 141

@@ -1024,6 +1024,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: Audio SFX - Event Zone
       objectReference: {fileID: 0}
+    - target: {fileID: 5348913106041535006, guid: 061e1c5bd8269d545a6d42f763eea41c,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 7370856478632272372, guid: 061e1c5bd8269d545a6d42f763eea41c,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -1161,7 +1166,7 @@ PrefabInstance:
         type: 3}
       propertyPath: 'startupBanks.Array.data[0]'
       value: 
-      objectReference: {fileID: 11400000, guid: 00a64e9578207d64eb2a5a551f791f54,
+      objectReference: {fileID: 11400000, guid: 47d7857ab5a915545851f198637375b1,
         type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -1181,6 +1186,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1158617706}
+  - component: {fileID: 1158617707}
   m_Layer: 0
   m_Name: SceneBankTest
   m_TagString: Untagged
@@ -1203,6 +1209,20 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1158617707
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1158617705}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5200aea35666ca94b8e3c3d875e7de56, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SceneAudioBank
+  banks:
+  - {fileID: 11400000, guid: 8e306eb56b9d24748b254b9b81216f6b, type: 2}
 --- !u!1 &1214705720
 GameObject:
   m_ObjectHideFlags: 0
@@ -1228,13 +1248,20 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1214705720}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 4487e1fdcf311e14faa98da012b1153a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   playerTransform: {fileID: 2146425261}
   ambientLocationTransform: {fileID: 961739753}
+  musicTrack: 0
+  combatTrack: 0
+  ambientTrack: 0
+  buttonClickSfx: 0
+  explosionSfx: 0
+  engineLoopSfx: 0
+  footstepDefinition: {fileID: 0}
 --- !u!4 &1214705722
 Transform:
   m_ObjectHideFlags: 0
@@ -1265,6 +1292,7 @@ MonoBehaviour:
   musicTrack: {fileID: 11400000, guid: a96ffd8c4ac8d0544a0b77da1ef78b4f, type: 2}
   sfx: {fileID: 11400000, guid: f230412001ee9244c8717d46dece2725, type: 2}
   loopingSfx: {fileID: 11400000, guid: c9344565010d6d24a8a3ff37cfe029d4, type: 2}
+  testSoundId: 20
   sfxAttachPoint: {fileID: 1214705722}
 --- !u!1 &1308476517 stripped
 GameObject:
@@ -2076,6 +2104,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: Audio Track - Event Zone
+      objectReference: {fileID: 0}
+    - target: {fileID: 5274121441138690220, guid: 89621415efb6a794087214f779dcb9f2,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5355574976095253072, guid: 89621415efb6a794087214f779dcb9f2,
         type: 3}

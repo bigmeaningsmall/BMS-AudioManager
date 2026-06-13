@@ -96,8 +96,11 @@ AudioEvent.AdjustTrack(AudioTrackType.BGM, 0.5f, 1.2f, 2f);
 
 ### Play SFX
 
-A SoundDefinition's `clip` + `variations` form the random pool, so "pick one of several" is built
-into the definition - no array needed at the call site.
+A SoundDefinition carries the variation parameters itself, so a single `PlaySFX(def)` is usually all
+you need. On the asset (under **SFX Variation & 3D**) you set: `clip` + `variations` (random pool),
+`randomizePitch` + `pitchRange`, `volumeRange`, `percentChanceToPlay`, `randomizeDelay` + `delay`, and
+`minDistance` / `maxDistance`. A gun, footstep set, or impact then plays with full variety from one call —
+no per-call parameters. (Override args like `PlaySFX(def, volume)` still take precedence where given.)
 
 ```csharp
 [SerializeField] private SoundId explosion;     // SFX-category id

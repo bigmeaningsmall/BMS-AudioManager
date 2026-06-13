@@ -344,19 +344,21 @@ public class AudioManager : MonoBehaviour
         float delay = 0f,
         Transform attachTo = null,
         string eventName = "",
-        AudioClip directClip = null)
+        AudioClip directClip = null,
+        float minDistance = 1f,
+        float maxDistance = 500f)
     {
         // Cancel any existing delayed coroutine for this track type
         CancelDelayedTrack(trackType);
 
         if (delay <= 0f)
         {
-            PlayTrackImmediate(trackType, attachTo, trackNumber, trackName, volume, pitch, spatialBlend, fadeType, fadeDuration, fadeTarget, loop, eventName, directClip);
+            PlayTrackImmediate(trackType, attachTo, trackNumber, trackName, volume, pitch, spatialBlend, fadeType, fadeDuration, fadeTarget, loop, eventName, directClip, minDistance, maxDistance);
         }
         else
         {
             // Store the coroutine reference so we can cancel it later
-            Coroutine delayedCoroutine = StartCoroutine(PlayTrackDelayed(delay, trackType, attachTo, trackNumber, trackName, volume, pitch, spatialBlend, fadeType, fadeDuration, fadeTarget, loop, eventName, directClip));
+            Coroutine delayedCoroutine = StartCoroutine(PlayTrackDelayed(delay, trackType, attachTo, trackNumber, trackName, volume, pitch, spatialBlend, fadeType, fadeDuration, fadeTarget, loop, eventName, directClip, minDistance, maxDistance));
             delayedCoroutines[trackType] = delayedCoroutine;
         }
     }
@@ -377,7 +379,7 @@ public class AudioManager : MonoBehaviour
             AudioDebug.Log($"[AudioManager] No delayed {trackType} event to cancel"); // Add this line too
         }
     }
-    private void PlayTrackImmediate(AudioTrackType trackType, Transform attachTo, int trackNumber, string trackName, float volume, float pitch, float spatialBlend, FadeType fadeType, float fadeDuration, FadeTarget fadeTarget, bool loop, string eventName, AudioClip directClip = null)
+    private void PlayTrackImmediate(AudioTrackType trackType, Transform attachTo, int trackNumber, string trackName, float volume, float pitch, float spatialBlend, FadeType fadeType, float fadeDuration, FadeTarget fadeTarget, bool loop, string eventName, AudioClip directClip = null, float minDistance = 1f, float maxDistance = 500f)
     {
         AudioTrack targetTrack = GetTrackByType(trackType);
         if (targetTrack == null)
@@ -388,14 +390,14 @@ public class AudioManager : MonoBehaviour
 
         // CALL THE TRACK METHOD
         // This will handle the actual playing of the track
-        targetTrack.Play(trackNumber, trackName, volume, pitch, spatialBlend, fadeType, fadeDuration, fadeTarget, loop, attachTo, directClip);
+        targetTrack.Play(trackNumber, trackName, volume, pitch, spatialBlend, fadeType, fadeDuration, fadeTarget, loop, attachTo, directClip, minDistance, maxDistance);
         
         // Set parameters for the track -- parameters are updated in LateUpdate when fading 
         AudioTrackParamters newParams = new AudioTrackParamters(targetTrack.currentState, attachTo, trackNumber, trackName, volume, pitch, spatialBlend, loop, 0f, 0f, 0f, eventName);
         SetTrackParameters(trackType, newParams);
     }
     
-    private IEnumerator PlayTrackDelayed(float delay, AudioTrackType trackType, Transform attachTo, int trackNumber, string trackName, float volume, float pitch, float spatialBlend, FadeType fadeType, float fadeDuration, FadeTarget fadeTarget, bool loop, string eventName, AudioClip directClip = null)
+    private IEnumerator PlayTrackDelayed(float delay, AudioTrackType trackType, Transform attachTo, int trackNumber, string trackName, float volume, float pitch, float spatialBlend, FadeType fadeType, float fadeDuration, FadeTarget fadeTarget, bool loop, string eventName, AudioClip directClip = null, float minDistance = 1f, float maxDistance = 500f)
     {
         AudioDebug.Log($"[AudioManager] Delaying {trackType} track for {delay}s");
         yield return new WaitForSeconds(delay);
@@ -404,7 +406,7 @@ public class AudioManager : MonoBehaviour
         delayedCoroutines.Remove(trackType);
 
         AudioDebug.Log($"[AudioManager] Executing delayed {trackType} track");
-        PlayTrackImmediate(trackType, attachTo, trackNumber, trackName, volume, pitch, spatialBlend, fadeType, fadeDuration, fadeTarget, loop, eventName, directClip);
+        PlayTrackImmediate(trackType, attachTo, trackNumber, trackName, volume, pitch, spatialBlend, fadeType, fadeDuration, fadeTarget, loop, eventName, directClip, minDistance, maxDistance);
     }
 
 

@@ -151,6 +151,9 @@ public static class SoundDefinitionGenerator
                         def.loop = info.loop;
                         def.clip = clip;
                         def.audioType = info.audioType;
+                        // SFX get pitch randomisation on by default (natural variety for one-shots).
+                        if (info.audioType == AudioType.SFX)
+                            def.randomizePitch = true;
                         AssetDatabase.CreateAsset(def, desiredPath);
                         byClipGuid[guid] = def; // so duplicate clip refs in one run don't double-create
                         created++;

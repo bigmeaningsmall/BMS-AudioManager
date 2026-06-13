@@ -20,6 +20,14 @@ MonoBehaviour:
   pitch: 1
   loop: 1
   spatialBlend: 0
-  fadeType: 0
-  fadeDuration: 0.5
-  fadeTarget: 3
+  fadeType: 1
+  fadeDuration: 2.38
+  fadeTarget: 1
+  randomizePitch: 0
+  pitchRange: 0.1
+  volumeRange: 0
+  percentChanceToPlay: 100
+  randomizeDelay: 0
+  delay: 0
+  minDistance: 1
+  maxDistance: 500
