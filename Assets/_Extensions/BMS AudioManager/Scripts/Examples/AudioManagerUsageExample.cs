@@ -1,327 +1,201 @@
-using System;
+using System.Collections;
 using UnityEngine;
-using Random = UnityEngine.Random;
 
 /// <summary>
-/// CORRECTED usage examples showing the right way to use AudioManager
-/// Uses both direct event calls (with all parameters) and helper method overloads
+/// LIVE API REFERENCE + TEST HARNESS for BMS Audio Manager.
+///
+/// This single component is both the copy-paste cheat sheet (every method below is one
+/// self-contained snippet) and a click-to-test panel. Each example is callable two ways:
+///   - an on-screen button in Play mode (see the panel, top-left of the Game view), and
+///   - a right-click [ContextMenu] entry on this component.
+///
+/// SETUP
+///   1. Run  BMS AudioManager -> Generate Sound Definitions  (builds SoundDefinitions, SoundBanks, SoundId).
+///   2. Put an AudioManager in the scene and assign a bank that contains these sounds to its
+///      Startup Banks (MasterBank = everything). A sound only plays when its bank is loaded.
+///   3. Add this component anywhere, assign the SoundId / SoundDefinition fields below, press Play.
+///
+/// KEY IDEA
+///   - Tracks (BGM/Ambient/Dialogue/Aux) are CHANNELS. Play puts a clip on a channel; Stop/Pause/
+///     Adjust act on the channel (take an AudioTrackType), not a specific clip.
+///   - SFX are fire-and-forget one-shots; the definition's clip + variations form the random pool.
+///   - A SoundDefinition carries its own defaults (volume/pitch/fade/3D/variation), so most calls
+///     are one-liners. Pass a SoundId (typed key) or a SoundDefinition reference - both work.
 /// </summary>
 public class AudioManagerUsageExample : MonoBehaviour
 {
-    [Header("Example Objects")]
-    public Transform playerTransform;
-    public Transform ambientLocationTransform;
-    
-    private void Start()
+    [Header("Track SoundIds")]
+    [Tooltip("A BGM/music sound.")]      public SoundId musicTrack;
+    [Tooltip("An ambient/aux sound.")]   public SoundId ambientTrack;
+    [Tooltip("A dialogue sound.")]       public SoundId dialogueLine;
+
+    [Header("SFX SoundIds")]
+    [Tooltip("A one-shot SFX.")]         public SoundId sfxOneShot;
+    [Tooltip("A loopable SFX.")]         public SoundId loopingSfx;
+
+    [Header("SoundDefinition references (alternative to SoundId)")]
+    [Tooltip("Any track definition - shows the direct asset-reference API.")]
+    public SoundDefinition trackDef;
+    [Tooltip("An SFX definition (ideally with variations).")]
+    public SoundDefinition sfxDef;
+
+    [Header("Quick test")]
+    [Tooltip("Pick any sound; the 'Play (smart)' button auto-routes it to a track or SFX.")]
+    public SoundId quickTestId;
+
+    [Header("Options")]
+    [Tooltip("Transform that 3D examples attach to (defaults to this object).")]
+    public Transform attachPoint;
+
+    private Vector2 _scroll;
+
+    private void Awake()
     {
-        StartCoroutine(WaitAndRunExamples());
+        if (attachPoint == null) attachPoint = transform;
     }
 
-    private void Update()
+    // ============================================================ TRACKS
+
+    [ContextMenu("Track/Play (definition defaults)")]
+    private void PlayMusic() => AudioEvent.PlayTrack(musicTrack);
+
+    [ContextMenu("Track/Play at half volume")]
+    private void PlayMusicQuiet() => AudioEvent.PlayTrack(musicTrack, 0.5f);
+
+    [ContextMenu("Track/Play ambient 3D (attached)")]
+    private void PlayAmbient3D() => AudioEvent.PlayTrack(ambientTrack, attachPoint);
+
+    [ContextMenu("Track/Play via SoundDefinition reference")]
+    private void PlayTrackByRef() => AudioEvent.PlayTrack(trackDef);
+
+    [ContextMenu("Track/Play (smart dispatch by category)")]
+    private void PlaySmart() => AudioEvent.Play(quickTestId); // routes to track or SFX automatically
+
+    // ============================================================ TRACK CONTROL (channel-based)
+
+    [ContextMenu("Control/Stop BGM (1.5s fade)")]
+    private void StopBGM() => AudioEvent.StopTrack(AudioTrackType.BGM, 1.5f);
+
+    [ContextMenu("Control/Stop the music track's channel (definition fade)")]
+    private void StopMusicSymmetric() => AudioEvent.StopTrack(musicTrack); // uses the def's fade settings
+
+    [ContextMenu("Control/Pause-Resume BGM (toggle)")]
+    private void PauseBGM() => AudioEvent.PauseTrack(AudioTrackType.BGM, 0.5f);
+
+    [ContextMenu("Control/Adjust BGM volume")]
+    private void AdjustVolume() => AudioEvent.AdjustTrackVolume(AudioTrackType.BGM, 0.5f, 1f);
+
+    [ContextMenu("Control/Adjust BGM volume + pitch")]
+    private void AdjustVolumePitch() => AudioEvent.AdjustTrack(AudioTrackType.BGM, 0.8f, 1.1f, 1f);
+
+    [ContextMenu("Control/Duck for dialogue (pattern)")]
+    private void DuckForDialogue() => StartCoroutine(DuckRoutine());
+
+    private IEnumerator DuckRoutine()
     {
-        if (Input.GetKeyDown(KeyCode.Space))
-        {
-            print("play sfx");
-            // DirectEventExamples();
-            // PLAY SFX - ALL parameters must be provided
-            AudioEventManager.PlaySFX(
-                new string[] { "Buff" }, // soundName array
-                1f,                             // volume
-                1f,                             // pitch
-                false,                          // randomisePitch
-                0.1f,                           // pitchRange
-                0f,                             // spatialBlend
-                false,                          // loop
-                0f,                             // delay
-                100f,                           // percentChanceToPlay
-                null,                           // attachTo
-                Vector3.zero,                   // position
-                1f,                             // minDist
-                500f,                           // maxDist
-                ""                              // eventName
-            );
-        }
+        AudioEvent.AdjustTrackVolume(AudioTrackType.BGM, 0.15f, 0.4f); // duck under
+        AudioEvent.PlayTrack(dialogueLine);                           // play the line
+        yield return new WaitForSeconds(2f);
+        AudioEvent.AdjustTrackVolume(AudioTrackType.BGM, 0.8f, 1f);   // restore
     }
 
-    private System.Collections.IEnumerator WaitAndRunExamples()
+    // ============================================================ SFX
+
+    [ContextMenu("SFX/One-shot (2D)")]
+    private void Sfx2D() => AudioEvent.PlaySFX(sfxOneShot);
+
+    [ContextMenu("SFX/One-shot at half volume")]
+    private void SfxQuiet() => AudioEvent.PlaySFX(sfxOneShot, 0.5f);
+
+    [ContextMenu("SFX/One-shot 3D (attached)")]
+    private void Sfx3D() => AudioEvent.PlaySFX(sfxOneShot, attachPoint);
+
+    [ContextMenu("SFX/One-shot 3D (world position)")]
+    private void SfxAtPosition() => AudioEvent.PlaySFX(sfxOneShot, attachPoint.position);
+
+    [ContextMenu("SFX/One-shot 3D (explicit distances)")]
+    private void Sfx3DCustom() => AudioEvent.PlaySFX3D(sfxOneShot, attachPoint, 2f, 25f);
+
+    [ContextMenu("SFX/Looped (attached)")]
+    private void SfxLooped() => AudioEvent.PlayLoopedSFX(loopingSfx, attachPoint);
+
+    [ContextMenu("SFX/Via SoundDefinition reference (random variation)")]
+    private void SfxByRef() => AudioEvent.PlaySFX(sfxDef, attachPoint);
+
+    [ContextMenu("SFX/Stop all SFX")]
+    private void StopAllSfx() { if (AudioManager.Instance != null) AudioManager.Instance.StopAllSFX(); }
+
+    [ContextMenu("SFX/Stop looped SFX")]
+    private void StopLoopedSfx() { if (AudioManager.Instance != null) AudioManager.Instance.StopAllLoopedSFX(); }
+
+    // ============================================================ GLOBAL / QUERY
+
+    [ContextMenu("Global/Toggle pause all SFX")]
+    private void TogglePauseSfx() { if (AudioManager.Instance != null) AudioManager.Instance.TogglePauseAllSFX(); }
+
+    [ContextMenu("Global/Halve SFX volume")]
+    private void HalveSfxVolume() { if (AudioManager.Instance != null) AudioManager.Instance.GlobalSFXAttenuation = 0.5f; }
+
+    [ContextMenu("Global/Log active SFX count")]
+    private void LogActiveSfx()
     {
-        yield return null; // Wait one frame
-        
-        // Uncomment the examples you want to test
-        // DirectEventExamples();
-        // HelperMethodExamples();
-        // ComplexScenarioExamples();
+        if (AudioManager.Instance == null) return;
+        Debug.Log($"[Example] Active SFX: {AudioManager.Instance.GetActiveSFXCount()} | All paused: {AudioManager.Instance.AllSFXPaused}");
     }
-    
-    // ==================== DIRECT EVENT USAGE (Original Way) ====================
-    /// <summary>
-    /// Examples using the events directly - you MUST provide ALL parameters
-    /// </summary>
-    private void DirectEventExamples()
+
+    // ============================================================ ON-SCREEN TEST PANEL
+
+    private void OnGUI()
     {
-        AudioDebug.Log("=== DIRECT EVENT EXAMPLES (All Parameters Required) ===");
-        
-        // PLAY TRACK - ALL parameters must be provided
-        AudioEventManager.PlayTrack(
-            AudioTrackType.BGM,           // trackType
-            -1,                          // trackNumber (-1 to ignore)
-            "MainTheme",                 // trackName
-            1f,                          // volume
-            1f,                          // pitch
-            0f,                          // spatialBlend
-            FadeType.FadeInOut,          // fadeType
-            0.5f,                        // fadeDuration
-            FadeTarget.FadeBoth,         // fadeTarget
-            true,                        // loop
-            0f,                          // delay
-            null,                        // attachTo
-            ""                           // eventName
-        );
-        
-        // STOP TRACK - ALL parameters must be provided
-        AudioEventManager.StopTrack(
-            AudioTrackType.BGM,          // trackType
-            1f,                          // fadeDuration
-            FadeTarget.FadeVolume,       // fadeTarget
-            0f,                          // delay
-            ""                           // eventName
-        );
-        
-        // PAUSE TRACK - ALL parameters must be provided
-        AudioEventManager.PauseTrack(
-            AudioTrackType.Ambient,      // trackType
-            0f,                          // fadeDuration
-            FadeTarget.FadeVolume,       // fadeTarget
-            0f,                          // delay
-            ""                           // eventName
-        );
-        
-        // ADJUST TRACK - ALL parameters must be provided
-        AudioEventManager.AdjustTrack(
-            AudioTrackType.BGM,          // trackType
-            0.5f,                        // volume
-            1f,                          // pitch
-            0f,                          // spatialBlend
-            1f,                          // fadeDuration
-            FadeTarget.FadeVolume,       // fadeTarget
-            true,                        // loop
-            0f,                          // delay
-            null,                        // attachTo
-            ""                           // eventName
-        );
-        
-        // PLAY SFX - ALL parameters must be provided
-        AudioEventManager.PlaySFX(
-            new string[] { "ButtonClick" }, // soundName array
-            1f,                             // volume
-            1f,                             // pitch
-            false,                          // randomisePitch
-            0.1f,                           // pitchRange
-            0f,                             // spatialBlend
-            false,                          // loop
-            0f,                             // delay
-            100f,                           // percentChanceToPlay
-            null,                           // attachTo
-            Vector3.zero,                   // position
-            1f,                             // minDist
-            500f,                           // maxDist
-            ""                              // eventName
-        );
+        const float w = 260f;
+        GUILayout.BeginArea(new Rect(10, 10, w, Screen.height - 20), GUI.skin.box);
+        _scroll = GUILayout.BeginScrollView(_scroll);
+
+        GUILayout.Label("<b>BMS Audio - API Examples</b>", RichLabel());
+
+        Section("Tracks");
+        if (GUILayout.Button("Play music (defaults)")) PlayMusic();
+        if (GUILayout.Button("Play music @ 0.5 volume")) PlayMusicQuiet();
+        if (GUILayout.Button("Play ambient 3D (attached)")) PlayAmbient3D();
+        if (GUILayout.Button("Play via SoundDefinition ref")) PlayTrackByRef();
+        if (GUILayout.Button("Play (smart: quickTestId)")) PlaySmart();
+
+        Section("Track control (channel)");
+        if (GUILayout.Button("Stop BGM (1.5s fade)")) StopBGM();
+        if (GUILayout.Button("Stop music chan (def fade)")) StopMusicSymmetric();
+        if (GUILayout.Button("Pause / Resume BGM")) PauseBGM();
+        if (GUILayout.Button("Adjust BGM volume")) AdjustVolume();
+        if (GUILayout.Button("Adjust BGM volume + pitch")) AdjustVolumePitch();
+        if (GUILayout.Button("Duck for dialogue (pattern)")) DuckForDialogue();
+
+        Section("SFX");
+        if (GUILayout.Button("One-shot (2D)")) Sfx2D();
+        if (GUILayout.Button("One-shot @ 0.5 volume")) SfxQuiet();
+        if (GUILayout.Button("One-shot 3D (attached)")) Sfx3D();
+        if (GUILayout.Button("One-shot 3D (world pos)")) SfxAtPosition();
+        if (GUILayout.Button("One-shot 3D (custom dist)")) Sfx3DCustom();
+        if (GUILayout.Button("Looped (attached)")) SfxLooped();
+        if (GUILayout.Button("Via SoundDefinition ref")) SfxByRef();
+        if (GUILayout.Button("Stop all SFX")) StopAllSfx();
+        if (GUILayout.Button("Stop looped SFX")) StopLoopedSfx();
+
+        Section("Global");
+        if (GUILayout.Button("Toggle pause all SFX")) TogglePauseSfx();
+        if (GUILayout.Button("Halve SFX volume")) HalveSfxVolume();
+        if (GUILayout.Button("Log active SFX count")) LogActiveSfx();
+
+        GUILayout.EndScrollView();
+        GUILayout.EndArea();
     }
-    
-    // ==================== HELPER METHOD USAGE (Easy Way) ====================
-    /// <summary>
-    /// Examples using the helper methods - much easier!
-    /// </summary>
-    private void HelperMethodExamples()
+
+    private static void Section(string title)
     {
-        AudioDebug.Log("=== HELPER METHOD EXAMPLES (Easy Usage) ===");
-        
-        // SIMPLE TRACK OPERATIONS
-        AudioEvent.PlayTrack(AudioTrackType.BGM, "MainTheme");
-        AudioEvent.PlayTrack(AudioTrackType.BGM, "MainTheme", 0.8f);
-        AudioEvent.PlayTrack(AudioTrackType.BGM, "MainTheme", 0.8f, 2f);
-        AudioEvent.PlayTrack(AudioTrackType.Ambient, "ForestAmbient", 0.6f, 2f, ambientLocationTransform);
-        
-        // STOP AND PAUSE
-        AudioEvent.StopTrack(AudioTrackType.BGM);
-        AudioEvent.StopTrack(AudioTrackType.BGM, 2f);
-        AudioEvent.PauseTrack(AudioTrackType.Ambient);
-        AudioEvent.PauseTrack(AudioTrackType.Ambient, 1f);
-        
-        // ADJUST TRACKS
-        AudioEvent.AdjustTrackVolume(AudioTrackType.BGM, 0.5f);
-        AudioEvent.AdjustTrackVolume(AudioTrackType.BGM, 0.5f, 2f);
-        AudioEvent.AdjustTrack(AudioTrackType.BGM, 0.7f, 1.2f);
-        AudioEvent.AdjustTrack(AudioTrackType.BGM, 0.7f, 1.2f, 3f);
-        
-        // SIMPLE SFX
-        AudioEvent.PlaySFX("ButtonClick");
-        AudioEvent.PlaySFX("Explosion", 0.8f);
-        AudioEvent.PlaySFX(new string[] { "Footstep1", "Footstep2", "Footstep3" });
-        AudioEvent.PlaySFX("DoorCreak", 0.7f, true); // with random pitch
-        AudioEvent.PlaySFX("MagicSpell", 0.8f, playerTransform); // 3D attached
-        AudioEvent.PlaySFX("Explosion", 1f, new Vector3(10, 0, 5)); // 3D position
-        
-        // ADVANCED SFX
-        AudioEvent.PlaySFX3D("DistantThunder", 0.6f, ambientLocationTransform, 5f, 100f);
-        AudioEvent.PlayLoopedSFX("EngineHum", 0.7f, playerTransform);
-        AudioEvent.PlayRandomSFX(new string[] { "Bird1", "Bird2", "Bird3" }, 0.4f, 30f, 2f);
+        GUILayout.Space(6);
+        GUILayout.Label($"<b>{title}</b>", RichLabel());
     }
-    
-    // ==================== COMPLEX SCENARIOS ====================
-    /// <summary>
-    /// Real-world usage scenarios combining both approaches
-    /// </summary>
-    private void ComplexScenarioExamples()
+
+    private static GUIStyle RichLabel()
     {
-        AudioDebug.Log("=== COMPLEX SCENARIO EXAMPLES ===");
-        
-        StartCoroutine(CombatSequenceExample());
-        StartCoroutine(EnvironmentalTransitionExample());
-    }
-    
-    private System.Collections.IEnumerator CombatSequenceExample()
-    {
-        AudioDebug.Log("Starting Combat Sequence...");
-        
-        // 1. Quick fade out current music
-        AudioEvent.StopTrack(AudioTrackType.BGM, 1f);
-        
-        // 2. Warning sound
-        yield return new WaitForSeconds(0.5f);
-        AudioEvent.PlaySFX("WarningAlarm", 0.8f);
-        
-        // 3. Start tense ambient
-        AudioEvent.PlayTrack(AudioTrackType.Ambient, "TensionAmbient", 0.5f, 1f);
-        
-        // 4. Combat music with crossfade (needs full control - use direct event)
-        yield return new WaitForSeconds(2f);
-        AudioEventManager.PlayTrack(
-            AudioTrackType.BGM,
-            -1,
-            "BattleMusic",
-            0.9f,                        // volume
-            1f,                          // pitch
-            0f,                          // spatialBlend
-            FadeType.Crossfade,          // crossfade for smooth transition
-            3f,                          // fadeDuration
-            FadeTarget.FadeBoth,         // fadeTarget
-            true,                        // loop
-            0f,                          // delay
-            null,                        // attachTo
-            "Combat Start"               // eventName
-        );
-        
-        AudioDebug.Log("Combat Sequence Complete!");
-    }
-    
-    private System.Collections.IEnumerator EnvironmentalTransitionExample()
-    {
-        AudioDebug.Log("Starting Environmental Transition...");
-        
-        // 1. Start forest ambient (simple)
-        AudioEvent.PlayTrack(AudioTrackType.Ambient, "ForestAmbient", 0.7f, 1f, ambientLocationTransform);
-        
-        // 2. Forest sounds with randomization (needs full control)
-        AudioEventManager.PlaySFX(
-            new string[] { "LeafRustle1", "LeafRustle2", "BirdChirp" },
-            0.4f,                        // volume
-            1f,                          // pitch
-            true,                        // randomisePitch
-            0.3f,                        // pitchRange
-            0.8f,                        // spatialBlend
-            false,                       // loop
-            Random.Range(1f, 3f),        // delay
-            60f,                         // percentChanceToPlay
-            ambientLocationTransform,    // attachTo
-            Vector3.zero,                // position
-            2f,                          // minDist
-            30f,                         // maxDist
-            "Forest Sounds"              // eventName
-        );
-        
-        yield return new WaitForSeconds(5f);
-        
-        // 3. Fade to cave (simple adjustment)
-        AudioEvent.AdjustTrackVolume(AudioTrackType.Ambient, 0.3f, 2f);
-        
-        yield return new WaitForSeconds(1f);
-        
-        // 4. Cave entrance sound
-        AudioEvent.PlaySFX3D("CaveEcho", 0.8f, ambientLocationTransform, 3f, 25f);
-        
-        yield return new WaitForSeconds(2f);
-        
-        // 5. Switch to cave ambient with crossfade
-        AudioEventManager.PlayTrack(
-            AudioTrackType.Ambient,
-            -1,
-            "CaveAmbient",
-            0.6f,
-            1f,
-            1f,                          // Full spatial blend for cave
-            FadeType.Crossfade,
-            4f,
-            FadeTarget.FadeBoth,
-            true,
-            0f,
-            ambientLocationTransform,
-            "Enter Cave"
-        );
-        
-        AudioDebug.Log("Environmental Transition Complete!");
-    }
-    
-    // ==================== CONVENIENCE WRAPPER METHODS ====================
-    /// <summary>
-    /// You can also create your own wrapper methods for specific game needs
-    /// </summary>
-    
-    public void StartCombatMusic()
-    {
-        // Stop current BGM and start combat music with crossfade
-        AudioEventManager.PlayTrack(AudioTrackType.BGM, -1, "CombatTheme", 0.8f, 1f, 0f, 
-                                   FadeType.Crossfade, 2f, FadeTarget.FadeBoth, true, 0f, null, "Combat");
-    }
-    
-    public void PlayFootstepSFX()
-    {
-        // Random footstep with slight pitch variation
-        AudioEventManager.PlaySFX(new string[] { "Footstep1", "Footstep2", "Footstep3" }, 
-                                 0.6f, 1f, true, 0.2f, 0.5f, false, 0f, 100f, 
-                                 playerTransform, Vector3.zero, 1f, 10f, "Footstep");
-    }
-    
-    public void DuckMusicForDialogue(float duckLevel = 0.2f)
-    {
-        // Duck background music for dialogue
-        AudioEvent.AdjustTrackVolume(AudioTrackType.BGM, duckLevel, 0.5f);
-    }
-    
-    public void RestoreMusicAfterDialogue(float normalLevel = 0.8f)
-    {
-        // Restore music after dialogue
-        AudioEvent.AdjustTrackVolume(AudioTrackType.BGM, normalLevel, 1f);
-    }
-    
-    // ==================== DEBUG METHODS ====================
-    
-    [ContextMenu("Test Direct Events")]
-    public void TestDirectEvents()
-    {
-        DirectEventExamples();
-    }
-    
-    [ContextMenu("Test Helper Methods")]
-    public void TestHelperMethods()
-    {
-        HelperMethodExamples();
-    }
-    
-    [ContextMenu("Test Complex Scenarios")]
-    public void TestComplexScenarios()
-    {
-        ComplexScenarioExamples();
+        return new GUIStyle(GUI.skin.label) { richText = true };
     }
 }

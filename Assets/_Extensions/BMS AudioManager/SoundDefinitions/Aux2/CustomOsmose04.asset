@@ -1,0 +1,34 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ee9a1cb6078a55c42a2b364279de8e50, type: 3}
+  m_Name: CustomOsmose04
+  m_EditorClassIdentifier: Assembly-CSharp::SoundDefinition
+  id: 20
+  clip: {fileID: 8300000, guid: 7eafdfd9342529543b702176c1826c92, type: 3}
+  variations:
+  - {fileID: 8300000, guid: 19d76efaaca3ce547914c4e0bb1c9dd4, type: 3}
+  audioType: 5
+  volume: 1
+  pitch: 1
+  loop: 1
+  spatialBlend: 1
+  fadeType: 1
+  fadeDuration: 2
+  fadeTarget: 1
+  randomizePitch: 0
+  pitchRange: 0.396
+  volumeRange: 0
+  percentChanceToPlay: 100
+  randomizeDelay: 0
+  delay: 0
+  minDistance: 0.6
+  maxDistance: 1

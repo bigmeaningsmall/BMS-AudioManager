@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 93f5f0f1244fd974b8bbce4edd0cffcf, type: 3}
+  m_Name: Ambient
+  m_EditorClassIdentifier: Assembly-CSharp::SoundBank
+  bankId: Ambient
+  sounds:
+  - {fileID: 11400000, guid: 86b4f1fd711468049b5f29bcae137189, type: 2}
+  - {fileID: 11400000, guid: d4e226b82b43c7341a46e1e8cd750580, type: 2}
+  - {fileID: 11400000, guid: f87f242a3c21baa4a9e2019dab72d5cf, type: 2}
+  - {fileID: 11400000, guid: 5c84b0eafd4fa2945916126b90eb441f, type: 2}
+  - {fileID: 11400000, guid: 1c31623b06b94a246b4f40c34ac22d25, type: 2}
+  - {fileID: 11400000, guid: 6cdc5884397eb784e89b5e84ab8d141a, type: 2}

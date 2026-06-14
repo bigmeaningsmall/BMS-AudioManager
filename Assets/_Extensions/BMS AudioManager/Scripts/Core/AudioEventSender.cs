@@ -190,12 +190,16 @@ public class AudioEventSender : MonoBehaviour
 
         // The SoundDefinition supplies the clip directly (asset-safe). Playback params come from
         // the definition's defaults unless the user opts to override with the inspector values.
-        AudioClip directClip = soundDefinition.GetClip();
+        // GetRandomClip() picks from clip + variations (per play); no-ops to the primary clip
+        // when there are no variations, so single-clip track defs are unaffected.
+        AudioClip directClip = soundDefinition.GetRandomClip();
 
         float useVolume = volume, usePitch = pitch, useSpatialBlend = spatialBlend, useFadeDuration = fadeDuration;
         bool useLoop = loop;
         FadeType useFadeType = fadeType;
         FadeTarget useFadeTarget = fadeTarget;
+        // 3D rolloff distances come from the definition (the sender has no distance fields).
+        float useMinDistance = 1f, useMaxDistance = 500f;
 
         if (useDefinitionDefaults)
         {
@@ -208,7 +212,11 @@ public class AudioEventSender : MonoBehaviour
             useFadeTarget = soundDefinition.fadeTarget;
         }
 
-        AudioEventManager.PlayTrack(audioTrackType, -1, "", useVolume, usePitch, useSpatialBlend, useFadeType, useFadeDuration, useFadeTarget, useLoop, eventDelay, targetTransform, eventName, directClip);
+        // Distances always come from the def when assigned (applies to spatialised tracks).
+        useMinDistance = soundDefinition.minDistance;
+        useMaxDistance = soundDefinition.maxDistance;
+
+        AudioEventManager.PlayTrack(audioTrackType, -1, "", useVolume, usePitch, useSpatialBlend, useFadeType, useFadeDuration, useFadeTarget, useLoop, eventDelay, targetTransform, eventName, directClip, useMinDistance, useMaxDistance);
 
     }
 

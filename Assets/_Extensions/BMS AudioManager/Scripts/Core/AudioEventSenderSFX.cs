@@ -22,6 +22,8 @@ public class AudioEventSenderSFX : MonoBehaviour, IAudioEventSender
     [Header("Sound Definition (required)")]
     [Tooltip("Asset-safe reference whose clip + variations form the random SFX pool. Required - this sender plays nothing without it.")]
     public SoundDefinition soundDefinition;
+    [Tooltip("Pull volume/pitch/pitch-randomisation/spatialBlend/loop/chance/3D distance/delay from the Sound Definition. Untick to use the inspector values below.")]
+    public bool useDefinitionDefaults = true;
 
     [Space(10)]
     [Header("Sound FX Event Parameters (SFX)")] [Space(5)]
@@ -199,23 +201,44 @@ public class AudioEventSenderSFX : MonoBehaviour, IAudioEventSender
         }
         // else: attachTo remains null, AudioManager will use its own transform (default behavior)
     
-        // Determine 3D audio settings
-        float minDist = useCustom3DSettings ? minDistance : 1f;
-        float maxDist = useCustom3DSettings ? maxDistance : 500f;
-    
-        AudioDebug.Log($"[EventSender] SFX attachment: attachTo={(attachTo?.name ?? "AudioManager(default)")}, position={position}, spatialBlend={spatialBlend}");
-        
-        float delay = eventDelay;
-        if (randomiseDelay)
-        {
-            delay = Random.Range(0, eventDelay);
-        }
-        
         // The SoundDefinition supplies the clip pool directly - asset-safe, no string lookup
         AudioClip[] directClips = soundDefinition.GetClipPool();
 
+        // Resolve playback params: either from the definition (default) or the inspector fields.
+        float useVolume, usePitch, usePitchRange, useSpatialBlend, useDelay, useChance, minDist, maxDist;
+        bool useRandomisePitch, useLoop;
+
+        if (useDefinitionDefaults)
+        {
+            useVolume         = soundDefinition.NextSfxVolume();
+            usePitch          = soundDefinition.pitch;
+            useRandomisePitch = soundDefinition.randomizePitch;
+            usePitchRange     = soundDefinition.pitchRange;
+            useSpatialBlend   = soundDefinition.spatialBlend;
+            useLoop           = soundDefinition.loop;
+            useDelay          = soundDefinition.NextSfxDelay();
+            useChance         = soundDefinition.percentChanceToPlay;
+            minDist           = soundDefinition.minDistance;
+            maxDist           = soundDefinition.maxDistance;
+        }
+        else
+        {
+            useVolume         = volume;
+            usePitch          = pitch;
+            useRandomisePitch = randomisePitch;
+            usePitchRange     = pitchRange;
+            useSpatialBlend   = spatialBlend;
+            useLoop           = loop;
+            useDelay          = randomiseDelay ? Random.Range(0f, eventDelay) : eventDelay;
+            useChance         = percentageChanceToPlay;
+            minDist           = useCustom3DSettings ? minDistance : 1f;
+            maxDist           = useCustom3DSettings ? maxDistance : 500f;
+        }
+
+        AudioDebug.Log($"[EventSender] SFX attachment: attachTo={(attachTo?.name ?? "AudioManager(default)")}, position={position}, spatialBlend={useSpatialBlend}");
+
         // Send the PlaySFX Event (soundName is null - clips are provided directly)
-        AudioEventManager.PlaySFX(null, volume, pitch, randomisePitch, pitchRange, spatialBlend, loop, delay, percentageChanceToPlay, attachTo, position, minDist, maxDist, eventName, directClips);
+        AudioEventManager.PlaySFX(null, useVolume, usePitch, useRandomisePitch, usePitchRange, useSpatialBlend, useLoop, useDelay, useChance, attachTo, position, minDist, maxDist, eventName, directClips);
     }
     
     // Interface methods to call SFX management functions:

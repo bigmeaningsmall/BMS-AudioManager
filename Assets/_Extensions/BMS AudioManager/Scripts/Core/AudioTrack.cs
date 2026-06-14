@@ -51,6 +51,26 @@ public class AudioTrack : MonoBehaviour
     private float targetPitch = 1f;
     private float currentSpatialBlend = 0f;
     private bool isLooping = true;
+
+    // 3D rolloff distances, applied to any source created at spatialBlend > 0 (set in Play).
+    private float currentMinDistance = 1f;
+    private float currentMaxDistance = 500f;
+
+    /// <summary>
+    /// Sets spatial blend on a source and, when it's 3D (blend > 0), applies the track's rolloff
+    /// distances. Centralises 3D config so every source (main/cue/outgoing) is consistent.
+    /// </summary>
+    private void ApplyRolloff(AudioSource source, float spatialBlend)
+    {
+        if (source == null) return;
+        source.spatialBlend = spatialBlend;
+        if (spatialBlend > 0f)
+        {
+            source.rolloffMode = AudioRolloffMode.Logarithmic;
+            source.minDistance = currentMinDistance;
+            source.maxDistance = currentMaxDistance;
+        }
+    }
     
     // Active coroutines
     private Coroutine cueCoroutine;      // Handles cue fade in
@@ -104,7 +124,8 @@ public class AudioTrack : MonoBehaviour
     /// Play method with 3-source safety system - STATE BASED -
     /// </summary>
     public void Play(int trackNumber, string trackName, float volume, float pitch, float spatialBlend,
-                     FadeType fadeType, float fadeDuration, FadeTarget fadeTarget, bool loop, Transform attachTo, AudioClip directClip = null)
+                     FadeType fadeType, float fadeDuration, FadeTarget fadeTarget, bool loop, Transform attachTo, AudioClip directClip = null,
+                     float minDistance = 1f, float maxDistance = 500f)
     {
         AudioDebug.Log($"[Track] Play called - Current State: {currentState}, FadeType: {fadeType}");
 
@@ -112,6 +133,8 @@ public class AudioTrack : MonoBehaviour
         targetVolume = volume;
         targetPitch = pitch;
         currentSpatialBlend = spatialBlend;
+        currentMinDistance = minDistance;
+        currentMaxDistance = maxDistance;
         isLooping = loop;
 
         // Get the audio clip
@@ -461,7 +484,7 @@ public class AudioTrack : MonoBehaviour
         mainSource.loop = newLoop;
         
         // Spatial blend - instant (could be faded in Phase 2)
-        mainSource.spatialBlend = newSpatialBlend;
+        ApplyRolloff(mainSource, newSpatialBlend);
         
         // Volume and Pitch updates based on FadeTarget
         if (fadeTarget == FadeTarget.Ignore)
@@ -542,7 +565,7 @@ public class AudioTrack : MonoBehaviour
 
         cueSource.clip = clip;
         cueSource.loop = loop;
-        cueSource.spatialBlend = spatialBlend;
+        ApplyRolloff(cueSource, spatialBlend);
         cueSource.volume = (fadeTarget == FadeTarget.FadeVolume || fadeTarget == FadeTarget.FadeBoth) ? 0f : volume;
         cueSource.pitch = (fadeTarget == FadeTarget.FadePitch || fadeTarget == FadeTarget.FadeBoth) ? 0f : pitch;
         cueSource.Play();
@@ -628,7 +651,7 @@ public class AudioTrack : MonoBehaviour
 
                 cueSource.clip = clip;
                 cueSource.loop = loop;
-                cueSource.spatialBlend = spatialBlend;
+                ApplyRolloff(cueSource, spatialBlend);
                 cueSource.volume = (fadeTarget == FadeTarget.FadeVolume || fadeTarget == FadeTarget.FadeBoth) ? 0f : volume;
                 cueSource.pitch = (fadeTarget == FadeTarget.FadePitch || fadeTarget == FadeTarget.FadeBoth) ? 0f : pitch;
                 cueSource.Play();
@@ -680,7 +703,7 @@ public class AudioTrack : MonoBehaviour
     
         mainSource.clip = clip;
         mainSource.loop = loop;
-        mainSource.spatialBlend = spatialBlend;
+        ApplyRolloff(mainSource, spatialBlend);
     
         if (fadeTarget == FadeTarget.Ignore || fadeDuration <= 0)
         {
@@ -755,7 +778,7 @@ public class AudioTrack : MonoBehaviour
 
         cueSource.clip = clip;
         cueSource.loop = loop;
-        cueSource.spatialBlend = spatialBlend;
+        ApplyRolloff(cueSource, spatialBlend);
 
         // Set initial fade values
         cueSource.volume = (fadeTarget == FadeTarget.FadeVolume || fadeTarget == FadeTarget.FadeBoth) ? 0f : volume;
@@ -955,7 +978,7 @@ public class AudioTrack : MonoBehaviour
 
         cueSource.clip = newClip;
         cueSource.loop = loop;
-        cueSource.spatialBlend = spatialBlend;
+        ApplyRolloff(cueSource, spatialBlend);
         cueSource.volume = (fadeTarget == FadeTarget.FadeVolume || fadeTarget == FadeTarget.FadeBoth) ? 0f : volume;
         cueSource.pitch = (fadeTarget == FadeTarget.FadePitch || fadeTarget == FadeTarget.FadeBoth) ? 0f : pitch;
         // Don't play yet - it's waiting as cue
@@ -1232,48 +1255,15 @@ public class AudioTrack : MonoBehaviour
     // ==================== HELPER METHODS ====================
     #region HELPER METHODS
 
-    // Resolve audio clip by direct reference, then track name, then track number
+    // Resolve the audio clip. Clips now come exclusively from SoundDefinitions (directClip);
+    // the legacy name/index lookup into Resources has been removed. trackNumber/trackName remain
+    // in the signature only for delegate-chain compatibility and are no longer used to find clips.
     private AudioClip ResolveAudioClip(int trackNumber, string trackName, AudioClip directClip = null)
     {
-        // Direct asset reference (from a SoundDefinition) wins - asset-safe, no string lookup
         if (directClip != null) return directClip;
 
-        if (audioManager == null)
-        {
-            AudioDebug.LogError($"[AudioTrack] AudioManager is null!");
-            return null;
-        }
-
-        // Try by name first if provided AND NOT EMPTY
-        if (!string.IsNullOrEmpty(trackName))
-        {
-            AudioClip clip = trackType switch
-            {
-                AudioTrackType.BGM => audioManager.GetBGMClip(trackName),
-                AudioTrackType.Ambient => audioManager.GetAmbientClip(trackName),
-                AudioTrackType.Dialogue => audioManager.GetDialogueClip(trackName),
-                AudioTrackType.Aux1 => audioManager.GetAux1Clip(trackName),
-                AudioTrackType.Aux2 => audioManager.GetAux2Clip(trackName),
-                _ => null
-            };
-
-            if (clip != null) return clip;
-        }
-
-        // ONLY use track number if trackNumber >= 0 (your original logic)
-        if (trackNumber >= 0)
-        {
-            return trackType switch
-            {
-                AudioTrackType.BGM => audioManager.GetBGMClip(trackNumber),
-                AudioTrackType.Ambient => audioManager.GetAmbientClip(trackNumber),
-                AudioTrackType.Dialogue => audioManager.GetDialogueClip(trackNumber),
-                AudioTrackType.Aux1 => audioManager.GetAux1Clip(trackNumber),
-                AudioTrackType.Aux2 => audioManager.GetAux2Clip(trackNumber),
-                _ => null
-            };
-        }
-    
+        AudioDebug.LogError("[AudioTrack] No clip supplied. Play tracks via a SoundDefinition or SoundId " +
+                            "(string/index lookup was removed in the bank-only workflow).");
         return null;
     }
     

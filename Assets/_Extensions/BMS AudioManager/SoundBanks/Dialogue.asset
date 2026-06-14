@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 93f5f0f1244fd974b8bbce4edd0cffcf, type: 3}
+  m_Name: Dialogue
+  m_EditorClassIdentifier: Assembly-CSharp::SoundBank
+  bankId: Dialogue
+  sounds:
+  - {fileID: 11400000, guid: 7c4df3bd8b54fd340a041ae0379ba088, type: 2}
+  - {fileID: 11400000, guid: 57a0512f5cb976f42a34e6e21facc870, type: 2}
+  - {fileID: 11400000, guid: c20ffa20f1a12a449a99faeb63c266ac, type: 2}
+  - {fileID: 11400000, guid: 0ceedd94f23ca1b45946ae83ea13a72a, type: 2}
+  - {fileID: 11400000, guid: af109140343f0f442b5b406f6f1d0f39, type: 2}
+  - {fileID: 11400000, guid: fa48c4041c2cf474398bec12ead10e27, type: 2}

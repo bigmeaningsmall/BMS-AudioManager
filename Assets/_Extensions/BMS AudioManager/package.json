@@ -1,0 +1,28 @@
+{
+  "name": "com.bms.audiomanager",
+  "version": "3.0.0",
+  "displayName": "BMS Audio Manager",
+  "description": "Event-driven Unity audio system with 3-source crossfading, 5 independent tracks (BGM/Ambient/Dialogue/Aux1/Aux2), spatial audio, and inspector-driven audio zones. Audio is organised through asset-based SoundDefinitions grouped into loadable SoundBanks and addressed by a generated, compile-safe SoundId enum - no magic strings and no Resources dependency.\n\nOptional: install com.unity.splines to use the SplineFollower components.",
+  "unity": "6000.0",
+  "keywords": [
+    "audio",
+    "sound",
+    "music",
+    "sfx",
+    "crossfade",
+    "spatial-audio",
+    "audio-manager",
+    "scriptableobject"
+  ],
+  "author": {
+    "name": "Niall Mc Shane"
+  },
+  "license": "CC-BY-ND-4.0",
+  "samples": [
+    {
+      "displayName": "Demo Scenes",
+      "description": "Trigger zones, spline-following audio, and scripting examples.",
+      "path": "Scenes"
+    }
+  ]
+}
