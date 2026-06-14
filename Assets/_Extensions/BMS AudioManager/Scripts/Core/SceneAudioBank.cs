@@ -11,6 +11,12 @@ using UnityEngine;
 /// </summary>
 public class SceneAudioBank : MonoBehaviour
 {
+    [Header("Enable / Disable Component to Load or Unload Sound Banks to the AudioManager")]
+    [Space(5)]
+    [Header("Used to control which assets are available in the scene")]
+    [Space(5)]
+    [Header("Assign the SoundBanks that should be loaded while this component is active.")]
+    [Space(10)]
     [Tooltip("Banks to load while this component is active.")]
     public List<SoundBank> banks = new List<SoundBank>();
 
