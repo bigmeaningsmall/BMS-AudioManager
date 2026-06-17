@@ -1,5 +1,7 @@
 # BMS Audio Manager - Code API Reference
 
+**See also:** [README](ReadMe.md) (overview & core concepts) · [Inspector & Editor Usage](Usage-Editor-Inspector.md) (no-code zones) · [Changelog](CHANGELOG.md)
+
 > **Bank-only workflow.** Audio is no longer loaded from `Resources` by string name. Clips live in
 > **SoundDefinition** assets, grouped into **SoundBank**s that you load into the registry
 > (`AudioManager.startupBanks` or a `SceneAudioBank` component). Run **BMS AudioManager → Generate

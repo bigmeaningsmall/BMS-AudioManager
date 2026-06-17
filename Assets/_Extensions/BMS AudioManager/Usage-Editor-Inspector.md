@@ -2,22 +2,42 @@
 
 How to trigger audio entirely from the Unity Editor - no code required.
 
+**See also:** [README](ReadMe.md) (overview & core concepts) · [Code API Reference](Usage-Code-API.md) (scripting) · [Changelog](CHANGELOG.md)
+
 ---
 
 ## Setup
 
 1. Place the **AudioManager prefab** in your scene. It must be present for any audio to work.
-2. Put your audio clips in the correct `Resources/Audio/` subfolder:
+2. Put your audio clips in a folder with one subfolder per category (the subfolder name sets the
+   category). This folder is configurable on the **SoundGeneratorSettings** asset and does **not** need
+   to be under `Resources`:
 
 ```
-Assets/Resources/Audio/
-    BGM/         ← background music
-    Ambient/     ← environmental beds
-    Dialogue/    ← speech / narration
-    SFX/         ← sound effects
+<audioSourceRoot>/      ← set on SoundGeneratorSettings (default: Assets/Audio)
+    BGM/                ← background music
+    Ambient/            ← environmental beds
+    Dialogue/           ← speech / narration
+    Aux1/  Aux2/        ← auxiliary tracks
+    Ambience-Environment/
+    SFX/                ← sound effects
 ```
 
-The **filename without extension** is the name you type into the inspector fields.
+3. Run **BMS AudioManager → Generate Sound Definitions**. This creates a **SoundDefinition** asset per
+   clip, groups them into **SoundBanks** (one per category + a `MasterBank`), and generates the
+   `SoundId` enum. Re-run it any time you add/rename clips.
+4. On the **AudioManager**, assign a bank to **Startup Banks** so its sounds are available — drop in
+   **MasterBank** for "everything loaded" (or use a `SceneAudioBank` component for per-scene loading).
+
+You then assign **SoundDefinition** assets to the sender components below — no clip names, no strings.
+
+> **Auto-generated vs your own definitions.** The generator creates one definition per clip (in
+> `SoundDefinitions/`) and owns them. To **group specific clips** into one sound (a primary clip +
+> variations) or curate your own, make a definition by hand via **Create → BMS AudioManager → Sound
+> Definition** and keep it in a separate folder (e.g. `SoundDefinitions-User/`) so the generator leaves
+> it alone. Assign it to senders directly, and add it to a SoundBank to make it registry-available.
+> Note: the generator only *adds/updates* — it never deletes definitions for clips you rename or
+> remove, so tidy up stale auto-generated ones yourself.
 
 ---
 
@@ -31,10 +51,10 @@ Use this to play, stop, or pause a BGM / Ambient / Dialogue track when a player 
 
 | Field | What it does |
 |---|---|
-| **Audio Track Type** | Which track to control: BGM, Ambient, Dialogue, Aux1, or Aux2 |
-| **Track Name** | Clip filename (without extension) e.g. `ForestAmbient` |
-| **Track Number** | Play by index instead of name (leave at -1 to use Track Name) |
-| **Volume** | Playback volume 0–1 |
+| **Audio Track Type** | Which track (channel) to play on: BGM, Ambient, Dialogue, Aux1, or Aux2 |
+| **Sound Definition** | **Required** - the sound asset to play (assign a generated SoundDefinition) |
+| **Use Definition Defaults** | Pull volume/pitch/loop/spatial/fade from the definition. Untick to use the fields below |
+| **Volume** | Playback volume 0–1 (used when *Use Definition Defaults* is off) |
 | **Pitch** | Playback pitch (1 = normal, 0.5 = half speed, 2 = double) |
 | **Spatial Blend** | 0 = 2D stereo, 1 = full 3D positional |
 | **Loop** | Keep looping until stopped |
@@ -102,9 +122,10 @@ Use this for footsteps, pickups, ambient bird chirps, buttons, or any one-shot /
 
 | Field | What it does |
 |---|---|
-| **SFX Name** (array) | One or more clip filenames - one is picked at random each play |
+| **Sound Definition** | **Required** - its `clip` + `variations` form the random pool. One is picked per play |
+| **Use Definition Defaults** | Pull volume/pitch/jitter/chance/loop/3D/delay from the definition. Untick to use the fields below |
 | **Play On Enabled** | Auto-play when the GameObject activates |
-| **Volume** | 0–1 |
+| **Volume** | 0–1 (used when *Use Definition Defaults* is off) |
 | **Pitch** | 1 = normal |
 | **Randomise Pitch** | Vary pitch slightly on each play |
 | **Pitch Range** | How much to vary pitch when Randomise Pitch is on |
@@ -120,6 +141,10 @@ Use this for footsteps, pickups, ambient bird chirps, buttons, or any one-shot /
 | **Use Custom Position** | Play at a fixed world position instead of a transform |
 | **Custom Position** | The world position to play at when above is enabled |
 | **Event Name** | Optional label for debug logs |
+
+> **Tip:** with *Use Definition Defaults* on, configure variation/pitch/chance/3D **on the
+> SoundDefinition asset** so every sender and script call reuses them. Untick only for a one-off
+> per-placement override.
 
 ### Collision / Trigger Zone Setup
 
@@ -145,7 +170,7 @@ Same as AudioEventSender above - set **Collision Type**, **Target Tag**.
 
 ## AudioTrackParameterDisplay - Monitor Track States
 
-Attach to any GameObject to see live BGM, Ambient, and Dialogue track states in the Inspector while the game runs.
+Attach to any GameObject to see live track states (BGM, Ambient, Dialogue, Aux1, Aux2) in the Inspector while the game runs.
 
 **Add component:** `Add Component → AudioTrackParameterDisplay`
 
@@ -221,14 +246,13 @@ Slots left empty will fall back to the prefab's default output.
 3. Size and position the collider to cover the cave entrance area
 4. Add component **AudioEventSender**
 5. Set **Audio Track Type** → `Ambient`
-6. Set **Track Name** → `CaveAmbient` (must match the filename in `Resources/Audio/Ambient/`)
-7. Set **Volume** → `0.7`
-8. Set **Fade Type** → `Crossfade`, **Fade Duration** → `3`
-9. Set **Collision Type** → `Trigger`, **Target Tag** → `Player`
-10. Tick **Stop On Exit**
-11. Optionally tick **Attach To This Transform** if you want the ambient to be positionally 3D
+6. Drag your cave-ambient **Sound Definition** into the **Sound Definition** slot
+7. Leave **Use Definition Defaults** on (volume/fade/etc. come from the definition), or untick to set **Volume** `0.7`, **Fade Type** `Crossfade`, **Fade Duration** `3` here
+8. Set **Collision Type** → `Trigger`, **Target Tag** → `Player`
+9. Set **On Enter Action** → `Play`, **On Exit Action** → `Stop`
+10. Optionally tick **Attach To This Transform** if you want the ambient to be positionally 3D
 
-Done - no code written.
+Done - no code written. (Make sure the definition's bank is loaded - MasterBank in the AudioManager's Startup Banks, or a SceneAudioBank.)
 
 ---
 
@@ -236,13 +260,16 @@ Done - no code written.
 
 **Goal:** Play a random footstep crunch sound when the player walks over gravel.
 
-1. Create an empty GameObject, name it `GravelZone`
-2. Add a **Box Collider**, tick **Is Trigger**, size it to the gravel patch
-3. Add component **AudioEventSenderSFX**
-4. Set **SFX Name** array size to 3, fill with `GravelStep1`, `GravelStep2`, `GravelStep3`
-5. Set **Volume** → `0.8`, tick **Randomise Pitch**, set **Pitch Range** → `0.15`
-6. Set **Percentage Chance To Play** → `70` (plays 70% of the time for variety)
+1. First, make a **Sound Definition** for the footsteps: put the three step clips on one definition
+   (primary `clip` + two `variations`), tick **Randomise Pitch** (`Pitch Range` `0.15`), set
+   **Percentage Chance To Play** `70`, **Spatial Blend** `1`, and **Min/Max Distance** `1`/`10` on it.
+   (The generator already creates one definition per clip - either add the extra clips to one as
+   variations, or create a definition manually via `Create → BMS AudioManager → Sound Definition`.)
+2. Create an empty GameObject, name it `GravelZone`
+3. Add a **Box Collider**, tick **Is Trigger**, size it to the gravel patch
+4. Add component **AudioEventSenderSFX**
+5. Drag the footsteps **Sound Definition** into the **Sound Definition** slot
+6. Leave **Use Definition Defaults** on — all the variation/pitch/chance/3D settings come from the definition
 7. Set **Collision Type** → `Trigger`, **Target Tag** → `Player`
-8. Set **Spatial Blend** → `1`, tick **Use Custom 3D Settings**, **Min Distance** `1`, **Max Distance** `10`
 
-Done.
+Done. One configured definition now drives the variety; the same definition works identically from code (`AudioEvent.PlaySFX(...)`).

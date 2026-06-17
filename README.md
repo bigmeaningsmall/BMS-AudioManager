@@ -7,11 +7,11 @@ A Unity audio management system featuring 3-source crossfading, an event-driven 
 **Unity Version:** 6000.4.8f1+
 **Optional Dependency:** `com.unity.splines` (required only for SplineFollower components)
 
-Full documentation is in [`Assets/Extensions/BMS AudioManager/ReadMe.md`](Assets/Extensions/BMS%20AudioManager/ReadMe.md).
+Full documentation is in [`Assets/_Extensions/BMS AudioManager/ReadMe.md`](Assets/_Extensions/BMS%20AudioManager/ReadMe.md).
 
-- [Code API Reference](Assets/Extensions/BMS%20AudioManager/Usage-Code-API.md) - calling audio from scripts
-- [Inspector & Editor Usage](Assets/Extensions/BMS%20AudioManager/Usage-Editor-Inspector.md) - audio zones and components without code
-- [Changelog](Assets/Extensions/BMS%20AudioManager/CHANGELOG.md) - version history and migration notes
+- [Code API Reference](Assets/_Extensions/BMS%20AudioManager/Usage-Code-API.md) - calling audio from scripts
+- [Inspector & Editor Usage](Assets/_Extensions/BMS%20AudioManager/Usage-Editor-Inspector.md) - audio zones and components without code
+- [Changelog](Assets/_Extensions/BMS%20AudioManager/CHANGELOG.md) - version history and migration notes
 
 ---
 
@@ -22,7 +22,7 @@ Full documentation is in [`Assets/Extensions/BMS AudioManager/ReadMe.md`](Assets
 3. Double-click the downloaded file, or drag it into the Unity Editor
 4. In the Import dialog, make sure everything is ticked and click **Import**
 
-The package will install into `Assets/Extensions/BMS AudioManager/` - keep it there and separate from your game logic.
+The package will install into `Assets/_Extensions/BMS AudioManager/` - keep it there and separate from your game logic.
 
 ### Updating
 
