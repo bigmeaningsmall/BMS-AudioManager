@@ -1,0 +1,6 @@
+These Sound Definitions are auto generated.
+
+You can generate the Sound Definitions automatically from all the individual audio clips. Each clip will create a new definition.
+or
+You can create them yourself and have control over which clips and how they are grouped (recommended) - see folder /SoundDefinitions-User
+

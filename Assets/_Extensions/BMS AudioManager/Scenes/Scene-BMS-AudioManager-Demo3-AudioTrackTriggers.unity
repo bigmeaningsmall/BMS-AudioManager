@@ -1437,6 +1437,12 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5355574976095253072, guid: 89621415efb6a794087214f779dcb9f2,
         type: 3}
+      propertyPath: soundDefinition
+      value: 
+      objectReference: {fileID: 11400000, guid: 7c4df3bd8b54fd340a041ae0379ba088,
+        type: 2}
+    - target: {fileID: 5355574976095253072, guid: 89621415efb6a794087214f779dcb9f2,
+        type: 3}
       propertyPath: ambientTrackNumber
       value: 0
       objectReference: {fileID: 0}
@@ -2032,6 +2038,12 @@ PrefabInstance:
       propertyPath: showTriggerInfo
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 5355574976095253072, guid: 89621415efb6a794087214f779dcb9f2,
+        type: 3}
+      propertyPath: soundDefinition
+      value: 
+      objectReference: {fileID: 11400000, guid: 5e851232d3728794387bdf50fcec42d6,
+        type: 2}
     - target: {fileID: 5355574976095253072, guid: 89621415efb6a794087214f779dcb9f2,
         type: 3}
       propertyPath: ambientTrackNumber
