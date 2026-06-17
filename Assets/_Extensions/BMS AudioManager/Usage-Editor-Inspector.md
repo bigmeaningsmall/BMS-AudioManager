@@ -32,12 +32,14 @@ How to trigger audio entirely from the Unity Editor - no code required.
 You then assign **SoundDefinition** assets to the sender components below — no clip names, no strings.
 
 > **Auto-generated vs your own definitions.** The generator creates one definition per clip (in
-> `SoundDefinitions/`) and owns them. To **group specific clips** into one sound (a primary clip +
-> variations) or curate your own, make a definition by hand via **Create → BMS AudioManager → Sound
-> Definition** and keep it in a separate folder (e.g. `SoundDefinitions-User/`) so the generator leaves
-> it alone. Assign it to senders directly, and add it to a SoundBank to make it registry-available.
-> Note: the generator only *adds/updates* — it never deletes definitions for clips you rename or
-> remove, so tidy up stale auto-generated ones yourself.
+> `SoundDefinitions/`). To **group specific clips** into one sound (a primary clip + variations) or
+> curate your own, make a definition by hand via **Create → BMS AudioManager → Sound Definition** and
+> keep it in the **user folder** (`SoundGeneratorSettings.userDefinitionsRoot`, default
+> `SoundDefinitions-User/`). The generator never creates/moves/deletes those, but it **does include
+> them**: they get a `SoundId` and go into the **MasterBank** + a **UserBank** — so they work just like
+> auto definitions (assign by SoundId or drag the asset onto a sender). Note: the generator only
+> *adds/updates* — it never deletes definitions for clips you rename or remove, so tidy up stale
+> auto-generated ones yourself.
 
 ---
 

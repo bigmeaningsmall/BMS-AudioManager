@@ -22,6 +22,7 @@ public static class SoundDefinitionGenerator
     private static string s_outputRoot;
     private static string s_banksRoot;
     private static string s_generatedScriptsRoot;
+    private static string s_userDefinitionsRoot;
     private static string SoundIdPath => $"{s_generatedScriptsRoot}/SoundId.cs";
 
     // Maps a source category folder name to its AudioType + a sensible default loop value.
@@ -52,6 +53,7 @@ public static class SoundDefinitionGenerator
         s_outputRoot = settings.soundDefinitionsRoot;
         s_banksRoot = settings.soundBanksRoot;
         s_generatedScriptsRoot = settings.generatedScriptsRoot;
+        s_userDefinitionsRoot = settings.userDefinitionsRoot;
 
         if (!AssetDatabase.IsValidFolder(s_audioRoot))
         {
@@ -80,6 +82,11 @@ public static class SoundDefinitionGenerator
         // existing definition (preserving its id) instead of spawning a duplicate.
         // Built BEFORE StartAssetEditing so the search index is complete.
         Dictionary<string, SoundDefinition> byClipGuid = BuildClipGuidIndex();
+
+        // Hand-authored definitions (grouped/curated by the user). Loaded BEFORE StartAssetEditing so
+        // these pre-existing assets are in the search index. They get ids + a SoundId + go into the
+        // MasterBank and a UserBank, but the generator never creates/moves/deletes them.
+        List<SoundDefinition> userDefs = LoadUserDefinitions();
 
         try
         {
@@ -171,19 +178,27 @@ public static class SoundDefinitionGenerator
                 }
             }
 
-            // (Re)build one bank per category plus a master bank of everything.
+            // Everything that gets an id + SoundId entry: auto (clip-derived) defs plus hand-authored
+            // user defs. User defs are NOT added to the per-category banks (those mirror the clip
+            // folders) but DO go into the MasterBank and their own UserBank.
+            var allWithUser = new List<SoundDefinition>(allDefs);
+            allWithUser.AddRange(userDefs);
+
+            // (Re)build one bank per category (auto defs only).
             foreach (var pair in byCategory)
             {
                 WriteBank($"{s_banksRoot}/{pair.Key}.asset", pair.Key, pair.Value);
             }
-            WriteBank($"{s_banksRoot}/MasterBank.asset", "Master", allDefs);
+            // MasterBank = everything (auto + user). UserBank = just the hand-authored defs.
+            WriteBank($"{s_banksRoot}/MasterBank.asset", "Master", allWithUser);
+            if (userDefs.Count > 0)
+                WriteBank($"{s_banksRoot}/UserBank.asset", "User", userDefs);
 
             // Stage 3: assign stable ids and (re)generate the SoundId enum.
-            // Use the in-memory allDefs list (every definition touched this run) rather than
-            // re-querying with FindAssets - newly created assets aren't in the search index until
-            // StopAssetEditing, so a FindAssets here would miss them on a first run.
-            AssignStableIds(allDefs);
-            GenerateSoundIdEnum(allDefs, displayNames);
+            // Use the in-memory lists (every definition touched this run) rather than re-querying with
+            // FindAssets - newly created assets aren't in the search index until StopAssetEditing.
+            AssignStableIds(allWithUser);
+            GenerateSoundIdEnum(allWithUser, displayNames);
         }
         finally
         {
@@ -194,8 +209,8 @@ public static class SoundDefinitionGenerator
 
         // Use Debug.Log directly (not AudioDebug) - this runs in edit mode where there's no
         // AudioManager.Instance to gate logging, so AudioDebug would be silently suppressed.
-        Debug.Log($"[SoundDefinitionGenerator] Done. Created: {created}, Updated: {updated}, Unchanged: {skipped}. " +
-                  $"Banks: {byCategory.Count} category + 1 master ({allDefs.Count} defs). Source: {s_audioRoot}. Output: {s_outputRoot}, {s_banksRoot}");
+        Debug.Log($"[SoundDefinitionGenerator] Done. Created: {created}, Updated: {updated}, Unchanged: {skipped}, User defs: {userDefs.Count}. " +
+                  $"Banks: {byCategory.Count} category + MasterBank{(userDefs.Count > 0 ? " + UserBank" : "")}. Source: {s_audioRoot}. Output: {s_outputRoot}, {s_banksRoot}");
     }
 
     /// <summary>
@@ -217,6 +232,37 @@ public static class SoundDefinitionGenerator
         Debug.Log($"[SoundDefinitionGenerator] Created default settings at {SettingsPath}. " +
                   "Edit it to point at a different audio source folder or output locations.");
         return settings;
+    }
+
+    /// <summary>
+    /// Loads hand-authored SoundDefinitions from the user folder so they can be included in the
+    /// SoundId enum, MasterBank, and UserBank. The generator never creates/moves/deletes these.
+    /// Skips if the folder is unset/missing, or if it overlaps the auto output folder (which would
+    /// double-count the generated defs).
+    /// </summary>
+    private static List<SoundDefinition> LoadUserDefinitions()
+    {
+        var result = new List<SoundDefinition>();
+        if (string.IsNullOrEmpty(s_userDefinitionsRoot) || !AssetDatabase.IsValidFolder(s_userDefinitionsRoot))
+            return result;
+
+        // Guard: the user folder must be distinct from the auto output folder, otherwise we'd scan
+        // the generated defs again and double-count them.
+        if (s_userDefinitionsRoot == s_outputRoot ||
+            s_userDefinitionsRoot.StartsWith(s_outputRoot + "/") ||
+            s_outputRoot.StartsWith(s_userDefinitionsRoot + "/"))
+        {
+            Debug.LogWarning($"[SoundDefinitionGenerator] userDefinitionsRoot ('{s_userDefinitionsRoot}') overlaps " +
+                             $"soundDefinitionsRoot ('{s_outputRoot}'). Skipping user definitions - keep them in separate folders.");
+            return result;
+        }
+
+        foreach (string guid in AssetDatabase.FindAssets("t:SoundDefinition", new[] { s_userDefinitionsRoot }))
+        {
+            var def = AssetDatabase.LoadAssetAtPath<SoundDefinition>(AssetDatabase.GUIDToAssetPath(guid));
+            if (def != null) result.Add(def);
+        }
+        return result;
     }
 
     /// <summary>

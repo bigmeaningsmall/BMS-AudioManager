@@ -21,6 +21,11 @@ public class SoundGeneratorSettings : ScriptableObject
     [Tooltip("Where generated SoundDefinition assets are written.")]
     public string soundDefinitionsRoot = "Assets/_Extensions/BMS AudioManager/SoundDefinitions";
 
+    [Tooltip("Folder for YOUR hand-authored SoundDefinitions (Create -> BMS AudioManager -> Sound Definition - " +
+             "for grouping specific clips). The generator includes these in the SoundId enum, the MasterBank, and a " +
+             "UserBank, but never creates, moves, or deletes them. Keep it OUTSIDE the auto SoundDefinitions folder above.")]
+    public string userDefinitionsRoot = "Assets/_Extensions/BMS AudioManager/SoundDefinitions-User";
+
     [Tooltip("Where generated SoundBank assets are written.")]
     public string soundBanksRoot = "Assets/_Extensions/BMS AudioManager/SoundBanks";
 

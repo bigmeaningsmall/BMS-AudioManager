@@ -261,7 +261,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &283624888
 Transform:
   m_ObjectHideFlags: 0
@@ -1220,13 +1220,19 @@ PrefabInstance:
     - target: {fileID: 7366141512683043284, guid: ccc2f9deca1fd8440a1f8646e2051deb,
         type: 3}
       propertyPath: startupBanks.Array.size
-      value: 1
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 7366141512683043284, guid: ccc2f9deca1fd8440a1f8646e2051deb,
         type: 3}
       propertyPath: 'startupBanks.Array.data[0]'
       value: 
       objectReference: {fileID: 11400000, guid: 10cff59e48e13174a9ef531c344a3b3c,
+        type: 2}
+    - target: {fileID: 7366141512683043284, guid: ccc2f9deca1fd8440a1f8646e2051deb,
+        type: 3}
+      propertyPath: 'startupBanks.Array.data[1]'
+      value: 
+      objectReference: {fileID: 11400000, guid: 422fbc9dae51f3f479e3ece61a1066d9,
         type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

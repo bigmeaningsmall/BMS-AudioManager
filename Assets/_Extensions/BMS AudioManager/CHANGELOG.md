@@ -29,6 +29,10 @@ SoundDefinitions**, grouped into loadable **SoundBanks**, and addressed by a gen
 - **Generator** (`BMS AudioManager → Generate Sound Definitions`) — mirrors a configurable audio
   folder into definitions, one bank per category + a `MasterBank`, and emits `SoundId.cs`. Idempotent
   and **rename/move-safe** (definitions matched to clips by GUID; stable ids preserved).
+- **Hand-authored (user) definitions** — definitions you create in `SoundGeneratorSettings.userDefinitionsRoot`
+  (default `SoundDefinitions-User/`) for grouping specific clips are picked up by the generator: each gets a
+  `SoundId`, and they're added to the `MasterBank` plus a dedicated `UserBank`. The generator never
+  creates, moves, or deletes them.
 - **`AudioEvent` SoundDefinition & SoundId overloads** — `Play(SoundId)` smart-dispatch (routes to
   track vs SFX by category), plus `PlayTrack` / `PlaySFX` / `PlaySFX3D` / `PlayLoopedSFX` / `StopTrack`
   taking a `SoundId` or `SoundDefinition`.

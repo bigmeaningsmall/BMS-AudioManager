@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ee9a1cb6078a55c42a2b364279de8e50, type: 3}
   m_Name: SoundDef_ThemeSongSynthPopB
   m_EditorClassIdentifier: Assembly-CSharp::SoundDefinition
+  id: 66
   clip: {fileID: 8300000, guid: fc8794d82890fad42a309c3ca38c8445, type: 3}
   variations: []
   audioType: 1
@@ -22,3 +23,11 @@ MonoBehaviour:
   fadeType: 0
   fadeDuration: 4
   fadeTarget: 2
+  randomizePitch: 0
+  pitchRange: 0.1
+  volumeRange: 0
+  percentChanceToPlay: 100
+  randomizeDelay: 0
+  delay: 0
+  minDistance: 1
+  maxDistance: 500

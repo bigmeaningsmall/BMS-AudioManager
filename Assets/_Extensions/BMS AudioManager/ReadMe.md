@@ -543,13 +543,18 @@ There are two kinds of SoundDefinition, and they live in **separate folders**:
   definition per source clip, owned and rewritten by the generator. These get a stable `SoundId` and
   are placed into the generated category banks + `MasterBank`. **Don't hand-edit which clips they point
   at** — re-running the generator manages them.
-- **Your own** (`…/SoundDefinitions-User`, or any folder *outside* `soundDefinitionsRoot`) — hand-authored
-  via **Create → BMS AudioManager → Sound Definition**. This is how you **group specific clips** (a
-  primary `clip` + `variations`) and tune their parameters as a single named sound — e.g. a `Footsteps`
-  or `GunShots` definition. The generator never touches these.
-  - Use them by **direct reference** (drag onto a sender, or a `[SerializeField] SoundDefinition` field).
-  - To make one available via the registry/`SoundId`, add it to a **SoundBank** yourself (your own bank,
-    or drop it into `MasterBank`). Custom definitions are **not** part of the generated `SoundId` enum.
+- **Your own** (`SoundGeneratorSettings.userDefinitionsRoot`, default `…/SoundDefinitions-User`) —
+  hand-authored via **Create → BMS AudioManager → Sound Definition**. This is how you **group specific
+  clips** (a primary `clip` + `variations`) and tune their parameters as a single named sound — e.g. a
+  `Footsteps` or `GunShots` definition. The generator **never creates, moves, or deletes** these, but it
+  **does pick them up**: each gets a stable `SoundId`, and they're added to the **MasterBank** plus a
+  dedicated **UserBank** (so you can load just your custom sounds per scene).
+  - So a custom definition works exactly like an auto one: `AudioEvent.Play(SoundId.GunShots)`, assign
+    by `SoundId` dropdown, or drag the asset directly onto a sender.
+  - Keep this folder **separate** from the auto `SoundDefinitions/` folder (the generator warns and skips
+    if they overlap, to avoid double-counting).
+  - A clip can have *both* an auto definition (per-clip) and appear inside a user definition — they're
+    two distinct `SoundId`s with different names. That's fine and intended.
 
 > **The generator only adds/updates — it never deletes.** If you rename or remove a source clip, the
 > old auto-generated definition is left behind (it just loses its clip). Delete stale definitions
@@ -629,7 +634,6 @@ The bridge maps BMS track/clip names to middleware event paths via a serialised 
 - `AudioRegistry.UnloadBank` controls **availability**, not memory - clips stay resident until an Addressables provider is added (see Audio Loading)
 - Clips referenced by definitions load with their owning scene/assets (synchronous); async/streaming needs the deferred Addressables provider
 - The generator only adds/updates auto-generated definitions - it never deletes them, so a renamed/removed clip leaves a stale definition to clean up by hand (see *Auto-generated vs your own definitions*)
-- Custom (hand-authored) definitions are not part of the generated `SoundId` enum - reference them directly and add them to a bank manually
 - `SplineFollower` requires `com.unity.splines` - the project will not compile if the package is absent and these scripts are included
 - Mixer group slots on the AudioManager are optional - if left unassigned, audio sources route to whatever is set on the shared prefab
 
