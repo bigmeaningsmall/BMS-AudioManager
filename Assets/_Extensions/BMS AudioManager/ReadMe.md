@@ -1,11 +1,11 @@
-# BMS Audio Manager v3.0.0
+# BMS Audio Manager v3.1.0
 
 A Unity audio management system featuring 3-source crossfading, an event-driven architecture, spatial audio, and inspector-driven audio zones. Audio is organised through **asset-based SoundDefinitions** grouped into loadable **SoundBanks**, and addressed in code by a generated, compile-safe **`SoundId`** enum — no magic strings, no `Resources` dependency. Designed for small-to-medium projects requiring clean audio transitions and flexible sound management.
 
 **Unity Version:** 6000.4.8f1+
 **Optional Dependency:** `com.unity.splines` (required only for SplineFollower components)
 
-> **v3.0.0 is a major, breaking release.** Clip loading moved off `Resources` strings onto SoundDefinition assets + a typed `SoundId` API. See [CHANGELOG](CHANGELOG.md) for the migration summary.
+> **The v3 line is a major, breaking change from v2.2.0.** Clip loading moved off `Resources` strings onto SoundDefinition assets + a typed `SoundId` API. See [CHANGELOG](CHANGELOG.md) for the migration summary.
 
 ---
 
@@ -649,4 +649,4 @@ Free to use in any project, including commercial. You may not redistribute modif
 
 ---
 
-*BMS Audio Manager v3.0.0 - Unity 6*
+*BMS Audio Manager v3.1.0 - Unity 6*

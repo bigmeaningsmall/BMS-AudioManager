@@ -1,4 +1,4 @@
-# BMS Audio Manager v3.0.0 (pre-RC)
+# BMS Audio Manager v3.1.0
 
 - Release package is to be added once example usage and demo scenes are finalised
 
@@ -17,7 +17,7 @@ Full documentation is in [`Assets/_Extensions/BMS AudioManager/ReadMe.md`](Asset
 
 ## Installation
 
-1. Go to the [Releases](../../releases) page and download the latest `BMS-AudioManager(v3.0.0).unitypackage`
+1. Go to the [Releases](../../releases) page and download the latest `BMS-AudioManager(v3.1.0).unitypackage`
 2. Open your Unity project
 3. Double-click the downloaded file, or drag it into the Unity Editor
 4. In the Import dialog, make sure everything is ticked and click **Import**
@@ -75,4 +75,4 @@ Licensed under **CC BY-ND 4.0** - free to use in any project including commercia
 
 © 2026 Niall Mc Shane - [creativecommons.org/licenses/by-nd/4.0](https://creativecommons.org/licenses/by-nd/4.0/)
 
-*BMS Audio Manager v3.0.0 - Unity 6*
+*BMS Audio Manager v3.1.0 - Unity 6*

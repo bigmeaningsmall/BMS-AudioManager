@@ -4,11 +4,11 @@ All notable changes to **BMS Audio Manager** are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [3.0.0] - 2026-06-17
+## [3.1.0] - 2026-06-17
 
-Major, breaking release. Clip loading moves off `Resources` + magic strings onto **asset-based
-SoundDefinitions**, grouped into loadable **SoundBanks**, and addressed by a generated, compile-safe
-**`SoundId`** enum. The runtime no longer references `Resources` at all.
+Major, breaking release (vs 2.2.0). Clip loading moves off `Resources` + magic strings onto
+**asset-based SoundDefinitions**, grouped into loadable **SoundBanks**, and addressed by a generated,
+compile-safe **`SoundId`** enum. The runtime no longer references `Resources` at all.
 
 ### Added
 - **`SoundDefinition`** ScriptableObject — wraps an `AudioClip` (+ optional `variations`) with its
@@ -40,7 +40,9 @@ SoundDefinitions**, grouped into loadable **SoundBanks**, and addressed by a gen
   not just SFX.
 - **Variation support for tracks** — track playback picks a random clip from `clip + variations`
   per play (single-clip definitions are unaffected).
-- **`SoundDefinitionScriptingTest`** example component.
+- **`AudioManagerUsageExample`** — a single click-to-test reference component (on-screen buttons +
+  right-click `[ContextMenu]` entries) that exercises the whole API and doubles as an annotated
+  copy-paste cheat sheet.
 
 ### Changed
 - **Sender components require a `SoundDefinition`.** `AudioEventSender` and `AudioEventSenderSFX` gained
