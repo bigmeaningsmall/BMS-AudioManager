@@ -19,7 +19,7 @@ public class AudioEventSender : MonoBehaviour
     [Tooltip("Asset-safe reference to the clip + its defaults. Required - this sender plays nothing without it.")]
     public SoundDefinition soundDefinition;
     [Tooltip("Pull volume/pitch/loop/spatialBlend/fade from the Sound Definition. Untick to override with the inspector values below.")]
-    public bool useDefinitionDefaults = false;
+    public bool useDefinitionDefaults = true;
 
     [Space(10)]
     [Header("Audio Track - Event Parameters")]
@@ -96,12 +96,18 @@ public class AudioEventSender : MonoBehaviour
         Play();
     }
 
+    // True once this sender has started playback (and hasn't stopped it since). Used so disabling or
+    // unloading a zone only stops the channel when this zone was the one playing on it - a zone that
+    // never played must not cut off music started by code or by another zone.
+    private bool startedPlayback = false;
+
     private void OnDisable()
     {
-        if (AudioManager.Instance != null && AudioManager.Instance.isActiveAndEnabled)
+        if (startedPlayback && AudioManager.Instance != null && AudioManager.Instance.isActiveAndEnabled)
         {
             Stop();
         }
+        startedPlayback = false;
     }
     
     private void OnTriggerEnter(Collider other)
@@ -141,7 +147,9 @@ public class AudioEventSender : MonoBehaviour
         }
 
         //----------------- EDITOR / TESTING-----------------
-        // This section is only used in the editor to test the events 
+        // This section is only used in the editor to test the events.
+        // Legacy Input only - compiled out when the project uses the new Input System exclusively.
+#if ENABLE_LEGACY_INPUT_MANAGER
         if (testMode)
         {
             if (Input.GetKeyDown(KeyCode.M))
@@ -162,6 +170,7 @@ public class AudioEventSender : MonoBehaviour
                 AdjustParameters();
             }
         }
+#endif
     }
 
     public void Play()
@@ -173,7 +182,7 @@ public class AudioEventSender : MonoBehaviour
     {
         if (soundDefinition == null)
         {
-            AudioDebug.LogWarning($"[AudioEventSender] '{name}' has no Sound Definition assigned - nothing to play.");
+            AudioDebug.LogUsageWarning($"[AudioEventSender] '{name}' has no Sound Definition assigned - nothing to play.");
             return;
         }
 
@@ -217,6 +226,7 @@ public class AudioEventSender : MonoBehaviour
         useMaxDistance = soundDefinition.maxDistance;
 
         AudioEventManager.PlayTrack(audioTrackType, -1, "", useVolume, usePitch, useSpatialBlend, useFadeType, useFadeDuration, useFadeTarget, useLoop, eventDelay, targetTransform, eventName, directClip, useMinDistance, useMaxDistance);
+        startedPlayback = true;
 
     }
 
@@ -251,9 +261,14 @@ public class AudioEventSender : MonoBehaviour
         
     }
 
+    // Fade settings for Stop/Pause - from the definition when using its defaults (symmetric with Play).
+    private float ActiveFadeDuration => useDefinitionDefaults && soundDefinition != null ? soundDefinition.fadeDuration : fadeDuration;
+    private FadeTarget ActiveFadeTarget => useDefinitionDefaults && soundDefinition != null ? soundDefinition.fadeTarget : fadeTarget;
+
     private void StopTrack()
     {
-        AudioEventManager.StopTrack(audioTrackType, fadeDuration, fadeTarget, eventDelay, eventName);
+        AudioEventManager.StopTrack(audioTrackType, ActiveFadeDuration, ActiveFadeTarget, eventDelay, eventName);
+        startedPlayback = false;
     }
 
     private IEnumerator StopTrack_Delayed(float delay)
@@ -272,7 +287,7 @@ public class AudioEventSender : MonoBehaviour
     private void PauseTrack()
     {
         //send the Pause Event with parameters from the inspector
-        AudioEventManager.PauseTrack(audioTrackType, fadeDuration, fadeTarget, eventDelay, eventName);
+        AudioEventManager.PauseTrack(audioTrackType, ActiveFadeDuration, ActiveFadeTarget, eventDelay, eventName);
     }
     
     

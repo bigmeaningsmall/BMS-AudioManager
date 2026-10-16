@@ -121,7 +121,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b675a75333cdca84b8f0b419d0080d84, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  eventName: Custom SFX Event Name
+  eventName:
   sfxName:
   - Assault Rifle Shot
   - Dry Shot
@@ -149,4 +149,5 @@ MonoBehaviour:
   useTransformScale: 1
   showTriggerInfo: 1
   triggerActiveColor: {r: 1, g: 0, b: 0.1296277, a: 1}
-  testMode: 1
+  testMode: 0
+  useDefinitionDefaults: 1

@@ -24,6 +24,16 @@ public class SimplifiedSplineFollower : MonoBehaviour
     [Tooltip("When enabled, follower will not track the target outside of closed splines")]
     public bool onlyTrackInsideClosedSpline = false;
 
+    [Header("Rejoining the Spline (after leaving a closed spline)")]
+    [Tooltip("Maximum speed (m/s) the follower closes the gap back onto the spline when the target leaves the inside of " +
+             "a closed spline. Lower = gentler, avoiding a sudden loudness jump as the sound moves.")]
+    [Range(0.5f, 20f)]
+    public float rejoinMaxSpeed = 3f;
+
+    [Tooltip("Roughly how long (seconds) the rejoin eases in and out. Higher = softer start and finish.")]
+    [Range(0.05f, 2f)]
+    public float rejoinSmoothTime = 0.5f;
+
     [Header("Position Offset")]
     [Tooltip("Offset from the spline position (local to spline direction)")]
     public Vector3 positionOffset = Vector3.zero;
@@ -73,6 +83,20 @@ public class SimplifiedSplineFollower : MonoBehaviour
 
     private FollowState currentState = FollowState.Normal;
     private float currentSplinePosition = 0f;
+    private bool hasTrackedPosition = false; // first placement snaps, later moves are smoothed
+
+    // When two parts of the spline are about equally close (a U-bend, a figure-8), stay on the current
+    // part until the other is closer by more than this fraction - prevents flip-flopping between them.
+    private const float BranchTieTolerance = 0.05f;
+    private const int ClosestPointSamples = 50;
+
+    // Leaving the inside of a closed spline: the follower eases from where it was (near the target) onto
+    // the spline at the exit point. The remaining gap is held as an offset from the (moving) spline point
+    // and smoothed to zero, so the closing speed is capped no matter how fast the target walks on.
+    private bool rejoining = false;
+    private bool rejoinStarting = false;
+    private Vector3 rejoinOffset;
+    private Vector3 rejoinVelocity;
     private Vector3 currentOffset = Vector3.zero;
 
     // Update timing
@@ -143,7 +167,7 @@ public class SimplifiedSplineFollower : MonoBehaviour
         }
 
         // Try AudioListener first
-        AudioListener listener = FindObjectOfType<AudioListener>();
+        AudioListener listener = FindAnyObjectByType<AudioListener>();
         if (listener != null)
         {
             trackingTarget = listener.transform;
@@ -161,7 +185,7 @@ public class SimplifiedSplineFollower : MonoBehaviour
         }
 
         // Try any camera
-        Camera[] cameras = FindObjectsOfType<Camera>();
+        Camera[] cameras = FindObjectsByType<Camera>();
         if (cameras.Length > 0)
         {
             trackingTarget = cameras[0].transform;
@@ -216,6 +240,8 @@ public class SimplifiedSplineFollower : MonoBehaviour
         // Find closest point and position follower there immediately
         float closestT = SplineUtilities.FindClosestPoint(splineContainer, trackingTarget.position);
         currentSplinePosition = closestT;
+        hasTrackedPosition = true;
+        rejoining = false;
 
         Vector3 splinePosition = splineContainer.EvaluatePosition(currentSplinePosition);
         Vector3 finalPosition = SplineUtilities.ApplyOffsetToSplinePosition(
@@ -256,6 +282,7 @@ public class SimplifiedSplineFollower : MonoBehaviour
 
     private void UpdateFollowState()
     {
+        FollowState previousState = currentState;
         bool isSplineClosed = splineContainer?.Spline?.Closed ?? false;
 
         if (isSplineClosed)
@@ -263,18 +290,35 @@ public class SimplifiedSplineFollower : MonoBehaviour
             bool isInside = SplineUtilities.IsPointInsideClosedSpline(splineContainer, trackingTarget.position);
 
             if (!isInside && onlyTrackInsideClosedSpline)
-            {
                 currentState = FollowState.OutOfRange;
-                return;
-            }
-
-            currentState = isInside ? FollowState.InsideClosed : FollowState.Normal;
+            else
+                currentState = isInside ? FollowState.InsideClosed : FollowState.Normal;
         }
         else
         {
             float distance = SplineUtilities.GetDistanceToSpline(splineContainer, trackingTarget.position);
             currentState = distance <= proximityThreshold ? FollowState.Normal : FollowState.OutOfRange;
         }
+
+        if (previousState == FollowState.InsideClosed && currentState == FollowState.Normal)
+            OnExitedClosedArea();
+    }
+
+    /// <summary>
+    /// The target just left the inside of a closed spline. While inside, the follower tracked the target in
+    /// world space and its spline position went stale (it still held the spot where the target entered).
+    /// Re-seed it at the exit point and glide onto the spline from the follower's current position -
+    /// otherwise it snaps back to the entry point and travels round the loop to the target.
+    /// </summary>
+    private void OnExitedClosedArea()
+    {
+        currentSplinePosition = SplineUtilities.FindClosestPointNear(splineContainer, trackingTarget.position,
+            currentSplinePosition, ClosestPointSamples, BranchTieTolerance);
+        hasTrackedPosition = true;
+
+        rejoining = true;
+        rejoinStarting = true;   // the gap is measured on the next position update
+        rejoinVelocity = Vector3.zero;
     }
 
     private void UpdatePosition()
@@ -307,17 +351,46 @@ public class SimplifiedSplineFollower : MonoBehaviour
 
     private void UpdateNormalPosition()
     {
-        // Find closest point on spline
-        float targetT = SplineUtilities.FindClosestPoint(splineContainer, trackingTarget.position);
+        // Find closest point on spline (sticking to the current part when another is about equally close)
+        float targetT = SplineUtilities.FindClosestPointNear(splineContainer, trackingTarget.position,
+            currentSplinePosition, ClosestPointSamples, BranchTieTolerance);
 
-        // Smooth movement along spline
-        currentSplinePosition = Mathf.Lerp(currentSplinePosition, targetT, 
-            Time.deltaTime * movementSpeed * (1 - smoothing));
+        if (!hasTrackedPosition)
+        {
+            // First placement: snap to the closest point rather than gliding in from the spline's start
+            currentSplinePosition = targetT;
+            hasTrackedPosition = true;
+        }
+        else
+        {
+            // Smooth movement along spline - always the shortest way round. A plain Lerp on t went the long
+            // way whenever the target crossed a closed spline's first knot (where t wraps from 1 back to 0).
+            currentSplinePosition = SplineUtilities.StepTowards(currentSplinePosition, targetT,
+                Time.deltaTime * movementSpeed * (1 - smoothing), splineContainer.Spline.Closed);
+        }
 
         // Position the follower
         Vector3 splinePosition = splineContainer.EvaluatePosition(currentSplinePosition);
         Vector3 finalPosition = SplineUtilities.ApplyOffsetToSplinePosition(
             splineContainer, splinePosition, currentSplinePosition, currentOffset);
+
+        // Just left the inside of a closed spline - ease onto the spline at a capped speed rather than snapping
+        if (rejoining)
+        {
+            if (rejoinStarting)
+            {
+                rejoinOffset = followObject.transform.position - finalPosition;
+                rejoinStarting = false;
+            }
+
+            rejoinOffset = Vector3.SmoothDamp(rejoinOffset, Vector3.zero, ref rejoinVelocity,
+                rejoinSmoothTime, rejoinMaxSpeed, Time.deltaTime);
+
+            if (rejoinOffset.sqrMagnitude < 0.0004f) // within 2 cm - hand over to normal following
+                rejoining = false;
+            else
+                finalPosition += rejoinOffset;
+        }
 
         followObject.transform.position = finalPosition;
     }

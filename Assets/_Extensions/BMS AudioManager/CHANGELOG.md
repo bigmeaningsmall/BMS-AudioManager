@@ -4,6 +4,48 @@ All notable changes to **BMS Audio Manager** are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+Readiness fixes for dropping the package into new projects. No API changes.
+
+### Fixed
+- **Projects without `com.unity.splines` no longer fail to compile.** The spline scripts are in their own
+  assembly (`BMS.AudioManager.Splines`) that only builds when the Splines package is installed.
+- **Spline followers no longer go the long way round closed splines.** When the target crossed the first
+  knot (where position wraps from 1 back to 0) the follower travelled the whole loop the wrong way. Both
+  followers now always take the shortest route, and stay on their current part of the spline when two parts
+  are about equally close instead of flip-flopping.
+- **Leaving the inside of a closed spline no longer snaps the follower back to where the target entered.** It
+  now rejoins the spline at the exit point, easing there at a capped speed (new **Rejoin Max Speed** and
+  **Rejoin Smooth Time** settings on both followers) instead of rushing across - the old exit reached ~30 m/s
+  and caused an audible loudness bump. `SplineFollower` also no longer restarts its "entering" transition every
+  frame while the target is inside.
+- A track stopped instantly (e.g. `AudioEvent.StopTrack(AudioTrackType.BGM)`) no longer stays silent the
+  next time it plays with a fade.
+- `PlayTrack` now works while a track is paused, fading to/from pause, or mid volume-adjust (previously ignored).
+- `AdjustTrackVolume` / `AdjustTrack` keep the track's current spatial blend, loop and pitch (previously reset
+  3D tracks to 2D and made one-shot dialogue loop).
+- SFX pitch randomisation is correct when pitch isn't 1 (pitch was applied twice).
+- Percent chance: 0% now never plays (previously 1%).
+- A duplicate AudioManager (prefab in every scene) no longer receives events before it destroys itself.
+- The generator never reuses a `SoundId` value, even after a definition is deleted, and warns about
+  unrecognised category folders or finding no clips.
+- No obsolete-API warnings in Unity 6; zone test keys and the demo controller no longer throw in projects
+  using only the new Input System.
+
+### Changed
+- Zone prefabs ship with **test mode off** (test keys could fire during gameplay, e.g. S stopped all SFX).
+- The AudioManager prefab loads **MasterBank** at startup so `AudioEvent.Play(SoundId)` works out of the box,
+  and ships with debug logging off.
+- Setup mistakes (bank not loaded, missing Sound Definition, no AudioManager in the scene) always log a
+  warning, regardless of the debug-logging toggle.
+- `AudioEventSender.useDefinitionDefaults` now defaults to on, matching `AudioEventSenderSFX`; zone Stop/Pause
+  use the definition's fade settings when it's on.
+- A track zone that is disabled or unloaded only stops its channel if it started the playback.
+- `SplineFollower`: removed `directionBias` (part of the old workaround) and `exitTransitionSpeedMultiplier`
+  (replaced by the rejoin settings); `equidistantThreshold` now sets how much closer another part of the
+  spline must be before the follower switches to it.
+
 ## [3.1.0] - 2026-06-17
 
 Major, breaking release (vs 2.2.0). Clip loading moves off `Resources` + magic strings onto

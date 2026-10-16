@@ -97,7 +97,7 @@ public class AudioTrack : MonoBehaviour
         // If still not found, try to find it in the scene
         if (audioManager == null)
         {
-            audioManager = FindObjectOfType<AudioManager>();
+            audioManager = FindAnyObjectByType<AudioManager>();
         }
     
         if (audioManager == null)
@@ -201,9 +201,26 @@ public class AudioTrack : MonoBehaviour
                 break;
                 
             case AudioTrackState.Paused:
-                AudioDebug.LogWarning("Cannot play while paused. Resume or stop first.");
+                // The paused source is silent - discard it and start the new clip fresh
+                // (e.g. pause menu paused the music, then "Main Menu" plays new music).
+                InstantStop();
+                StartFromStopped(clip, volume, pitch, spatialBlend, fadeDuration, fadeTarget, loop, attachTo);
                 break;
-                
+
+            case AudioTrackState.AdjustingParameters:
+            case AudioTrackState.FadeToPause:
+            case AudioTrackState.FadeFromPause:
+                // A volume/pitch fade (ducking) or a pause fade is running on the main source.
+                // Cancel it and transition from the current level exactly as if it were Playing.
+                if (mainCoroutine != null)
+                {
+                    StopCoroutine(mainCoroutine);
+                    mainCoroutine = null;
+                }
+                if (mainSource != null) mainSource.UnPause();
+                currentState = AudioTrackState.Playing;
+                goto case AudioTrackState.Playing;
+
             case AudioTrackState.FadingOut:
                 // Interrupt fade-out and crossfade to new track
                 HandlePlayDuringFadeOut(clip, volume, pitch, spatialBlend, fadeType, fadeDuration, fadeTarget, loop, attachTo);
@@ -430,6 +447,9 @@ public class AudioTrack : MonoBehaviour
 
         pendingPlayAction = null;
         currentState = AudioTrackState.Stopped;
+        // Stop() already halted every coroutine, so there is nothing left to interrupt. Clear the flag
+        // (as FadeAllToStop does) - otherwise the next faded Play's fade-in would abort at volume 0.
+        stopRequested = false;
         AudioDebug.Log("[Track] Instant stop complete");
     }
     

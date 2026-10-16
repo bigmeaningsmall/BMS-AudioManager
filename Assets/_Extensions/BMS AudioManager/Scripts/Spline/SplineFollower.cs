@@ -23,12 +23,9 @@ public class SplineFollower : MonoBehaviour
     [Tooltip("Smoothing factor for follower movement (higher = smoother but less responsive)")] [Range(0f, 0.95f)]
     public float smoothing = 0.7f;
 
-    [Header("Direction Consistency Settings")]
-    [Tooltip("How strongly to maintain the current movement direction (prevents flipping at equidistant points)")]
-    [Range(0.1f, 5f)]
-    public float directionBias = 1.5f;
-    
-    [Tooltip("Distance threshold for determining equidistant points")]
+    [Header("Branch Stickiness")]
+    [Tooltip("When two parts of the spline are about equally close to the target (a U-bend, a figure-8), the follower " +
+             "stays on the part it's already on until the other is closer by more than this fraction. Prevents flip-flopping.")]
     [Range(0.01f, 0.5f)]
     public float equidistantThreshold = 0.05f;
 
@@ -57,11 +54,18 @@ public class SplineFollower : MonoBehaviour
     [Tooltip("Smoothing factor for transitions between states")] [Range(0f, 0.95f)]
     public float transitionSmoothing = 0.7f;
 
-    [Tooltip("Maximum time for state transitions (seconds)")] [Range(0.1f, 3.0f)]
+    [Tooltip("Time (seconds) to move from the spline into the closed area when the target enters it")] [Range(0.1f, 3.0f)]
     public float transitionTime = 0.5f;
 
-    [Tooltip("Faster exit transition multiplier (higher = quicker exit to spline boundary)")] [Range(1f, 10f)]
-    public float exitTransitionSpeedMultiplier = 2.0f;
+    [Header("Rejoining the Spline (after leaving a closed spline)")]
+    [Tooltip("Maximum speed (m/s) the follower closes the gap back onto the spline when the target leaves the inside of " +
+             "a closed spline. Lower = gentler, avoiding a sudden loudness jump as the sound moves.")]
+    [Range(0.5f, 20f)]
+    public float rejoinMaxSpeed = 3f;
+
+    [Tooltip("Roughly how long (seconds) the rejoin eases in and out. Higher = softer start and finish.")]
+    [Range(0.05f, 2f)]
+    public float rejoinSmoothTime = 0.5f;
 
     [Header("References")] [Tooltip("The child GameObject that will follow the spline (optional, will be created if not set)")]
     public GameObject followObject;
@@ -113,10 +117,17 @@ public class SplineFollower : MonoBehaviour
     private float transitionProgress = 0f;
     private PositionState transitionTargetState = PositionState.Normal;
 
-    // Direction tracking variables for equidistant point handling
-    private float lastSplinePosition = 0f;
-    private float currentDirection = 1f; // 1 = forward, -1 = backward
-    private float directionChangeTimer = 0f;
+    // False until the follower has been placed on the spline once (first placement snaps, later moves are smoothed)
+    private bool hasTrackedPosition = false;
+    private float currentDirection = 1f; // last movement direction along the spline (1 = forward, -1 = backward) - debug arrow only
+
+    // Leaving the inside of a closed spline: the follower eases from where it was onto the spline at the exit
+    // point. The remaining gap is held as an offset from the (moving) spline point and smoothed to zero, so
+    // the closing speed is capped by rejoinMaxSpeed no matter how fast the target walks on.
+    private bool rejoining = false;
+    private bool rejoinStarting = false;
+    private Vector3 rejoinOffset;
+    private Vector3 rejoinVelocity;
 
     private void Awake(){
         // Get the SplineContainer component
@@ -230,7 +241,7 @@ public class SplineFollower : MonoBehaviour
         // Otherwise, try to find a suitable default target
 
         // First try to find an AudioListener
-        AudioListener listener = FindObjectOfType<AudioListener>();
+        AudioListener listener = FindAnyObjectByType<AudioListener>();
         if (listener != null){
             trackingTarget = listener.transform;
             isInitialized = true;
@@ -246,7 +257,7 @@ public class SplineFollower : MonoBehaviour
         }
 
         // If still no target, try any camera
-        Camera[] cameras = FindObjectsOfType<Camera>();
+        Camera[] cameras = FindObjectsByType<Camera>();
         if (cameras.Length > 0){
             trackingTarget = cameras[0].transform;
             isInitialized = true;
@@ -270,7 +281,8 @@ public class SplineFollower : MonoBehaviour
 
         // Immediately position the follower without smoothing
         currentSplinePosition = closestT;
-        lastSplinePosition = closestT; // Reset direction tracking
+        rejoining = false;
+        hasTrackedPosition = true;
 
         // Position the follow object at the closest point
         Vector3 splinePosition = EvaluateSplinePosition(currentSplinePosition);
@@ -348,21 +360,23 @@ private void LateUpdate()
             return;
         }
 
-        // Handle state transitions
-        if (isInside && currentState != PositionState.InsideClosed)
+        // Handle state transitions. Compare against where we're HEADING, not just the current state:
+        // during a transition currentState is Transitioning, so checking it alone restarted the
+        // "entering" transition every frame while inside, and delayed the exit until it finished.
+        if (isInside && !IsHeadingInside())
         {
             // Entering the closed spline
             StartTransition(PositionState.InsideClosed);
         }
-        else if (!isInside && currentState == PositionState.InsideClosed)
+        else if (!isInside && IsHeadingInside())
         {
-            // Exiting the closed spline
+            // Exiting the closed spline - re-seeds the spline position at the exit point
             StartTransition(PositionState.Normal);
         }
     }
-    else if (currentState == PositionState.InsideClosed)
+    else if (IsHeadingInside())
     {
-        // If the spline is no longer closed but we're in insideClosed state
+        // If the spline is no longer closed but we're in (or heading to) the insideClosed state
         StartTransition(PositionState.Normal);
     }
 
@@ -390,6 +404,13 @@ private void LateUpdate()
             UpdateTransitionPosition();
             break;
     }
+}
+
+// True when the follower is inside a closed spline, or transitioning toward it
+private bool IsHeadingInside()
+{
+    return currentState == PositionState.InsideClosed ||
+           (currentState == PositionState.Transitioning && transitionTargetState == PositionState.InsideClosed);
 }
 
 // New method to directly follow the target
@@ -448,43 +469,33 @@ private void UpdateDirectFollowPosition()
     }
 
     private void StartTransition(PositionState targetState){
-        // Set up transition
+        if (targetState == PositionState.Normal){
+            // Leaving the closed area: go straight back to normal spline following, re-seeded at the exit
+            // point (the spline position went stale while inside). The gap between the follower and the
+            // spline is closed by the speed-capped rejoin in UpdateNormalPosition - a timed transition
+            // here rushed the sound across that gap and caused a loudness bump.
+            currentSplinePosition = SplineUtilities.FindClosestPointNear(splineContainer, trackingTarget.position,
+                currentSplinePosition, Mathf.Max(50, splineSampleCount * 2), equidistantThreshold);
+            hasTrackedPosition = true;
+            currentState = PositionState.Normal;
+
+            rejoining = true;
+            rejoinStarting = true;   // the gap is measured on the next position update
+            rejoinVelocity = Vector3.zero;
+            return;
+        }
+
+        // Entering the closed area: timed transition from the spline toward the inside position
         transitionStartPosition = followObject.transform.position;
         transitionProgress = 0f;
         currentState = PositionState.Transitioning;
         transitionTargetState = targetState;
-
-        // Set up target position based on the destination state
-        if (targetState == PositionState.Normal){
-            // Find the closest point on the spline to the target
-            float closestT = FindRawClosestPointOnSpline(trackingTarget.position);
-            currentSplinePosition = closestT;
-            lastSplinePosition = closestT; // Reset direction tracking
-
-            // Find the closest point on the spline boundary
-            Vector3 boundaryPoint = EvaluateSplinePosition(closestT);
-
-            // Transitioning to normal spline-following - target boundary point
-            transitionTargetPosition = boundaryPoint;
-            if (currentOffset != Vector3.zero){
-                transitionTargetPosition = ApplyOffsetToSplinePosition(transitionTargetPosition, closestT);
-            }
-
-            // Set a faster transition time for exiting closed splines to stay in bounds
-            // We do this by artificially advancing the transition progress
-            transitionProgress = 0.3f; // Start 30% into the transition for faster response
-        }
-        else{
-            // Transitioning to inside closed spline
-            transitionTargetPosition = GetInsideClosedPosition();
-        }
+        transitionTargetPosition = GetInsideClosedPosition();
     }
 
     private void UpdateTransitionPosition(){
-        // Progress the transition - use faster speed when exiting closed spline
-        float transitionSpeed = (transitionTargetState == PositionState.Normal) ? exitTransitionSpeedMultiplier : 1.0f;
-
-        transitionProgress += (Time.deltaTime / transitionTime) * transitionSpeed;
+        // Transitions only run when entering the closed area (leaving uses the rejoin in UpdateNormalPosition)
+        transitionProgress += Time.deltaTime / transitionTime;
 
         if (transitionProgress >= 1.0f){
             // Transition complete
@@ -499,32 +510,8 @@ private void UpdateDirectFollowPosition()
                 transitionTargetPosition,
                 t);
 
-            // Update target position during transition if needed
-            if (transitionTargetState == PositionState.Normal){
-                // For exiting a closed spline:
-                // 1. We want to move quickly to the spline boundary
-                // 2. We want to maintain focus on the exit point rather than following the target
-
-                // Find the current closest point on spline
-                float newClosestT = FindRawClosestPointOnSpline(trackingTarget.position);
-                Vector3 newClosestPoint = EvaluateSplinePosition(newClosestT);
-
-                // Check if this is significantly different from our current target
-                // (prevents minor fluctuations but allows major changes)
-                if (Vector3.Distance(newClosestPoint, transitionTargetPosition) > proximityThreshold * 0.5f){
-                    transitionTargetPosition = newClosestPoint;
-                    if (currentOffset != Vector3.zero){
-                        transitionTargetPosition = ApplyOffsetToSplinePosition(transitionTargetPosition, newClosestT);
-                    }
-
-                    currentSplinePosition = newClosestT;
-                    lastSplinePosition = newClosestT; // Update direction tracking
-                }
-            }
-            else if (transitionTargetState == PositionState.InsideClosed){
-                // Update target if we're transitioning to inside (could follow target)
-                transitionTargetPosition = GetInsideClosedPosition();
-            }
+            // Keep aiming at the inside position (it may follow the target)
+            transitionTargetPosition = GetInsideClosedPosition();
         }
     }
 
@@ -556,11 +543,27 @@ private void UpdateDirectFollowPosition()
 
         // Only update position along spline if the target is in proximity
         if (inProximity){
-            // Find the closest point on the spline to the target
-            float closestT = FindClosestPointWithDirectionLock(trackingTarget.position);
+            // Find the closest point on the spline to the target (sticking to the current part of the
+            // spline when another part is about equally close)
+            float closestT = SplineUtilities.FindClosestPointNear(splineContainer, trackingTarget.position,
+                currentSplinePosition, Mathf.Max(50, splineSampleCount * 2), equidistantThreshold);
 
-            // Smooth the movement along the spline
-            currentSplinePosition = Mathf.Lerp(currentSplinePosition, closestT, Time.deltaTime * movementSpeed * (1 - smoothing));
+            if (!hasTrackedPosition)
+            {
+                // First placement: snap to the closest point rather than gliding in from the spline's start
+                currentSplinePosition = closestT;
+                hasTrackedPosition = true;
+            }
+            else
+            {
+                // Smooth the movement along the spline - always the shortest way round. A plain Lerp on t
+                // went the long way whenever the target crossed a closed spline's first knot (where t wraps 1 -> 0).
+                bool closed = splineContainer.Spline.Closed;
+                float delta = SplineUtilities.ShortestDelta(currentSplinePosition, closestT, closed);
+                if (Mathf.Abs(delta) > 0.0001f) currentDirection = Mathf.Sign(delta);
+                currentSplinePosition = SplineUtilities.StepTowards(currentSplinePosition, closestT,
+                    Time.deltaTime * movementSpeed * (1 - smoothing), closed);
+            }
 
             // Position the follow object along the spline
             Vector3 splinePosition = EvaluateSplinePosition(currentSplinePosition);
@@ -575,13 +578,27 @@ private void UpdateDirectFollowPosition()
                 Time.deltaTime * offsetTransitionSpeed);
 
             // Apply offset if needed
-            if (currentOffset != Vector3.zero){
-                Vector3 offsetPosition = ApplyOffsetToSplinePosition(splinePosition, currentSplinePosition);
-                followObject.transform.position = offsetPosition;
+            Vector3 finalPosition = currentOffset != Vector3.zero
+                ? ApplyOffsetToSplinePosition(splinePosition, currentSplinePosition)
+                : splinePosition;
+
+            // Just left the inside of a closed spline - ease onto the spline at a capped speed rather than snapping
+            if (rejoining){
+                if (rejoinStarting){
+                    rejoinOffset = followObject.transform.position - finalPosition;
+                    rejoinStarting = false;
+                }
+
+                rejoinOffset = Vector3.SmoothDamp(rejoinOffset, Vector3.zero, ref rejoinVelocity,
+                    rejoinSmoothTime, rejoinMaxSpeed, Time.deltaTime);
+
+                if (rejoinOffset.sqrMagnitude < 0.0004f) // within 2 cm - hand over to normal following
+                    rejoining = false;
+                else
+                    finalPosition += rejoinOffset;
             }
-            else{
-                followObject.transform.position = splinePosition;
-            }
+
+            followObject.transform.position = finalPosition;
         }
         // When not in proximity, the follow object stays where it is
     }
@@ -642,153 +659,6 @@ private void UpdateDirectFollowPosition()
         }
 
         return bounds;
-    }
-
-    // Improved method for finding closest point with direction consistency
-    private float FindClosestPointWithDirectionLock(Vector3 targetPosition)
-    {
-        // First, find the raw closest point
-        float rawClosestT = FindRawClosestPointOnSpline(targetPosition);
-        
-        // For first initialization, just use the raw closest point
-        if (lastSplinePosition == 0f && currentSplinePosition == 0f)
-        {
-            lastSplinePosition = rawClosestT;
-            return rawClosestT;
-        }
-        
-        // Check if we're on a closed spline
-        bool isClosedSpline = splineContainer != null && 
-                             splineContainer.Spline != null && 
-                             splineContainer.Spline.Closed;
-        
-        if (!isClosedSpline)
-        {
-            // For open splines, just use the raw closest point
-            lastSplinePosition = rawClosestT;
-            return rawClosestT;
-        }
-        
-        // For closed splines, we need to handle equidistant points
-        
-        // 1. Check if there are multiple equidistant points
-        bool hasEquidistantPoints = CheckForEquidistantPoints(targetPosition, rawClosestT);
-        
-        if (hasEquidistantPoints)
-        {
-            // We have equidistant points - use direction consistency
-
-            // Update the direction based on recent movement
-            float signedDistance = CalculateSignedDistance(lastSplinePosition, currentSplinePosition, true);
-            
-            // Only change direction if it's significant and consistent
-            if (Mathf.Abs(signedDistance) > 0.01f)
-            {
-                float newDirection = Mathf.Sign(signedDistance);
-                
-                // Change direction only if it's been consistent for a while
-                if (newDirection != currentDirection)
-                {
-                    directionChangeTimer += Time.deltaTime;
-                    if (directionChangeTimer > 0.5f) // 0.5 seconds of consistent opposite direction
-                    {
-                        currentDirection = newDirection;
-                        directionChangeTimer = 0f;
-                    }
-                }
-                else
-                {
-                    directionChangeTimer = 0f; // Reset timer if direction matches
-                }
-            }
-            
-            // Calculate a biased position based on current direction
-            float biasedT = CalculateBiasedPosition(currentSplinePosition, currentDirection, directionBias * Time.deltaTime);
-            
-            // Update last position and return the biased position
-            lastSplinePosition = currentSplinePosition;
-            return biasedT;
-        }
-        else
-        {
-            // No equidistant points - regular tracking
-            lastSplinePosition = currentSplinePosition;
-            return rawClosestT;
-        }
-    }
-    
-    // Helper function to check for equidistant points
-    private bool CheckForEquidistantPoints(Vector3 targetPosition, float closestT)
-    {
-        // Find the distance from target to the closest point
-        Vector3 closestPoint = EvaluateSplinePosition(closestT);
-        float closestDistance = Vector3.Distance(targetPosition, closestPoint);
-        
-        // Sample around the spline to check for other points with similar distance
-        int sampleCount = 12;
-        float sampleRange = 0.4f; // 40% of the spline to check
-        
-        // Start sampling at back half of the range
-        float startT = closestT - (sampleRange * 0.5f);
-        if (startT < 0) startT += 1f;
-        
-        int equidistantCount = 0;
-        
-        for (int i = 0; i <= sampleCount; i++)
-        {
-            float t = startT + (sampleRange * i / sampleCount);
-            t = Mathf.Repeat(t, 1f); // Handle wrap-around for closed splines
-            
-            // Skip checking the exact closest point
-            if (Mathf.Abs(t - closestT) < 0.01f) continue;
-            
-            Vector3 samplePoint = EvaluateSplinePosition(t);
-            float sampleDistance = Vector3.Distance(targetPosition, samplePoint);
-            
-            // If this point is nearly the same distance as the closest point
-            if (Mathf.Abs(sampleDistance - closestDistance) < (closestDistance * equidistantThreshold))
-            {
-                equidistantCount++;
-                if (equidistantCount >= 1) // Found at least one other equidistant point
-                {
-                    return true;
-                }
-            }
-        }
-        
-        return false;
-    }
-    
-    // Calculate signed distance considering wrap-around
-    private float CalculateSignedDistance(float fromT, float toT, bool closedSpline)
-    {
-        if (!closedSpline)
-            return toT - fromT;
-            
-        float directDist = toT - fromT;
-        
-        // Check if wrapping gives a shorter path
-        if (Mathf.Abs(directDist) > 0.5f)
-        {
-            // We need to wrap around
-            if (directDist > 0)
-                return directDist - 1f; // Wrapping backward (negative direction)
-            else
-                return directDist + 1f; // Wrapping forward (positive direction)
-        }
-        
-        return directDist;
-    }
-    
-    // Calculate position biased in the current direction
-    private float CalculateBiasedPosition(float currentT, float direction, float bias)
-    {
-        float biasedT = currentT + (direction * bias);
-        
-        // Handle wrap-around for closed splines
-        biasedT = Mathf.Repeat(biasedT, 1f);
-        
-        return biasedT;
     }
 
     // Gets the raw closest point on the spline (without direction locking)

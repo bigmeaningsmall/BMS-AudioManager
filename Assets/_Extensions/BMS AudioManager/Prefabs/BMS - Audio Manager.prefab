@@ -148,8 +148,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1656c91dd4c38034db3f2581b5d861ab, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  version: v1.4
-  enableDebugLogging: 1
+  enableDebugLogging: 0
+  startupBanks:
+  - {fileID: 11400000, guid: 10cff59e48e13174a9ef531c344a3b3c, type: 2}
   audioTrackPrefab: {fileID: 8822123416660145754, guid: be37be929a4c7cc448bf059b8b2745f4,
     type: 3}
   soundEffectPrefab: {fileID: 7698994631750102530, guid: fe18fd3b82aee3244a8132f55ee67eb0,

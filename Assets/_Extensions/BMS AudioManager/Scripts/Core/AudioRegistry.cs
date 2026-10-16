@@ -53,7 +53,7 @@ public class AudioRegistry
                 if (def.id != 0)
                     byId[def.id] = def;
                 else
-                    AudioDebug.LogWarning($"[AudioRegistry] '{def.name}' has id 0 (not generated) - it won't be reachable via SoundId. Run 'Generate Sound Definitions'.");
+                    AudioDebug.LogUsageWarning($"[AudioRegistry] '{def.name}' has id 0 (not generated) - it won't be reachable via SoundId. Run 'Generate Sound Definitions'.");
 
                 added++;
             }

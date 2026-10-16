@@ -1,0 +1,25 @@
+{
+    "name": "BMS.AudioManager.Splines",
+    "rootNamespace": "",
+    "references": [
+        "Unity.Splines",
+        "Unity.Mathematics"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [
+        "BMS_SPLINES_PRESENT"
+    ],
+    "versionDefines": [
+        {
+            "name": "com.unity.splines",
+            "expression": "",
+            "define": "BMS_SPLINES_PRESENT"
+        }
+    ],
+    "noEngineReferences": false
+}

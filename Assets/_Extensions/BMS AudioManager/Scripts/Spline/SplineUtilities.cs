@@ -38,6 +38,113 @@ public static class SplineUtilities
     }
 
     /// <summary>
+    /// Shortest signed step from <paramref name="from"/> to <paramref name="to"/> (both normalised 0-1).
+    /// On a closed spline 0 and 1 are the same point (the first knot), so the step wraps through that
+    /// seam when that's shorter: 0.95 -> 0.05 is +0.10, not -0.90. Smoothing with a plain Lerp on t
+    /// instead sends the follower the long way round whenever the target crosses the seam.
+    /// </summary>
+    public static float ShortestDelta(float from, float to, bool closed)
+    {
+        float delta = to - from;
+        if (closed) delta = Mathf.Repeat(delta + 0.5f, 1f) - 0.5f;
+        return delta;
+    }
+
+    /// <summary>
+    /// Moves <paramref name="current"/> a fraction (0-1) of the way toward <paramref name="target"/>
+    /// along the shortest route - the wrap-aware replacement for Mathf.Lerp on a spline position.
+    /// </summary>
+    public static float StepTowards(float current, float target, float fraction, bool closed)
+    {
+        float t = current + ShortestDelta(current, target, closed) * Mathf.Clamp01(fraction);
+        return closed ? Mathf.Repeat(t, 1f) : Mathf.Clamp01(t);
+    }
+
+    // Reused sample buffer for FindClosestPointNear (avoids a per-frame allocation).
+    private static float[] s_sampleDistances = new float[0];
+
+    /// <summary>
+    /// Finds the closest point on the spline to <paramref name="targetPosition"/>, preferring the part of
+    /// the spline the follower is already on when two parts are about equally close (a U-bend, a figure-8,
+    /// a player standing between two stretches). Without this the target can flip between the two parts
+    /// frame to frame and the follower swings back and forth.
+    /// </summary>
+    /// <param name="currentT">Where the follower currently is (normalised 0-1).</param>
+    /// <param name="sampleCount">Coarse samples along the spline; the best one is then refined locally.</param>
+    /// <param name="tieTolerance">How close (as a fraction of the best distance) another part must be to count as a tie.</param>
+    /// <returns>Normalised position (0-1) along the spline.</returns>
+    public static float FindClosestPointNear(SplineContainer splineContainer, Vector3 targetPosition, float currentT,
+                                             int sampleCount = 50, float tieTolerance = 0.05f)
+    {
+        if (splineContainer?.Spline == null) return currentT;
+        return FindClosestPointNear(t => splineContainer.EvaluatePosition(t), splineContainer.Spline.Closed,
+                                    targetPosition, currentT, sampleCount, tieTolerance);
+    }
+
+    /// <summary>
+    /// Path-agnostic core of <see cref="FindClosestPointNear(SplineContainer, Vector3, float, int, float)"/>:
+    /// <paramref name="evaluate"/> maps a normalised t (0-1) to a world position.
+    /// </summary>
+    public static float FindClosestPointNear(System.Func<float, Vector3> evaluate, bool closed, Vector3 targetPosition,
+                                             float currentT, int sampleCount = 50, float tieTolerance = 0.05f)
+    {
+        sampleCount = Mathf.Max(8, sampleCount);
+
+        // A closed spline's t=1 is the same point as t=0, so sample [0,1) for closed and [0,1] for open.
+        int count = closed ? sampleCount : sampleCount + 1;
+        if (s_sampleDistances.Length < count) s_sampleDistances = new float[count];
+
+        float best = float.MaxValue;
+        for (int i = 0; i < count; i++)
+        {
+            float d = Vector3.Distance(evaluate((float)i / sampleCount), targetPosition);
+            s_sampleDistances[i] = d;
+            if (d < best) best = d;
+        }
+
+        // Every local minimum within tolerance of the best is a candidate; take the one nearest the follower.
+        float tieLimit = best + Mathf.Max(best * tieTolerance, 0.01f);
+        int chosen = -1;
+        float chosenGap = float.MaxValue;
+        for (int i = 0; i < count; i++)
+        {
+            float d = s_sampleDistances[i];
+            if (d > tieLimit) continue;
+
+            float prev = (i > 0) ? s_sampleDistances[i - 1] : (closed ? s_sampleDistances[count - 1] : float.MaxValue);
+            float next = (i < count - 1) ? s_sampleDistances[i + 1] : (closed ? s_sampleDistances[0] : float.MaxValue);
+            if (d > prev || d > next) continue; // not a local minimum
+
+            float gap = Mathf.Abs(ShortestDelta(currentT, (float)i / sampleCount, closed));
+            if (gap < chosenGap)
+            {
+                chosenGap = gap;
+                chosen = i;
+            }
+        }
+        if (chosen < 0) return currentT; // shouldn't happen - the global best is always a local minimum
+
+        // Refine between the neighbouring samples with a ternary search (the distance is unimodal there).
+        float step = 1f / sampleCount;
+        float lo = (float)chosen / sampleCount - step;
+        float hi = (float)chosen / sampleCount + step;
+        if (!closed) { lo = Mathf.Max(lo, 0f); hi = Mathf.Min(hi, 1f); }
+
+        for (int iteration = 0; iteration < 12; iteration++)
+        {
+            float m1 = lo + (hi - lo) / 3f;
+            float m2 = hi - (hi - lo) / 3f;
+            float d1 = Vector3.Distance(evaluate(WrapT(m1, closed)), targetPosition);
+            float d2 = Vector3.Distance(evaluate(WrapT(m2, closed)), targetPosition);
+            if (d1 < d2) hi = m2; else lo = m1;
+        }
+
+        return WrapT((lo + hi) * 0.5f, closed);
+    }
+
+    private static float WrapT(float t, bool closed) => closed ? Mathf.Repeat(t, 1f) : Mathf.Clamp01(t);
+
+    /// <summary>
     /// Gets the distance from a point to the closest point on a spline
     /// </summary>
     public static float GetDistanceToSpline(SplineContainer splineContainer, Vector3 point, int sampleCount = 20)

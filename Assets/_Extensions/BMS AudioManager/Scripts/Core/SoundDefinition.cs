@@ -44,7 +44,7 @@ public class SoundDefinition : ScriptableObject
                 case AudioType.Aux1:     return AudioTrackType.Aux1;
                 case AudioType.Aux2:     return AudioTrackType.Aux2;
                 default:
-                    AudioDebug.LogWarning($"[SoundDefinition] '{name}' has audioType {audioType}, which is not a track channel. Falling back to Aux1. Use PlaySFX for SFX definitions.");
+                    AudioDebug.LogUsageWarning($"[SoundDefinition] '{name}' has audioType {audioType}, which is not a track channel. Falling back to Aux1. Use PlaySFX for SFX definitions.");
                     return AudioTrackType.Aux1;
             }
         }

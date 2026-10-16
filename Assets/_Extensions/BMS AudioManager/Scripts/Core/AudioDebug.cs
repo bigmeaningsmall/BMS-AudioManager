@@ -32,6 +32,16 @@ public static class AudioDebug
     }
     
     /// <summary>
+    /// Log a setup/usage mistake (always shown regardless of debug setting) - e.g. a sound whose
+    /// bank isn't loaded, a sender with no Sound Definition, or no AudioManager in the scene.
+    /// These are the warnings a user needs to see, so they must not depend on the debug toggle.
+    /// </summary>
+    public static void LogUsageWarning(string message)
+    {
+        Debug.LogWarning(message);
+    }
+
+    /// <summary>
     /// Log error message (always shown regardless of debug setting)
     /// </summary>
     public static void LogError(string message)

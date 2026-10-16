@@ -14,9 +14,8 @@ public class AudioEventSenderSFX : MonoBehaviour, IAudioEventSender
 {
     
     [Space(20)]
-    //  USE THIS AS A TAG TO DETERMINE WHICH EVENT TO SEND (Multiple scripts can be attached to the same object)
-    // Loop through the AudioEventSender_SFX scripts on the object and send the event with the matching eventName
-    public string eventName = "Custom SFX Event Name"; //for future use //todo - add a custom event name to the AudioEventManager class
+    [Tooltip("Optional label used in debug logs and the scene gizmo to identify this sender.")]
+    public string eventName = "";
     
     [Space(10)]
     [Header("Sound Definition (required)")]
@@ -138,7 +137,8 @@ public class AudioEventSenderSFX : MonoBehaviour, IAudioEventSender
             }
         }
 
-        // Test mode input
+        // Test mode input (legacy Input only - compiled out when the project uses the new Input System exclusively)
+#if ENABLE_LEGACY_INPUT_MANAGER
         if (testMode)
         {
             if (Input.GetKeyDown(KeyCode.T))
@@ -161,6 +161,7 @@ public class AudioEventSenderSFX : MonoBehaviour, IAudioEventSender
                 Stop();
             }
         }
+#endif
     }
     
     public void Play()
@@ -173,7 +174,7 @@ public class AudioEventSenderSFX : MonoBehaviour, IAudioEventSender
     {
         if (soundDefinition == null)
         {
-            AudioDebug.LogWarning($"[AudioEventSenderSFX] '{name}' has no Sound Definition assigned - nothing to play.");
+            AudioDebug.LogUsageWarning($"[AudioEventSenderSFX] '{name}' has no Sound Definition assigned - nothing to play.");
             return;
         }
 

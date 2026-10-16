@@ -31,4 +31,9 @@ public class SoundGeneratorSettings : ScriptableObject
 
     [Tooltip("Where the generated SoundId.cs enum is written (runtime script).")]
     public string generatedScriptsRoot = "Assets/_Extensions/BMS AudioManager/Scripts/Generated";
+
+    [Header("Bookkeeping - Do Not Edit")]
+    [Tooltip("Highest SoundId value ever issued. New sounds always get a higher id, so an id is never reused " +
+             "even after its definition is deleted (a reused id would silently retarget saved SoundId fields).")]
+    public int highestIdIssued = 0;
 }

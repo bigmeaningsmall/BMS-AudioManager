@@ -269,6 +269,10 @@ public class AudioManager : MonoBehaviour
     #region Event Subscriptions
     private void OnEnable()
     {
+        // A duplicate manager (e.g. the prefab placed in every scene) destroys itself in Awake, but
+        // destruction is deferred to end of frame - don't let it receive events in the meantime.
+        if (Instance != this) return;
+
         AudioEventManager.PlayTrack += PlayTrack;
         AudioEventManager.StopTrack += StopTrack;
         AudioEventManager.PauseTrack += PauseTrack;
@@ -660,10 +664,11 @@ public class AudioManager : MonoBehaviour
         // Check if the sound should play based on the percentage chance
         if (percentChanceToPlay < 100f)
         {
+            // Roll 0-99: 0% never plays, 100% always plays (handled by the guard above)
             int random = Random.Range(0, 100);
-            if (random > percentChanceToPlay)
+            if (random >= percentChanceToPlay)
             {
-                AudioDebug.Log($"[AudioManager] SFX skipped due to chance ({random} > {percentChanceToPlay})");
+                AudioDebug.Log($"[AudioManager] SFX skipped due to chance ({random} >= {percentChanceToPlay})");
                 return;
             }
         }
@@ -761,7 +766,7 @@ public class AudioManager : MonoBehaviour
         // Apply basic parameters
         sfxSource.clip = clip;
         sfxSource.volume = volume * globalSFXAttenuation;
-        sfxSource.pitch = randomizePitch ? Random.Range(pitch - pitchRange, pitch + pitchRange) * pitch : pitch;
+        sfxSource.pitch = randomizePitch ? Random.Range(pitch - pitchRange, pitch + pitchRange) : pitch;
         sfxSource.loop = loop;
         
         // IMPORTANT: Apply spatial blend and 3D settings BEFORE other 3D properties
@@ -836,7 +841,7 @@ public class AudioManager : MonoBehaviour
     public void StopAllLoopedSFX()
     {
         // Find all AudioSourceType components and filter for SFX
-        AudioSourceType[] allAudioTypes = FindObjectsOfType<AudioSourceType>();
+        AudioSourceType[] allAudioTypes = FindObjectsByType<AudioSourceType>();
         int stoppedCount = 0;
         
         foreach (var audioType in allAudioTypes)
@@ -860,7 +865,7 @@ public class AudioManager : MonoBehaviour
     // Method to stop ALL SFX (looped and non-looped)
     public void StopAllSFX()
     {
-        AudioSourceType[] allAudioTypes = FindObjectsOfType<AudioSourceType>();
+        AudioSourceType[] allAudioTypes = FindObjectsByType<AudioSourceType>();
         int stoppedCount = 0;
     
         foreach (var audioType in allAudioTypes)
@@ -882,7 +887,7 @@ public class AudioManager : MonoBehaviour
     // Method to pause/resume all SFX
     public void PauseAllSFX(bool pause)
     {
-        AudioSourceType[] allAudioTypes = FindObjectsOfType<AudioSourceType>();
+        AudioSourceType[] allAudioTypes = FindObjectsByType<AudioSourceType>();
         int affectedCount = 0;
     
         foreach (var audioType in allAudioTypes)
@@ -935,7 +940,7 @@ public class AudioManager : MonoBehaviour
     // Get count of active SFX
     public int GetActiveSFXCount()
     {
-        AudioSourceType[] allAudioTypes = FindObjectsOfType<AudioSourceType>();
+        AudioSourceType[] allAudioTypes = FindObjectsByType<AudioSourceType>();
         int count = 0;
         
         foreach (var audioType in allAudioTypes)
@@ -956,7 +961,7 @@ public class AudioManager : MonoBehaviour
     // Get all active SFX names (for debugging)
     public string[] GetActiveSFXNames()
     {
-        AudioSourceType[] allAudioTypes = FindObjectsOfType<AudioSourceType>();
+        AudioSourceType[] allAudioTypes = FindObjectsByType<AudioSourceType>();
         var activeSFXNames = new System.Collections.Generic.List<string>();
         
         foreach (var audioType in allAudioTypes)
@@ -986,6 +991,8 @@ public class AudioManager : MonoBehaviour
 
         private void LateUpdate()
     {
+        if (Instance != this) return;
+
         // Update parameters for all track types during fading states
         UpdateTrackParameters(AudioTrackType.BGM);
         UpdateTrackParameters(AudioTrackType.Ambient);

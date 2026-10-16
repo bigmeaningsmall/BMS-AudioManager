@@ -18,6 +18,7 @@ public static class SoundDefinitionGenerator
     private const string SettingsPath = "Assets/_Extensions/BMS AudioManager/SoundGeneratorSettings.asset";
 
     // Resolved paths for this run - populated from SoundGeneratorSettings at the top of Generate().
+    private static SoundGeneratorSettings s_settings;
     private static string s_audioRoot;
     private static string s_outputRoot;
     private static string s_banksRoot;
@@ -49,6 +50,7 @@ public static class SoundDefinitionGenerator
     {
         // Paths come from the settings asset (auto-created with defaults on first run).
         SoundGeneratorSettings settings = GetOrCreateSettings();
+        s_settings = settings;
         s_audioRoot = settings.audioSourceRoot;
         s_outputRoot = settings.soundDefinitionsRoot;
         s_banksRoot = settings.soundBanksRoot;
@@ -64,6 +66,8 @@ public static class SoundDefinitionGenerator
 
         EnsureFolder(s_outputRoot);
         EnsureFolder(s_banksRoot);
+
+        WarnAboutUnrecognisedFolders();
 
         int created = 0;
         int updated = 0;
@@ -207,6 +211,12 @@ public static class SoundDefinitionGenerator
             AssetDatabase.Refresh();
         }
 
+        if (allDefs.Count == 0 && userDefs.Count == 0)
+        {
+            Debug.LogWarning($"[SoundDefinitionGenerator] No audio clips found under '{s_audioRoot}'. Clips must sit inside " +
+                             $"one of these category folders: {string.Join(", ", CategoryMap.Keys)}.");
+        }
+
         // Use Debug.Log directly (not AudioDebug) - this runs in edit mode where there's no
         // AudioManager.Instance to gate logging, so AudioDebug would be silently suppressed.
         Debug.Log($"[SoundDefinitionGenerator] Done. Created: {created}, Updated: {updated}, Unchanged: {skipped}, User defs: {userDefs.Count}. " +
@@ -293,12 +303,22 @@ public static class SoundDefinitionGenerator
     /// <summary>
     /// Assigns a stable, never-reused id to any definition that doesn't have one (id == 0).
     /// Existing ids are preserved so enum values stay stable across re-runs and renames.
+    /// New ids start above the highest id ever issued - across this run, every SoundDefinition in the
+    /// project (including ones whose clips are no longer in the scan folder), and the settings'
+    /// recorded high-water mark (covering deleted definitions). Reusing an id would silently retarget
+    /// any SoundId field already saved in a scene or prefab.
     /// </summary>
     private static void AssignStableIds(List<SoundDefinition> defs)
     {
-        int maxId = 0;
+        int maxId = s_settings != null ? s_settings.highestIdIssued : 0;
         foreach (var d in defs)
             if (d.id > maxId) maxId = d.id;
+
+        foreach (string guid in AssetDatabase.FindAssets("t:SoundDefinition"))
+        {
+            var existing = AssetDatabase.LoadAssetAtPath<SoundDefinition>(AssetDatabase.GUIDToAssetPath(guid));
+            if (existing != null && existing.id > maxId) maxId = existing.id;
+        }
 
         // Deterministic order (by asset name) so first-run id assignment is reproducible.
         var unassigned = new List<SoundDefinition>();
@@ -310,6 +330,38 @@ public static class SoundDefinitionGenerator
         {
             d.id = ++maxId;
             EditorUtility.SetDirty(d);
+        }
+
+        if (s_settings != null && s_settings.highestIdIssued != maxId)
+        {
+            s_settings.highestIdIssued = maxId;
+            EditorUtility.SetDirty(s_settings);
+        }
+    }
+
+    /// <summary>
+    /// Category folders are matched by exact, case-sensitive name. Anything else in the audio root is
+    /// skipped - warn so a folder named "Sfx" or "Music" doesn't silently produce nothing.
+    /// </summary>
+    private static void WarnAboutUnrecognisedFolders()
+    {
+        foreach (string folder in AssetDatabase.GetSubFolders(s_audioRoot))
+        {
+            string name = Path.GetFileName(folder);
+            if (CategoryMap.ContainsKey(name)) continue;
+
+            string hint = "";
+            foreach (string category in CategoryMap.Keys)
+            {
+                if (string.Equals(category, name, System.StringComparison.OrdinalIgnoreCase))
+                {
+                    hint = $" Did you mean '{category}'? (names are case-sensitive)";
+                    break;
+                }
+            }
+
+            Debug.LogWarning($"[SoundDefinitionGenerator] Skipping '{folder}' - not a recognised category folder.{hint} " +
+                             $"Clips are only picked up inside: {string.Join(", ", CategoryMap.Keys)}.");
         }
     }
 
